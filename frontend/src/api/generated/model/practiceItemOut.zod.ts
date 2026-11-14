@@ -13,6 +13,7 @@ export const PracticeItemOut = zod
     hints: zod.array(zod.string()).describe("Hints revealed so far, in order"),
     hintsRemaining: zod.int(),
     id: zod.uuid(),
+    keypad: zod.boolean().describe("Show the on-screen maths keypad for this answer"),
     marks: zod.int(),
     objectiveRef: zod.string(),
     options: zod.array(
@@ -28,6 +29,9 @@ export const PracticeItemOut = zod
       .describe("How a question is answered and marked."),
     review: zod.boolean().describe("True when this is a spaced review of an earlier mistake"),
     stem: zod.string(),
+    symbolKeys: zod
+      .array(zod.string())
+      .describe("Extra keypad keys needed to type the answer (e.g. π, √, ^, x)"),
     unit: zod.union([zod.string(), zod.null()]),
   })
   .describe("A question as the student sees it. Never includes the answer.");

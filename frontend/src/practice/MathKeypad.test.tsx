@@ -4,10 +4,12 @@
  * - numeric questions show the keys; tapping 3, a/b, 5 builds "3/5", shows a
  *   fraction preview and submits "3/5"
  * - minus and decimal point keys; delete removes the last character; clear empties
- * - short-text maths questions get the ratio and percent keys; short-text
- *   questions without maths and multiple choice get no keys
+ * - symbol keys come from the server (symbolKeys) with spoken names; π typed
+ *   from the keys ("1/2π") is submitted, with a tip for π; none when not needed
+ * - no keys when the server says the answer is words (keypad false)
  * - the keys stop the phone keyboard opening until "Use keyboard instead"
- * - answerAsLatex: fractions only, numbers only, percent escaped
+ * - answerAsLatex: fractions, π, roots, powers, ×, ≤, degrees, percent; no preview
+ *   for plain numbers, ratios, words, or anything with a backslash
  */
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -30,6 +32,8 @@ const NUMERIC: PracticeItemOut = {
   hints: [],
   hintsRemaining: 4,
   review: false,
+  keypad: true,
+  symbolKeys: [],
 };
 
 function setup(item: PracticeItemOut = NUMERIC) {
@@ -74,22 +78,41 @@ describe("MathKeypad on a question", () => {
     expect(input).toHaveValue("");
   });
 
-  it("should add ratio and percent keys for short maths answers", async () => {
+  it("should show the symbol keys the server asks for, with spoken names", async () => {
     // Arrange
-    const { user, input } = setup({ ...NUMERIC, questionType: "short_text" });
+    const { user, input, onSubmit } = setup({
+      ...NUMERIC,
+      questionType: "short_text",
+      stem: "Write down the exact value of $\\frac{5}{6}\\pi - \\frac{1}{3}\\pi$",
+      symbolKeys: ["π", "√", "^", "(", ")", ":", "x"],
+    });
 
     // Act
-    await user.click(screen.getByRole("button", { name: "2" }));
-    await user.click(screen.getByRole("button", { name: "Ratio" }));
-    await user.click(screen.getByRole("button", { name: "3" }));
+    for (const name of ["1", "Fraction", "2", "Pi"]) {
+      await user.click(screen.getByRole("button", { name }));
+    }
+    await user.click(screen.getByRole("button", { name: "Check answer" }));
 
     // Assert
-    expect(input).toHaveValue("2:3");
-    expect(screen.getByRole("button", { name: "Percent" })).toBeInTheDocument();
+    expect(input).toHaveValue("1/2π");
+    expect(onSubmit).toHaveBeenCalledWith("1/2π");
+    for (const name of ["Square root", "Power", "Open bracket", "Close bracket", "Ratio", "x"]) {
+      expect(screen.getByRole("button", { name })).toBeInTheDocument();
+    }
+    expect(screen.getByText(/For π, use the π key/)).toBeInTheDocument();
   });
 
-  it("should not show keys for word answers or multiple choice", () => {
-    setup({ ...NUMERIC, questionType: "short_text", stem: "State the inverse of squaring." });
+  it("should show only number keys when no symbols are needed", () => {
+    // Arrange / Act
+    setup();
+
+    // Assert
+    expect(screen.queryByRole("button", { name: "Pi" })).not.toBeInTheDocument();
+    expect(screen.queryByText(/For π/)).not.toBeInTheDocument();
+  });
+
+  it("should not show keys when the server says the answer is words", () => {
+    setup({ ...NUMERIC, questionType: "short_text", keypad: false });
     expect(screen.queryByRole("group", { name: "Maths keys" })).not.toBeInTheDocument();
     expect(screen.getByLabelText("Your answer")).toHaveAttribute("inputmode", "text");
   });
@@ -115,11 +138,20 @@ describe("answerAsLatex", () => {
     [" -7 / 2 ", "-\\frac{7}{2}"],
     ["−1/4", "-\\frac{1}{4}"],
     ["1.5/3%", "\\frac{1.5}{3}\\%"],
-  ])("should turn %j into a fraction", (typed, latex) => {
+    ["1/2π", "\\frac{1}{2}\\pi"],
+    ["π/2", "\\frac{\\pi}{2}"],
+    ["√3", "\\sqrt{3}"],
+    ["√(x+1)", "\\sqrt{x+1}"],
+    ["x^2", "x^{2}"],
+    ["3×4", "3\\times4"],
+    ["2πx", "2\\pi x"],
+    ["x≤3", "x\\le3"],
+    ["45°", "45^{\\circ}"],
+  ])("should typeset %j", (typed, latex) => {
     expect(answerAsLatex(typed)).toBe(latex);
   });
 
-  it.each(["3", "0.6", "x/2", "3/5 \\href", ""])("should not preview %j", (typed) => {
+  it.each(["3", "0.6", "2:3", "3/5 \\href", "prime", ""])("should not preview %j", (typed) => {
     expect(answerAsLatex(typed)).toBeNull();
   });
 });

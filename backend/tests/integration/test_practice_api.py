@@ -12,6 +12,9 @@ Covers:
   the result without double-counting; a different key -> 409; missing or
   malformed key, empty or over-long answer -> 422
 - ladder: three correct moves up a level; full solution -> assisted, no move
+- keypad: number answers get the keypad; maths short answers get it with the
+  symbols needed (π); word answers and multiple choice don't; a typed π answer
+  is marked right against a LaTeX key, and the key is shown as maths
 - flag: hides the question from further serving; idempotent
 - access: another student's item -> 404; guardians -> 403; CSRF required
 """
@@ -362,3 +365,55 @@ async def test_practice_should_require_csrf(client: httpx.AsyncClient, setup: Se
 
     assert response.status_code == 403
     assert error_code(response) == "CSRF_FAILED"
+
+
+@pytest.mark.parametrize(
+    ("question_type", "answer", "keypad", "symbols"),
+    [
+        ("numeric", None, True, []),
+        ("short_text", {"accepted": ["2:3"]}, True, ["π", "√", "^", "(", ")", ":"]),
+        ("short_text", None, False, []),
+        ("multiple_choice", None, False, []),
+    ],
+)
+async def test_should_offer_the_keys_the_answer_needs(
+    client: httpx.AsyncClient,
+    session: AsyncSession,
+    setup: Setup,
+    question_type: str,
+    answer: dict[str, object] | None,
+    keypad: bool,
+    symbols: list[str],
+) -> None:
+    # Arrange
+    await create_question(
+        session, setup.a1, tier="foundation", question_type=question_type, answer=answer
+    )
+
+    # Act
+    body = (await _next(client, setup)).json()
+
+    # Assert
+    assert (body["keypad"], body["symbolKeys"]) == (keypad, symbols)
+
+
+async def test_should_mark_a_typed_pi_answer_against_a_latex_key(
+    client: httpx.AsyncClient, session: AsyncSession, setup: Setup
+) -> None:
+    # Arrange
+    await create_question(
+        session,
+        setup.a1,
+        tier="foundation",
+        question_type="short_text",
+        answer={"accepted": [r"\frac{1}{2}\pi"]},
+    )
+    item = (await _next(client, setup)).json()
+
+    # Act
+    result = (await _answer(client, item["id"], "π/2")).json()
+
+    # Assert
+    assert "π" in item["symbolKeys"]
+    assert result["correct"] is True
+    assert result["correctAnswer"] == r"$\frac{1}{2}\pi$"

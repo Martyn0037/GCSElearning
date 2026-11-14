@@ -152,8 +152,12 @@ async def create_question(
     question_type: str = "multiple_choice",
     status: str = "active",
     stem: str | None = None,
+    answer: dict[str, object] | None = None,
 ) -> uuid.UUID:
-    """Insert a bank question with four hints and commit; returns its ID."""
+    """Insert a bank question with four hints and commit; returns its ID.
+
+    ``answer`` overrides the default marking key for the question type.
+    """
     from app.models.curriculum import Tier
     from app.models.question import Hint, Question, QuestionStatus, QuestionType
 
@@ -163,7 +167,7 @@ async def create_question(
         QuestionType.NUMERIC: {"value": "4.75", "tolerance": "0", "unit": "cm"},
         QuestionType.SHORT_TEXT: {"accepted": ["prime", "prime number"]},
     }
-    answer = keys[qtype]
+    answer = answer or keys[qtype]
     question = Question(
         id=uuid.uuid4(),
         objective_id=objective_id,

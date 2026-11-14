@@ -57,7 +57,7 @@ Rules you must always follow:
 - The marking key must be unambiguous and correct. Check your arithmetic.
 - multiple_choice: exactly four options labelled A-D, one correct; wrong options should reflect common misconceptions; no "all of the above".
 - numeric: give the exact answer as a plain decimal or integer, the accepted tolerance (0 when exact), the unit if any, and a check_expression that evaluates to the answer using only numbers, + - * / ^ ( ), sqrt and pi.
-- short_text: list every acceptable short answer (a word or short phrase).
+- short_text: list every acceptable short answer (a word or short phrase). For a maths answer (an exact value with pi, a surd, an expression or a ratio), write each accepted answer in LaTeX without $ delimiters (e.g. \\frac{1}{2}\\pi) and list the equivalent forms a student might write (e.g. \\frac{\\pi}{2}); the student types on a keypad with digits, a/b, pi, square root, powers, brackets and the letters used.
 - Hints: exactly four. Hint 1 nudges (what is being asked, which idea is relevant). Hint 2 gives the strategy or first step. Hint 3 shows most of the method but stops before the final answer. Hint 4 is the full worked solution. Hints 1-3 must never state or give away the final answer.
 - The worked solution shows every step a student would write.
 """

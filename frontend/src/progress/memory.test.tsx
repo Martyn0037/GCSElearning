@@ -50,6 +50,8 @@ const ITEM_OUT: PracticeItemOut = {
   hints: [],
   hintsRemaining: 4,
   review: false,
+  keypad: false,
+  symbolKeys: [],
 };
 
 const WRONG: AnswerResultOut = {

@@ -21,6 +21,11 @@ project uses [Semantic Versioning](https://semver.org/).
 - **Build:** Vite no longer inlines small files as `data:` URLs, which the security policy blocks for fonts.
 
 ### Fixed
+- **Typing π and other symbols:** the keypad now shows every symbol an answer needs. The server works it out from the question's marking key: π, √, powers and brackets on every maths short answer, plus ratio, %, °, =, inequality signs and the letters used where the answer needs them. Before, a question like "the exact value of ⅚π − ⅓π" had no way to type π.
+- **Marking maths short answers:** answers are compared by form and value, so "1/2π", "π/2" and "0.5π" all match a key written as `\frac{1}{2}\pi`. Before, the text comparison silently dropped symbols such as π and "/".
+- **Correct answers written in LaTeX** now show as maths instead of raw code ("\frac{1}{2}\pi").
+- The answer preview typesets π, roots, powers, ×, ÷, ≤, ≥ and degrees as well as fractions.
+- Question generation now asks for maths answer keys in LaTeX, listing equivalent forms.
 - The question verifier no longer rejects good questions. It had treated hint 4 (the full solution, by design) as a leak, and compared its own answer word for word. About 4 in 5 generated questions were being thrown away.
 
 ### Added — Phase 4 (Memory and mistakes)

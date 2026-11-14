@@ -2,6 +2,7 @@
 """Deterministic marking for multiple-choice, numeric and short-text answers.
 
 No AI is involved: student answers are compared with the stored key.
+Maths short answers are compared via ``app.questions.answer_forms``.
 """
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ from fractions import Fraction
 from typing import Any
 
 from app.models.question import QuestionType
+from app.questions.answer_forms import display_answer, is_maths_answer, same_maths
 
 MAX_ANSWER_LENGTH = 200
 
@@ -109,5 +111,12 @@ def mark(
         return MarkResult(ok, display)
 
     accepted = [str(a) for a in answer_key.get("accepted", [])]
-    ok = normalise_text(response) in {normalise_text(a) for a in accepted}
-    return MarkResult(ok, accepted[0] if accepted else "")
+    # Words compare loosely (case, accents, punctuation); maths answers compare
+    # by form and value, so symbols like π and "/" aren't thrown away.
+    ok = any(
+        same_maths(response, a)
+        if is_maths_answer(a)
+        else normalise_text(response) == normalise_text(a)
+        for a in accepted
+    )
+    return MarkResult(ok, display_answer(accepted[0]) if accepted else "")

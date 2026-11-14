@@ -44,6 +44,8 @@ const MCQ: PracticeItemOut = {
   hints: [],
   hintsRemaining: 4,
   review: false,
+  keypad: false,
+  symbolKeys: [],
 };
 
 const NUMERIC: PracticeItemOut = {
@@ -53,6 +55,7 @@ const NUMERIC: PracticeItemOut = {
   stem: "Work out the length.",
   options: [],
   unit: "cm",
+  keypad: true,
 };
 
 function result(overrides: Partial<AnswerResultOut> = {}): AnswerResultOut {

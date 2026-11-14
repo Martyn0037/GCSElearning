@@ -22,10 +22,8 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
   // Phones: the on-screen keys replace the system keyboard unless asked for.
   const [useKeyboard, setUseKeyboard] = useState(false);
   const ids = { answer: useId(), stem: useId(), hint: useId() };
-  // Number answers always get the keys; short answers only on maths questions.
-  const showKeys =
-    item.questionType === "numeric" ||
-    (item.questionType === "short_text" && item.stem.includes("$"));
+  // The server decides: numbers, and short answers that are maths (not words).
+  const showKeys = item.keypad;
   const preview = showKeys ? answerAsLatex(answer) : null;
 
   function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
@@ -109,10 +107,11 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
             <>
               <p id={ids.hint} className="mt-1 text-sm text-slate-600">
                 Tap the keys or type. For a fraction, use a/b: 3 a/b 5 gives 3/5.
+                {item.symbolKeys.includes("π") && " For π, use the π key: 1 a/b 2 π gives ½π."}
               </p>
               <div className="mt-3">
                 <MathKeypad
-                  extraKeys={item.questionType === "short_text"}
+                  symbols={item.symbolKeys}
                   onInsert={(text) => {
                     setAnswer((current) => (current + text).slice(0, 200));
                   }}

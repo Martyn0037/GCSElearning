@@ -14,6 +14,7 @@ import asyncio
 import logging
 import uuid
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -33,12 +34,14 @@ from app.models.question import (
     Question,
     QuestionFlag,
     QuestionStatus,
+    QuestionType,
 )
 from app.models.user import User
 from app.practice import mastery
 from app.practice.ladder import LadderState, Outcome, advance
 from app.practice.review import FixedIntervalScheduler, ReviewScheduler, ReviewState, london_today
 from app.practice.schemas import AnswerResultOut, OptionOut, PracticeItemOut
+from app.questions.answer_forms import is_maths_answer, keypad_symbols
 from app.questions.bank import pick_question, request_generation
 from app.questions.generator import ObjectiveNotAvailableError, QuestionGenerator
 from app.questions.marking import MarkResult, mark
@@ -571,4 +574,23 @@ class PracticeService:
             hints=list(hints),
             hints_remaining=MAX_HINT_LEVEL - item.hints_revealed,
             review=item.mistake_id is not None,
+            **_keypad(question),
         )
+
+
+def _keypad(question: Question) -> dict[str, Any]:
+    """Whether to show the maths keypad, and the symbol keys the answer needs.
+
+    Numbers always get the keypad. Short answers get it when every accepted
+    answer is maths (not words), with every symbol needed to type them.
+    """
+    if question.question_type is QuestionType.NUMERIC:
+        return {"keypad": True, "symbol_keys": []}
+    accepted = [str(a) for a in question.answer.get("accepted", [])]
+    if (
+        question.question_type is QuestionType.SHORT_TEXT
+        and accepted
+        and all(is_maths_answer(a) for a in accepted)
+    ):
+        return {"keypad": True, "symbol_keys": keypad_symbols(accepted)}
+    return {"keypad": False, "symbol_keys": []}
