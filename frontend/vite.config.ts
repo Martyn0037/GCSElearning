@@ -13,7 +13,12 @@ export default defineConfig({
     port: 5173,
     proxy: { "/api": { target: apiTarget, changeOrigin: false } },
   },
-  build: { sourcemap: true },
+  build: {
+    sourcemap: true,
+    // Never inline assets as data: URLs: the Content-Security-Policy allows
+    // fonts only from 'self', and KaTeX's smallest fonts would otherwise be inlined.
+    assetsInlineLimit: 0,
+  },
   test: {
     environment: "jsdom",
     include: ["src/**/*.test.{ts,tsx}"],

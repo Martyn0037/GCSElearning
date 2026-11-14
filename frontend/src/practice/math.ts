@@ -1,5 +1,6 @@
 // frontend/src/practice/math.ts
 // Splitting text into plain and LaTeX parts, and rendering LaTeX safely.
+import "katex/dist/katex.min.css";
 import katex from "katex";
 
 /** A run of plain text, or a LaTeX expression that was between `$...$`. */
@@ -97,18 +98,36 @@ export function formatTexNumbers(tex: string): string {
 }
 
 /**
- * Render LaTeX as MathML (native browser rendering: no fonts, no inline
- * styles, so the strict Content-Security-Policy is unchanged). `trust: false`
- * blocks \href, \url, \includegraphics and similar; bad LaTeX renders as an
- * error span instead of throwing.
+ * Draw LaTeX into `element` with KaTeX's own layout and fonts, so maths looks
+ * the same in every browser (native MathML rendering varies a lot between
+ * Chrome, Safari and Firefox). Screen readers get the hidden MathML copy.
+ *
+ * Security:
+ * - KaTeX builds DOM nodes and sets their styles through the CSSOM, which the
+ *   strict Content-Security-Policy (`style-src 'self'`) allows; an HTML string
+ *   with `style="..."` attributes would be blocked.
+ * - `trust: false` blocks \href, \url, \includegraphics and similar.
+ * - Invalid LaTeX is shown as plain text: KaTeX's own error display uses a
+ *   style attribute, which the policy would block.
+ *
+ * `\displaystyle` draws fractions full size rather than shrunk to the line,
+ * as exam papers do.
+ *
+ * @param element - Element whose contents are replaced.
+ * @param tex - LaTeX source, without `$` delimiters.
  */
-export function renderMath(tex: string): string {
-  return katex.renderToString(formatTexNumbers(tex), {
-    output: "mathml",
-    throwOnError: false,
-    trust: false,
-    strict: "ignore",
-    maxSize: 20,
-    maxExpand: 200,
-  });
+export function renderMathInto(element: HTMLElement, tex: string): void {
+  try {
+    katex.render(`\\displaystyle ${formatTexNumbers(tex)}`, element, {
+      output: "htmlAndMathml",
+      throwOnError: true,
+      trust: false,
+      strict: "ignore",
+      maxSize: 20,
+      maxExpand: 200,
+    });
+  } catch (error) {
+    if (!(error instanceof katex.ParseError)) throw error;
+    element.textContent = tex;
+  }
 }

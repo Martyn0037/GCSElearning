@@ -2,8 +2,8 @@
 /**
  * Covers:
  * - splitting text and $...$ maths; escaped \$; unmatched and empty $ kept as text
- * - rendering produces MathML only (no inline styles), bad LaTeX doesn't throw,
- *   and \href is not turned into a link (trust disabled)
+ * - rendering draws KaTeX layout plus hidden MathML, in display style; invalid
+ *   LaTeX shown as plain text; \href not turned into a link; re-rendering replaces
  * - punctuation after maths is attached to it (only leading punctuation; text
  *   after it kept; maths at the end or before maths gets none)
  * - number formatting: 5+ digit whole numbers grouped, 4-digit numbers, decimal
@@ -12,7 +12,7 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { formatNumbers, formatTexNumbers, renderMath, splitMath, toPieces } from "./math";
+import { formatNumbers, formatTexNumbers, renderMathInto, splitMath, toPieces } from "./math";
 
 describe("splitMath", () => {
   it("should split text and maths", () => {
@@ -29,20 +29,41 @@ describe("splitMath", () => {
   });
 });
 
-describe("renderMath", () => {
-  it("should render MathML without inline styles", () => {
-    const html = renderMath("2^{5}");
+describe("renderMathInto", () => {
+  function render(tex: string): HTMLElement {
+    const element = document.createElement("span");
+    renderMathInto(element, tex);
+    return element;
+  }
 
-    expect(html).toContain("<math");
-    expect(html).not.toContain("style=");
+  it("should draw KaTeX layout plus a MathML copy for screen readers", () => {
+    const element = render("\\frac{5}{6}\\pi");
+
+    expect(element.querySelector(".katex-html .mfrac")).not.toBeNull();
+    expect(element.querySelector("math")).not.toBeNull();
   });
 
-  it("should not throw on invalid LaTeX", () => {
-    expect(() => renderMath("\\frac{1}{")).not.toThrow();
+  it("should draw fractions full size (display style)", () => {
+    expect(render("x").querySelector("annotation")?.textContent).toBe("\\displaystyle x");
+  });
+
+  it("should show invalid LaTeX as plain text", () => {
+    const element = render("\\frac{1}{");
+
+    expect(element.textContent).toBe("\\frac{1}{");
+    expect(element.querySelector(".katex")).toBeNull();
   });
 
   it("should not create links from \\href", () => {
-    expect(renderMath("\\href{https://evil.example}{x}")).not.toContain("href=");
+    expect(render("\\href{https://evil.example}{x}").querySelector("a")).toBeNull();
+  });
+
+  it("should replace what was drawn before", () => {
+    const element = document.createElement("span");
+    renderMathInto(element, "1");
+    renderMathInto(element, "2");
+
+    expect(element.querySelectorAll(".katex")).toHaveLength(1);
   });
 });
 
@@ -117,10 +138,10 @@ describe("formatTexNumbers", () => {
     expect(formatTexNumbers("2^{10} = 1024")).toBe("2^{10} = 1024");
   });
 
-  it("should render grouped numbers as separate MathML numbers with a space", () => {
-    const html = renderMath("1250000");
+  it("should draw grouped numbers as separate numbers with a space", () => {
+    const element = document.createElement("span");
+    renderMathInto(element, "1250000");
 
-    expect(html).toContain("<mn>1</mn><mtext>\u2009</mtext><mn>250</mn>");
-    expect(html).not.toContain("1250000</mn>");
+    expect(element.querySelector("annotation")?.textContent).toBe("\\displaystyle 1\\,250\\,000");
   });
 });

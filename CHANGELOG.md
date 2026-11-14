@@ -10,13 +10,15 @@ project uses [Semantic Versioning](https://semver.org/).
 - **Maths keypad:** number answers, and short answers on maths questions, get on-screen keys (digits, decimal point, minus, a/b fraction bar, ratio, percent, delete, clear). A typed fraction is previewed stacked. On phones the keys replace the system keyboard until "Use keyboard instead" is tapped.
 
 ### Changed
+- **Maths is drawn by KaTeX with its own fonts**, rather than by each browser's built-in maths rendering. That built-in rendering looked very different in Chrome, Safari and Firefox: fractions were cramped, π touched the fractions, and minus signs were tiny.
+  - KaTeX builds the page elements directly (no HTML strings), so the strict security policy is unchanged. Its fonts are served from our own site.
+  - Fractions are drawn full size, as on exam papers.
+  - Badly written LaTeX shows as plain text instead of KaTeX's error display.
 - **Easier-to-read numbers in questions:**
-  - Digits use the same font as the words, as on exam papers.
-  - Fractions are drawn full size instead of shrunk.
-  - The small number on a root (the 3 in a cube root) is larger.
   - Whole numbers of five or more digits are grouped in threes ("245 000").
   - A hyphen used as a minus sign shows as a true minus ("−5").
   - Punctuation stays next to the maths before it, with no gap and no line break.
+- **Build:** Vite no longer inlines small files as `data:` URLs, which the security policy blocks for fonts.
 
 ### Fixed
 - The question verifier no longer rejects good questions. It had treated hint 4 (the full solution, by design) as a leak, and compared its own answer word for word. About 4 in 5 generated questions were being thrown away.

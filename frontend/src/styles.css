@@ -9,32 +9,11 @@
 }
 
 /*
- * Maths (KaTeX MathML, rendered natively by the browser).
- * Exam papers print numbers in the same plain font as the words, so digits and
- * text use the app's font; letters keep the maths italic. Browsers' defaults
- * shrink inline fractions and root indices to hard-to-read sizes, so fractions
- * are drawn full size and the index of a root (the 3 in a cube root) is enlarged.
- * Checked visually in Chromium; the rules only touch MathML elements.
+ * Maths (KaTeX). KaTeX's default 1.21em is sized for academic papers; 1.1em sits
+ * better beside the app's text while staying larger than it.
  */
-.maths math {
+.maths .katex {
   font-size: 1.1em;
-  math-style: normal;
-}
-
-.maths mn,
-.maths mtext {
-  font-family: var(--font-sans);
-}
-
-.maths mroot > :last-child {
-  font-size: 0.7em;
-}
-
-/* The maths font's "space after a script" leaves a gap before a full stop: "5⁻² ." */
-.maths msup,
-.maths msub,
-.maths msubsup {
-  margin-inline-end: -0.12em;
 }
 
 /* Respect users who ask for less motion (WCAG 2.3.3). */
