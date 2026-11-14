@@ -4,13 +4,14 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from enum import IntEnum, StrEnum
 from typing import Any
 
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
+    Date,
     DateTime,
     Enum,
     Float,
@@ -163,6 +164,12 @@ class PracticeItem(Base):
     response: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
     correct: Mapped[bool | None] = mapped_column(Boolean)
     assisted: Mapped[bool | None] = mapped_column(Boolean)
+    # Set when this item is a spaced-review of an earlier mistake.
+    mistake_id: Mapped[uuid.UUID | None] = mapped_column(
+        # mistakes also references practice_items; use_alter breaks the cycle.
+        ForeignKey("mistakes.id", ondelete="SET NULL", use_alter=True),
+        index=True,
+    )
 
 
 class ObjectiveProgress(Base):
@@ -182,6 +189,9 @@ class ObjectiveProgress(Base):
     # "correct", "incorrect" or "assisted".
     recent: Mapped[list[str]] = mapped_column(JSONB, nullable=False, server_default=text("'[]'"))
     attempts: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
+    correct: Mapped[int] = mapped_column(Integer, nullable=False, server_default=text("0"))
+    # BKT estimate that the objective is mastered (ADR-005), 0..1.
+    mastery: Mapped[float] = mapped_column(Float, nullable=False, server_default=text("0.2"))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=text("now()")
     )
@@ -199,4 +209,75 @@ class QuestionFlag(Base):
     user_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("users.id", ondelete="SET NULL"))
     reason: Mapped[str | None] = mapped_column(String(500))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class ExplanationStatus(StrEnum):
+    """Whether the "where it went wrong" explanation is ready."""
+
+    PENDING = "pending"
+    READY = "ready"
+    UNAVAILABLE = "unavailable"  # Claude not available; the worked solution still shows
+
+
+class Mistake(TimestampMixin, Base):
+    """A wrong (or full-solution) answer, explained and brought back for review.
+
+    One open mistake per student and question: getting it wrong again resets
+    the schedule rather than adding a duplicate. The review schedule lives
+    here (one schedule per mistake), see ``app.practice.review``.
+    """
+
+    __tablename__ = "mistakes"
+    __table_args__ = (
+        Index(
+            "uq_mistakes_open_per_question",
+            "user_id",
+            "question_id",
+            unique=True,
+            postgresql_where=text("resolved_at IS NULL"),
+        ),
+        # "Reviews due" query.
+        Index(
+            "ix_mistakes_due",
+            "user_id",
+            "next_review_on",
+            postgresql_where=text("resolved_at IS NULL"),
+        ),
+        Index("ix_mistakes_user_created", "user_id", "created_at"),
+        CheckConstraint("review_stage BETWEEN 0 AND 10", name="review_stage_range"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+    )
+    enrolment_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("student_subjects.id", ondelete="CASCADE"), nullable=False
+    )
+    question_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("questions.id", ondelete="CASCADE"), nullable=False
+    )
+    objective_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("learning_objectives.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    source_item_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("practice_items.id", ondelete="CASCADE"), nullable=False
+    )
+    student_answer: Mapped[str] = mapped_column(String(200), nullable=False)
+    correct_answer: Mapped[str] = mapped_column(String(300), nullable=False)
+    assisted: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    misconception: Mapped[str | None] = mapped_column(String(60))
+    explanation: Mapped[str | None] = mapped_column(Text)
+    explanation_status: Mapped[ExplanationStatus] = mapped_column(
+        _enum(ExplanationStatus, "explanation_status"), nullable=False
+    )
+    review_stage: Mapped[int] = mapped_column(
+        SmallInteger, nullable=False, server_default=text("0")
+    )
+    correct_streak: Mapped[int] = mapped_column(
+        SmallInteger, nullable=False, server_default=text("0")
+    )
+    next_review_on: Mapped[date] = mapped_column(Date, nullable=False)
+    last_reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

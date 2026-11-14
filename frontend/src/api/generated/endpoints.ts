@@ -26,8 +26,13 @@ import {
   AdminSpecificationOut,
   AnswerResultOut,
   CatalogueOut,
+  MistakeOut,
+  MistakePage,
+  MistakeTopicGroup,
   MySubjectsOut,
   PracticeItemOut,
+  ProgressOut,
+  ReviewSummaryOut,
   SessionOut,
   TopicMapOut,
   UserOut,
@@ -38,6 +43,7 @@ import type {
   ErrorResponse,
   FlagRequest,
   ListEnrolmentsParams,
+  ListMyMistakesParams,
   LoginRequest,
   ResetPasswordRequest,
   SetTextUpdate,
@@ -1408,6 +1414,549 @@ export function useGetCatalogue<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+export const getListMyMistakesUrl = (params?: ListMyMistakesParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/me/mistakes?${stringifiedParams}`
+    : `/api/v1/me/mistakes`;
+};
+
+/**
+ * The student's mistakes, newest first.
+ * @summary List Mistakes
+ */
+export const listMyMistakes = async (
+  params?: ListMyMistakesParams,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<MistakePage> => {
+  return apiFetch<MistakePage>(getListMyMistakesUrl(params), {
+    ...options,
+    method: "GET",
+
+    schema: MistakePage,
+  });
+};
+
+export const getListMyMistakesQueryKey = (params?: ListMyMistakesParams) => {
+  return [`/api/v1/me/mistakes`, ...(params ? [params] : [])] as const;
+};
+
+export const getListMyMistakesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listMyMistakes>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params?: ListMyMistakesParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listMyMistakes>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListMyMistakesQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listMyMistakes>>> = ({ signal }) =>
+    listMyMistakes(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listMyMistakes>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListMyMistakesQueryResult = NonNullable<Awaited<ReturnType<typeof listMyMistakes>>>;
+export type ListMyMistakesQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * The student's mistakes, newest first.
+ * @summary List Mistakes
+ */
+export function useListMyMistakes<
+  TData = Awaited<ReturnType<typeof listMyMistakes>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: undefined | ListMyMistakesParams,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof listMyMistakes>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listMyMistakes>>,
+          TError,
+          Awaited<ReturnType<typeof listMyMistakes>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The student's mistakes, newest first.
+ * @summary List Mistakes
+ */
+export function useListMyMistakes<
+  TData = Awaited<ReturnType<typeof listMyMistakes>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params?: ListMyMistakesParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listMyMistakes>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listMyMistakes>>,
+          TError,
+          Awaited<ReturnType<typeof listMyMistakes>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The student's mistakes, newest first.
+ * @summary List Mistakes
+ */
+export function useListMyMistakes<
+  TData = Awaited<ReturnType<typeof listMyMistakes>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params?: ListMyMistakesParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listMyMistakes>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The student's mistakes, newest first.
+ * @summary List Mistakes
+ */
+export function useListMyMistakes<
+  TData = Awaited<ReturnType<typeof listMyMistakes>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params?: ListMyMistakesParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listMyMistakes>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListMyMistakesQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getMyMistakeGroupsUrl = () => {
+  return `/api/v1/me/mistakes/summary`;
+};
+
+/**
+ * Mistake counts by topic and misconception (bounded by the number of topics).
+ * @summary Mistake Summary
+ */
+export const myMistakeGroups = async (
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<MistakeTopicGroup[]> => {
+  return apiFetch<MistakeTopicGroup[]>(getMyMistakeGroupsUrl(), {
+    ...options,
+    method: "GET",
+
+    schema: zod.array(MistakeTopicGroup),
+  });
+};
+
+export const getMyMistakeGroupsQueryKey = () => {
+  return [`/api/v1/me/mistakes/summary`] as const;
+};
+
+export const getMyMistakeGroupsQueryOptions = <
+  TData = Awaited<ReturnType<typeof myMistakeGroups>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myMistakeGroups>>, TError, TData>>;
+  request?: SecondParameter<typeof apiFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getMyMistakeGroupsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof myMistakeGroups>>> = ({ signal }) =>
+    myMistakeGroups({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof myMistakeGroups>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type MyMistakeGroupsQueryResult = NonNullable<Awaited<ReturnType<typeof myMistakeGroups>>>;
+export type MyMistakeGroupsQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * Mistake counts by topic and misconception (bounded by the number of topics).
+ * @summary Mistake Summary
+ */
+export function useMyMistakeGroups<
+  TData = Awaited<ReturnType<typeof myMistakeGroups>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof myMistakeGroups>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof myMistakeGroups>>,
+          TError,
+          Awaited<ReturnType<typeof myMistakeGroups>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Mistake counts by topic and misconception (bounded by the number of topics).
+ * @summary Mistake Summary
+ */
+export function useMyMistakeGroups<
+  TData = Awaited<ReturnType<typeof myMistakeGroups>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myMistakeGroups>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof myMistakeGroups>>,
+          TError,
+          Awaited<ReturnType<typeof myMistakeGroups>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Mistake counts by topic and misconception (bounded by the number of topics).
+ * @summary Mistake Summary
+ */
+export function useMyMistakeGroups<
+  TData = Awaited<ReturnType<typeof myMistakeGroups>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myMistakeGroups>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Mistake counts by topic and misconception (bounded by the number of topics).
+ * @summary Mistake Summary
+ */
+export function useMyMistakeGroups<
+  TData = Awaited<ReturnType<typeof myMistakeGroups>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myMistakeGroups>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getMyMistakeGroupsQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getGetMyMistakeUrl = (mistakeId: string) => {
+  return `/api/v1/me/mistakes/${mistakeId}`;
+};
+
+/**
+ * One mistake, including its explanation once ready.
+ * @summary Get Mistake
+ */
+export const getMyMistake = async (
+  mistakeId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<MistakeOut> => {
+  return apiFetch<MistakeOut>(getGetMyMistakeUrl(mistakeId), {
+    ...options,
+    method: "GET",
+
+    schema: MistakeOut,
+  });
+};
+
+export const getGetMyMistakeQueryKey = (mistakeId: string) => {
+  return [`/api/v1/me/mistakes/${mistakeId}`] as const;
+};
+
+export const getGetMyMistakeQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMyMistake>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  mistakeId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyMistake>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMyMistakeQueryKey(mistakeId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyMistake>>> = ({ signal }) =>
+    getMyMistake(mistakeId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: mistakeId !== null && mistakeId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getMyMistake>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetMyMistakeQueryResult = NonNullable<Awaited<ReturnType<typeof getMyMistake>>>;
+export type GetMyMistakeQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * One mistake, including its explanation once ready.
+ * @summary Get Mistake
+ */
+export function useGetMyMistake<
+  TData = Awaited<ReturnType<typeof getMyMistake>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  mistakeId: string,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyMistake>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyMistake>>,
+          TError,
+          Awaited<ReturnType<typeof getMyMistake>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * One mistake, including its explanation once ready.
+ * @summary Get Mistake
+ */
+export function useGetMyMistake<
+  TData = Awaited<ReturnType<typeof getMyMistake>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  mistakeId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyMistake>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyMistake>>,
+          TError,
+          Awaited<ReturnType<typeof getMyMistake>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * One mistake, including its explanation once ready.
+ * @summary Get Mistake
+ */
+export function useGetMyMistake<
+  TData = Awaited<ReturnType<typeof getMyMistake>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  mistakeId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyMistake>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * One mistake, including its explanation once ready.
+ * @summary Get Mistake
+ */
+export function useGetMyMistake<
+  TData = Awaited<ReturnType<typeof getMyMistake>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  mistakeId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyMistake>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetMyMistakeQueryOptions(mistakeId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getMyReviewSummaryUrl = () => {
+  return `/api/v1/me/reviews/summary`;
+};
+
+/**
+ * How many mistakes are due for review today.
+ * @summary Review Summary
+ */
+export const myReviewSummary = async (
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ReviewSummaryOut> => {
+  return apiFetch<ReviewSummaryOut>(getMyReviewSummaryUrl(), {
+    ...options,
+    method: "GET",
+
+    schema: ReviewSummaryOut,
+  });
+};
+
+export const getMyReviewSummaryQueryKey = () => {
+  return [`/api/v1/me/reviews/summary`] as const;
+};
+
+export const getMyReviewSummaryQueryOptions = <
+  TData = Awaited<ReturnType<typeof myReviewSummary>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myReviewSummary>>, TError, TData>>;
+  request?: SecondParameter<typeof apiFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getMyReviewSummaryQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof myReviewSummary>>> = ({ signal }) =>
+    myReviewSummary({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof myReviewSummary>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type MyReviewSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof myReviewSummary>>>;
+export type MyReviewSummaryQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * How many mistakes are due for review today.
+ * @summary Review Summary
+ */
+export function useMyReviewSummary<
+  TData = Awaited<ReturnType<typeof myReviewSummary>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof myReviewSummary>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof myReviewSummary>>,
+          TError,
+          Awaited<ReturnType<typeof myReviewSummary>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * How many mistakes are due for review today.
+ * @summary Review Summary
+ */
+export function useMyReviewSummary<
+  TData = Awaited<ReturnType<typeof myReviewSummary>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myReviewSummary>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof myReviewSummary>>,
+          TError,
+          Awaited<ReturnType<typeof myReviewSummary>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * How many mistakes are due for review today.
+ * @summary Review Summary
+ */
+export function useMyReviewSummary<
+  TData = Awaited<ReturnType<typeof myReviewSummary>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myReviewSummary>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * How many mistakes are due for review today.
+ * @summary Review Summary
+ */
+export function useMyReviewSummary<
+  TData = Awaited<ReturnType<typeof myReviewSummary>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myReviewSummary>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getMyReviewSummaryQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
 export const getGetMySubjectsUrl = () => {
   return `/api/v1/me/subjects`;
 };
@@ -1625,6 +2174,147 @@ export const useReplaceMySubjects = <TError = ErrorType<ErrorResponse>, TContext
 > => {
   return useMutation(getReplaceMySubjectsMutationOptions(options), queryClient);
 };
+
+export const getMySubjectProgressUrl = (enrolmentId: string) => {
+  return `/api/v1/me/subjects/${enrolmentId}/progress`;
+};
+
+/**
+ * Mastery by topic, 30 days of activity, strongest and weakest skills.
+ * @summary Subject Progress
+ */
+export const mySubjectProgress = async (
+  enrolmentId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ProgressOut> => {
+  return apiFetch<ProgressOut>(getMySubjectProgressUrl(enrolmentId), {
+    ...options,
+    method: "GET",
+
+    schema: ProgressOut,
+  });
+};
+
+export const getMySubjectProgressQueryKey = (enrolmentId: string) => {
+  return [`/api/v1/me/subjects/${enrolmentId}/progress`] as const;
+};
+
+export const getMySubjectProgressQueryOptions = <
+  TData = Awaited<ReturnType<typeof mySubjectProgress>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  enrolmentId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof mySubjectProgress>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getMySubjectProgressQueryKey(enrolmentId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof mySubjectProgress>>> = ({ signal }) =>
+    mySubjectProgress(enrolmentId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: enrolmentId !== null && enrolmentId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof mySubjectProgress>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type MySubjectProgressQueryResult = NonNullable<
+  Awaited<ReturnType<typeof mySubjectProgress>>
+>;
+export type MySubjectProgressQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * Mastery by topic, 30 days of activity, strongest and weakest skills.
+ * @summary Subject Progress
+ */
+export function useMySubjectProgress<
+  TData = Awaited<ReturnType<typeof mySubjectProgress>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  enrolmentId: string,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof mySubjectProgress>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof mySubjectProgress>>,
+          TError,
+          Awaited<ReturnType<typeof mySubjectProgress>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Mastery by topic, 30 days of activity, strongest and weakest skills.
+ * @summary Subject Progress
+ */
+export function useMySubjectProgress<
+  TData = Awaited<ReturnType<typeof mySubjectProgress>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  enrolmentId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof mySubjectProgress>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof mySubjectProgress>>,
+          TError,
+          Awaited<ReturnType<typeof mySubjectProgress>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Mastery by topic, 30 days of activity, strongest and weakest skills.
+ * @summary Subject Progress
+ */
+export function useMySubjectProgress<
+  TData = Awaited<ReturnType<typeof mySubjectProgress>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  enrolmentId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof mySubjectProgress>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Mastery by topic, 30 days of activity, strongest and weakest skills.
+ * @summary Subject Progress
+ */
+export function useMySubjectProgress<
+  TData = Awaited<ReturnType<typeof mySubjectProgress>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  enrolmentId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof mySubjectProgress>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getMySubjectProgressQueryOptions(enrolmentId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
 
 export const getGetMyTopicMapUrl = (enrolmentId: string) => {
   return `/api/v1/me/subjects/${enrolmentId}/topics`;
@@ -2121,6 +2811,160 @@ export const useRevealHint = <TError = ErrorType<ErrorResponse>, TContext = unkn
   TContext
 > => {
   return useMutation(getRevealHintMutationOptions(options), queryClient);
+};
+
+export const getSimilarPracticeItemUrl = (itemId: string) => {
+  return `/api/v1/practice/items/${itemId}/similar`;
+};
+
+/**
+ * Another question on the same skill, straight after a wrong answer.
+ * @summary Similar
+ */
+export const similarPracticeItem = async (
+  itemId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<PracticeItemOut> => {
+  return apiFetch<PracticeItemOut>(getSimilarPracticeItemUrl(itemId), {
+    ...options,
+    method: "POST",
+
+    schema: PracticeItemOut,
+  });
+};
+
+export const getSimilarPracticeItemMutationKey = () => ["similarPracticeItem"] as const;
+
+export const getSimilarPracticeItemMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof similarPracticeItem>>,
+    TError,
+    SimilarPracticeItemMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof similarPracticeItem>>,
+  TError,
+  SimilarPracticeItemMutationVariables,
+  TContext
+> => {
+  const mutationKey = getSimilarPracticeItemMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof similarPracticeItem>>,
+    SimilarPracticeItemMutationVariables
+  > = (props) => {
+    const { itemId } = props ?? {};
+
+    return similarPracticeItem(itemId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SimilarPracticeItemMutationResult = NonNullable<
+  Awaited<ReturnType<typeof similarPracticeItem>>
+>;
+
+export type SimilarPracticeItemMutationError = ErrorType<ErrorResponse>;
+export type SimilarPracticeItemMutationVariables = { itemId: string };
+
+/**
+ * Another question on the same skill, straight after a wrong answer.
+ * @summary Similar
+ */
+export const useSimilarPracticeItem = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof similarPracticeItem>>,
+      TError,
+      SimilarPracticeItemMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof similarPracticeItem>>,
+  TError,
+  SimilarPracticeItemMutationVariables,
+  TContext
+> => {
+  return useMutation(getSimilarPracticeItemMutationOptions(options), queryClient);
+};
+
+export const getNextReviewItemUrl = () => {
+  return `/api/v1/practice/reviews/next`;
+};
+
+/**
+ * The next mistake due for review today (resumes an open one). Safe to repeat.
+ * @summary Next Review
+ */
+export const nextReviewItem = async (
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<PracticeItemOut> => {
+  return apiFetch<PracticeItemOut>(getNextReviewItemUrl(), {
+    ...options,
+    method: "POST",
+
+    schema: PracticeItemOut,
+  });
+};
+
+export const getNextReviewItemMutationKey = () => ["nextReviewItem"] as const;
+
+export const getNextReviewItemMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<Awaited<ReturnType<typeof nextReviewItem>>, TError, void, TContext>;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<Awaited<ReturnType<typeof nextReviewItem>>, TError, void, TContext> => {
+  const mutationKey = getNextReviewItemMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof nextReviewItem>>, void> = () => {
+    return nextReviewItem(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type NextReviewItemMutationResult = NonNullable<Awaited<ReturnType<typeof nextReviewItem>>>;
+
+export type NextReviewItemMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * The next mistake due for review today (resumes an open one). Safe to repeat.
+ * @summary Next Review
+ */
+export const useNextReviewItem = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof nextReviewItem>>,
+      TError,
+      void,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<Awaited<ReturnType<typeof nextReviewItem>>, TError, void, TContext> => {
+  return useMutation(getNextReviewItemMutationOptions(options), queryClient);
 };
 
 export const getGetCurrentUserUrl = () => {

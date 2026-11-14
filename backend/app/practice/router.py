@@ -104,3 +104,20 @@ async def flag(
     """Report "this looks wrong". The question is hidden until reviewed."""
     await service.flag(student.id, item_id, body.reason)
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.post(
+    "/items/{item_id}/similar", response_model=PracticeItemOut, operation_id="similarPracticeItem"
+)
+async def similar(
+    item_id: uuid.UUID, student: StudentDep, service: ServiceDep, session: SessionDep, now: NowDep
+) -> PracticeItemOut:
+    """Another question on the same skill, straight after a wrong answer."""
+    await rate_limit.hit(session, f"practice-next:{student.id}", NEXT_LIMIT, now)
+    return await service.similar(student.id, item_id)
+
+
+@router.post("/reviews/next", response_model=PracticeItemOut, operation_id="nextReviewItem")
+async def next_review(student: StudentDep, service: ServiceDep) -> PracticeItemOut:
+    """The next mistake due for review today (resumes an open one). Safe to repeat."""
+    return await service.next_review(student.id)

@@ -17,7 +17,9 @@ from app.models.enrolment import StudentSetText, StudentSubject, StudentTopicSet
 from app.models.ops import AiUsage, Job, JobStatus, UsageStatus
 from app.models.question import (
     Difficulty,
+    ExplanationStatus,
     Hint,
+    Mistake,
     ObjectiveProgress,
     PracticeItem,
     Question,
@@ -35,11 +37,13 @@ __all__ = [
     "Consent",
     "Difficulty",
     "ExamBoard",
+    "ExplanationStatus",
     "GuardianLink",
     "Hint",
     "Job",
     "JobStatus",
     "LearningObjective",
+    "Mistake",
     "ObjectiveProgress",
     "PracticeItem",
     "Question",

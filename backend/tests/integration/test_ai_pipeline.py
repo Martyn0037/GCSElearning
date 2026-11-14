@@ -35,7 +35,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 from app.ai.budget import BudgetExceededError, BudgetLedger, BudgetLimits
 from app.ai.circuit import CircuitBreaker
 from app.ai.client import LlmCallError
-from app.ai.factory import build_generator
+from app.ai.factory import build_explainer, build_generator
 from app.ai.gateway import AiGateway, AiRequest, AiUnavailableError
 from app.ai.pricing import TokenUsage
 from app.core.config import Settings
@@ -476,7 +476,14 @@ async def _ctx(
     client: FakeLlmClient | None,
     clock: FakeClock,
 ) -> JobContext:
-    return JobContext(factory, await _generator(factory, settings, client, clock), settings, clock)
+    breaker = CircuitBreaker(clock, 5, 60)
+    return JobContext(
+        factory,
+        build_generator(settings, factory, client, breaker, clock),
+        build_explainer(settings, factory, client, breaker, clock),
+        settings,
+        clock,
+    )
 
 
 async def _job(session: AsyncSession, kind: str) -> Job:

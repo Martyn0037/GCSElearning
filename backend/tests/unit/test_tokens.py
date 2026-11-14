@@ -2,7 +2,7 @@
 """Unit tests for access tokens and opaque-token helpers.
 
 Covers:
-- issue/decode round trip
+- issue/decode round trip; times judged by the injected clock (regression)
 - expiry boundary (exactly at exp is expired)
 - wrong audience / issuer / key, tampering, alg=none, missing claims -> invalid
 - refresh-token hashing is deterministic; random tokens are unique
@@ -128,3 +128,14 @@ def test_tokens_match_should_compare_safely(
     expected: str | None, provided: str | None, result: bool
 ) -> None:
     assert tokens_match(expected, provided) is result
+
+
+def test_should_judge_token_times_by_injected_clock_not_system_clock() -> None:
+    # Regression: PyJWT's own iat check used the system clock, so a token
+    # issued "tomorrow" by the app's clock was rejected as immature.
+    tomorrow = FIXED_NOW + timedelta(days=3650)
+    token = issue_access_token(SETTINGS, USER_ID, Role.STUDENT, tomorrow)
+
+    claims = decode_access_token(SETTINGS, token, tomorrow + timedelta(minutes=1))
+
+    assert claims.user_id == USER_ID

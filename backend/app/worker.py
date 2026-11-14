@@ -17,7 +17,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from app.ai.factory import build_breaker, build_generator, build_llm_client
+from app.ai.factory import build_breaker, build_explainer, build_generator, build_llm_client
 from app.core.clock import Clock, SystemClock
 from app.core.config import Settings, get_settings
 from app.core.context import trace_id_var
@@ -110,10 +110,15 @@ async def main(settings: Settings | None = None, clock: Clock | None = None) -> 
     )
     engine = create_engine(settings)
     session_factory = create_session_factory(engine)
-    generator = build_generator(
-        settings, session_factory, build_llm_client(settings), build_breaker(settings, clock), clock
+    client = build_llm_client(settings)
+    breaker = build_breaker(settings, clock)
+    ctx = JobContext(
+        session_factory,
+        build_generator(settings, session_factory, client, breaker, clock),
+        build_explainer(settings, session_factory, client, breaker, clock),
+        settings,
+        clock,
     )
-    ctx = JobContext(session_factory, generator, settings, clock)
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()
     for sig in (signal.SIGTERM, signal.SIGINT):

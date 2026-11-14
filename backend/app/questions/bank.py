@@ -31,8 +31,13 @@ async def pick_question(
     objective_id: uuid.UUID,
     tier: Tier | None,
     difficulty: int,
+    *,
+    exclude: uuid.UUID | None = None,
 ) -> Question | None:
-    """Best active question: never seen by this student first, else least recently seen."""
+    """Best active question: never seen by this student first, else least recently seen.
+
+    ``exclude`` skips one question (e.g. the one just answered wrongly).
+    """
     last_seen = (
         select(PracticeItem.question_id, func.max(PracticeItem.served_at).label("seen"))
         .where(PracticeItem.user_id == user_id)
@@ -47,6 +52,7 @@ async def pick_question(
             Question.difficulty == difficulty,
             Question.status == QuestionStatus.ACTIVE,
             _tier_filter(tier),
+            *([Question.id != exclude] if exclude else []),
         )
         .order_by(last_seen.c.seen.asc().nulls_first(), Question.created_at)
         .limit(1)

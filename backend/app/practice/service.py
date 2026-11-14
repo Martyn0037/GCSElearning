@@ -21,21 +21,27 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.ai.gateway import AiUnavailableError
 from app.core.config import Settings
 from app.core.errors import ConflictError, NotFoundError
+from app.jobs.queue import enqueue
 from app.models.curriculum import LearningObjective, Subtopic, Topic
 from app.models.enrolment import StudentSubject, StudentTopicSetting
 from app.models.question import (
+    ExplanationStatus,
     Hint,
+    Mistake,
     ObjectiveProgress,
     PracticeItem,
     Question,
     QuestionFlag,
     QuestionStatus,
 )
+from app.models.user import User
+from app.practice import mastery
 from app.practice.ladder import LadderState, Outcome, advance
+from app.practice.review import FixedIntervalScheduler, ReviewScheduler, ReviewState, london_today
 from app.practice.schemas import AnswerResultOut, OptionOut, PracticeItemOut
 from app.questions.bank import pick_question, request_generation
 from app.questions.generator import ObjectiveNotAvailableError, QuestionGenerator
-from app.questions.marking import mark
+from app.questions.marking import MarkResult, mark
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +49,7 @@ logger = logging.getLogger(__name__)
 # let the worker finish it in the background.
 SYNC_GENERATION_TIMEOUT_SECONDS = 25.0
 MAX_HINT_LEVEL = 4
+EXPLAIN_JOB = "explain_mistake"
 
 
 class PracticeService:
@@ -54,6 +61,7 @@ class PracticeService:
         settings: Settings,
         now: datetime,
         generator: QuestionGenerator | None,
+        scheduler: ReviewScheduler | None = None,
     ) -> None:
         """Create the service.
 
@@ -62,11 +70,13 @@ class PracticeService:
             settings: App settings.
             now: Request time.
             generator: Used only when the bank is empty; ``None`` disables it.
+            scheduler: When mistakes come back (default 1/3/7/14 days, ADR-006).
         """
         self._session = session
         self._settings = settings
         self._now = now
         self._generator = generator
+        self._scheduler = scheduler or FixedIntervalScheduler()
 
     # ------------------------------------------------------------------ serve
 
@@ -94,6 +104,7 @@ class PracticeService:
                 PracticeItem.user_id == student_id,
                 PracticeItem.enrolment_id == enrolment.id,
                 PracticeItem.answered_at.is_(None),
+                PracticeItem.mistake_id.is_(None),  # reviews resume separately
                 Subtopic.topic_id == topic_id,
                 Question.status == QuestionStatus.ACTIVE,
             )
@@ -216,7 +227,12 @@ class PracticeService:
     async def submit(
         self, student_id: uuid.UUID, item_id: uuid.UUID, answer: str, idempotency_key: str
     ) -> AnswerResultOut:
-        """Mark an answer and move the student along the ladder (once).
+        """Mark an answer, update mastery, ladder and mistakes (exactly once).
+
+        - Practice answers move the difficulty ladder; review answers don't
+          (they reschedule the mistake instead).
+        - A wrong or full-solution answer opens (or re-opens) a mistake,
+          scheduled for review and queued for an explanation.
 
         Raises:
             NotFoundError: Unknown or someone else's item.
@@ -239,27 +255,32 @@ class PracticeService:
             if result.correct
             else Outcome.INCORRECT
         )
+        is_review = item.mistake_id is not None
 
-        progress = await self._session.get(
-            ObjectiveProgress, (student_id, question.objective_id), with_for_update=True
-        )
-        if progress is None:
-            progress = ObjectiveProgress(
-                user_id=student_id,
-                objective_id=question.objective_id,
-                level=1,
-                recent=[],
-                attempts=0,
-            )
-            self._session.add(progress)
+        progress = await self._progress(student_id, question.objective_id)
         before = progress.level
-        new_state = advance(
-            LadderState(progress.level, tuple(Outcome(o) for o in progress.recent)), outcome
+        if not is_review:
+            new_state = advance(
+                LadderState(progress.level, tuple(Outcome(o) for o in progress.recent)), outcome
+            )
+            progress.level = new_state.level
+            progress.recent = [o.value for o in new_state.recent]
+        progress.mastery = mastery.update(
+            progress.mastery, outcome, question.difficulty, question.question_type
         )
-        progress.level = new_state.level
-        progress.recent = [o.value for o in new_state.recent]
         progress.attempts += 1
+        progress.correct += 1 if outcome is Outcome.CORRECT else 0
         progress.updated_at = self._now
+
+        mistake_id: uuid.UUID | None = None
+        resolved = False
+        if is_review:
+            resolved = await self._review_answered(item, outcome is Outcome.CORRECT, answer, result)
+            mistake_id = item.mistake_id
+        elif outcome is not Outcome.CORRECT:
+            mistake_id = await self._record_mistake(
+                item, question, answer, result.correct_answer_display, assisted
+            )
 
         out = AnswerResultOut(
             item_id=item.id,
@@ -268,7 +289,10 @@ class PracticeService:
             correct_answer=result.correct_answer_display,
             worked_solution=question.worked_solution,
             level_before=before,
-            level_after=new_state.level,
+            level_after=progress.level,
+            mistake_id=mistake_id,
+            review=is_review,
+            mistake_resolved=resolved,
         )
         item.answered_at = self._now
         item.idempotency_key = idempotency_key
@@ -277,6 +301,183 @@ class PracticeService:
         item.response = {"answer": answer, "result": out.model_dump(mode="json")}
         await self._session.commit()
         return out
+
+    async def _progress(self, student_id: uuid.UUID, objective_id: uuid.UUID) -> ObjectiveProgress:
+        progress = await self._session.get(
+            ObjectiveProgress, (student_id, objective_id), with_for_update=True
+        )
+        if progress is None:
+            progress = ObjectiveProgress(
+                user_id=student_id,
+                objective_id=objective_id,
+                level=1,
+                recent=[],
+                attempts=0,
+                correct=0,
+                mastery=mastery.P_INIT,
+            )
+            self._session.add(progress)
+        return progress
+
+    async def _record_mistake(
+        self,
+        item: PracticeItem,
+        question: Question,
+        answer: str,
+        correct_answer: str,
+        assisted: bool,
+    ) -> uuid.UUID:
+        """Open a mistake, or re-open the existing one for this question."""
+        schedule = self._scheduler.start(london_today(self._now))
+        existing = await self._session.scalar(
+            select(Mistake)
+            .where(
+                Mistake.user_id == item.user_id,
+                Mistake.question_id == question.id,
+                Mistake.resolved_at.is_(None),
+            )
+            .with_for_update()
+        )
+        mistake = existing or Mistake(
+            id=uuid.uuid4(),
+            user_id=item.user_id,
+            enrolment_id=item.enrolment_id,
+            question_id=question.id,
+            objective_id=question.objective_id,
+        )
+        mistake.source_item_id = item.id
+        mistake.student_answer = answer[:200]
+        mistake.correct_answer = correct_answer[:300]
+        mistake.assisted = assisted
+        mistake.review_stage = schedule.stage
+        mistake.correct_streak = schedule.correct_streak
+        mistake.next_review_on = schedule.next_review_on
+        mistake.explanation = None
+        mistake.misconception = None
+        mistake.explanation_status = (
+            ExplanationStatus.PENDING
+            if self._settings.anthropic_api_key
+            else ExplanationStatus.UNAVAILABLE
+        )
+        if existing is None:
+            self._session.add(mistake)
+        await self._session.flush()
+        if mistake.explanation_status is ExplanationStatus.PENDING:
+            await enqueue(
+                self._session,
+                EXPLAIN_JOB,
+                {"mistake_id": str(mistake.id)},
+                self._now,
+                dedupe_key=f"explain:{mistake.id}",
+            )
+        return mistake.id
+
+    async def _review_answered(
+        self, item: PracticeItem, correct: bool, answer: str, result: MarkResult
+    ) -> bool:
+        """Reschedule (or resolve) the mistake this review item was for."""
+        mistake = await self._session.get(Mistake, item.mistake_id, with_for_update=True)
+        if mistake is None or mistake.resolved_at is not None:
+            return False
+        state = self._scheduler.after_review(
+            ReviewState(mistake.review_stage, mistake.correct_streak, mistake.next_review_on),
+            correct,
+            london_today(self._now),
+        )
+        mistake.review_stage = state.stage
+        mistake.correct_streak = state.correct_streak
+        mistake.next_review_on = state.next_review_on
+        mistake.last_reviewed_at = self._now
+        if not correct:
+            mistake.student_answer = answer[:200]
+            mistake.correct_answer = result.correct_answer_display[:300]
+        if state.resolved:
+            mistake.resolved_at = self._now
+        return state.resolved
+
+    # ------------------------------------------------------------------ similar & review
+
+    async def similar(self, student_id: uuid.UUID, item_id: uuid.UUID) -> PracticeItemOut:
+        """Serve another question on the same skill (after a wrong answer).
+
+        Raises:
+            NotFoundError: Unknown or someone else's item.
+            ConflictError: ``QUESTIONS_PREPARING`` if none is available yet.
+        """
+        source = await self._item(student_id, item_id, lock=False)
+        enrolment = await self._enrolment(student_id, source.enrolment_id, lock=True)
+        question = await self._session.get(Question, source.question_id)
+        assert question is not None  # noqa: S101 - FK guarantees it
+        progress = await self._session.get(ObjectiveProgress, (student_id, question.objective_id))
+        level = progress.level if progress else 1
+        replacement = await pick_question(
+            self._session,
+            student_id,
+            question.objective_id,
+            enrolment.tier,
+            level,
+            exclude=question.id,
+        )
+        if replacement is None:
+            replacement = await self._generate_now(question.objective_id, enrolment, level)
+        if replacement is None:
+            await request_generation(
+                self._session, question.objective_id, enrolment.tier, level, self._now
+            )
+            await self._session.commit()
+            raise ConflictError(
+                "We're preparing more questions on this skill. Try again in a minute.",
+                code="QUESTIONS_PREPARING",
+            )
+        return await self._serve(student_id, enrolment.id, replacement, level)
+
+    async def next_review(self, student_id: uuid.UUID) -> PracticeItemOut:
+        """Serve the next due mistake again (resuming an open review first).
+
+        Raises:
+            ConflictError: ``NO_REVIEWS_DUE`` when nothing is due today.
+        """
+        await self._session.execute(select(User.id).where(User.id == student_id).with_for_update())
+        open_review = await self._session.scalar(
+            select(PracticeItem)
+            .where(
+                PracticeItem.user_id == student_id,
+                PracticeItem.mistake_id.is_not(None),
+                PracticeItem.answered_at.is_(None),
+            )
+            .limit(1)
+        )
+        if open_review is not None:
+            return await self._item_out(open_review)
+        due = await self._session.scalar(
+            select(Mistake)
+            .join(Question, Question.id == Mistake.question_id)
+            .where(
+                Mistake.user_id == student_id,
+                Mistake.resolved_at.is_(None),
+                Mistake.next_review_on <= london_today(self._now),
+                Question.status == QuestionStatus.ACTIVE,
+            )
+            .order_by(Mistake.next_review_on, Mistake.created_at)
+            .limit(1)
+        )
+        if due is None:
+            raise ConflictError("Nothing to review today. Nice work!", code="NO_REVIEWS_DUE")
+        question = await self._session.get(Question, due.question_id)
+        assert question is not None  # noqa: S101 - FK guarantees it
+        item = PracticeItem(
+            id=uuid.uuid4(),
+            user_id=student_id,
+            enrolment_id=due.enrolment_id,
+            question_id=question.id,
+            difficulty=question.difficulty,
+            served_at=self._now,
+            hints_revealed=0,
+            mistake_id=due.id,
+        )
+        self._session.add(item)
+        await self._session.commit()
+        return await self._item_out(item, question)
 
     # ------------------------------------------------------------------ flag
 
@@ -369,4 +570,5 @@ class PracticeService:
             objective_ref=objective_ref or "",
             hints=list(hints),
             hints_remaining=MAX_HINT_LEVEL - item.hints_revealed,
+            review=item.mistake_id is not None,
         )

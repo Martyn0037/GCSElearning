@@ -17,6 +17,8 @@ from app.auth import rate_limit
 from app.core.clock import Clock
 from app.core.config import Settings
 from app.models.curriculum import Tier
+from app.practice.explain import MistakeExplainer
+from app.practice.service import EXPLAIN_JOB
 from app.questions.bank import GENERATE_JOB, plan_top_up
 from app.questions.generator import ObjectiveNotAvailableError, QuestionGenerator
 
@@ -36,6 +38,7 @@ class JobContext:
 
     session_factory: async_sessionmaker[AsyncSession]
     generator: QuestionGenerator
+    explainer: MistakeExplainer
     settings: Settings
     clock: Clock
 
@@ -84,7 +87,14 @@ async def purge_rate_limits(ctx: JobContext, payload: dict[str, Any]) -> None:
     logger.info("rate_limits_purged", extra={"deleted": deleted})
 
 
+async def explain_mistake(ctx: JobContext, payload: dict[str, Any]) -> None:
+    """Write the "where it went wrong" explanation (or mark it unavailable)."""
+    status = await ctx.explainer.explain(uuid.UUID(payload["mistake_id"]))
+    logger.info("mistake_explained", extra={"status": status.value})
+
+
 HANDLERS: dict[str, Handler] = {
+    EXPLAIN_JOB: explain_mistake,
     GENERATE_JOB: generate_question,
     TOP_UP_JOB: top_up_bank,
     PURGE_RATE_LIMITS_JOB: purge_rate_limits,

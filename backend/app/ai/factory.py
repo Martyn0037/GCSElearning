@@ -11,6 +11,7 @@ from app.ai.client import AnthropicLlmClient, LlmClient
 from app.ai.gateway import AiGateway
 from app.core.clock import Clock
 from app.core.config import Settings
+from app.practice.explain import MistakeExplainer
 from app.questions.generator import QuestionGenerator
 
 
@@ -51,3 +52,17 @@ def build_generator(
         client, BudgetLedger(session_factory, budget_limits(settings)), breaker, settings, clock
     )
     return QuestionGenerator(session_factory, gateway, settings)
+
+
+def build_explainer(
+    settings: Settings,
+    session_factory: async_sessionmaker[AsyncSession],
+    client: LlmClient | None,
+    breaker: CircuitBreaker,
+    clock: Clock,
+) -> MistakeExplainer:
+    """Wire the mistake explainer with its budgeted, circuit-protected gateway."""
+    gateway = AiGateway(
+        client, BudgetLedger(session_factory, budget_limits(settings)), breaker, settings, clock
+    )
+    return MistakeExplainer(session_factory, gateway, settings)

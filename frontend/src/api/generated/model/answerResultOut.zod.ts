@@ -14,6 +14,11 @@ export const AnswerResultOut = zod
     itemId: zod.uuid(),
     levelAfter: zod.int(),
     levelBefore: zod.int(),
+    mistakeId: zod
+      .union([zod.uuid(), zod.null()])
+      .describe("Set when this answer opened (or is reviewing) a mistake"),
+    mistakeResolved: zod.boolean().describe("A review answered right twice in a row"),
+    review: zod.boolean(),
     workedSolution: zod.string(),
   })
   .describe("The marked answer.");

@@ -26,6 +26,7 @@ export const PracticeItemOut = zod
     questionType: zod
       .enum(["multiple_choice", "numeric", "short_text"])
       .describe("How a question is answered and marked."),
+    review: zod.boolean().describe("True when this is a spaced review of an earlier mistake"),
     stem: zod.string(),
     unit: zod.union([zod.string(), zod.null()]),
   })

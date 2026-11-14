@@ -21,6 +21,7 @@ from app.core.middleware import RequestContextMiddleware, SecurityHeadersMiddlew
 from app.db.session import create_engine, create_session_factory
 from app.enrolment.router import router as enrolment_router
 from app.health.router import router as health_router
+from app.practice.me_router import router as me_router
 from app.practice.router import router as practice_router
 from app.users.router import router as users_router
 
@@ -79,7 +80,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     # Each router carries its full /api/v1/... prefix so route templates (used
     # as metric labels) are complete paths.
-    for router in (auth_router, users_router, enrolment_router, practice_router, admin_router):
+    for router in (
+        auth_router,
+        users_router,
+        enrolment_router,
+        practice_router,
+        me_router,
+        admin_router,
+    ):
         app.include_router(router)
     app.include_router(health_router)
     return app

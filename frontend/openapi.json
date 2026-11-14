@@ -276,6 +276,28 @@
             "title": "Levelbefore",
             "type": "integer"
           },
+          "mistakeId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set when this answer opened (or is reviewing) a mistake",
+            "title": "Mistakeid"
+          },
+          "mistakeResolved": {
+            "description": "A review answered right twice in a row",
+            "title": "Mistakeresolved",
+            "type": "boolean"
+          },
+          "review": {
+            "title": "Review",
+            "type": "boolean"
+          },
           "workedSolution": {
             "title": "Workedsolution",
             "type": "string"
@@ -288,7 +310,10 @@
           "correctAnswer",
           "workedSolution",
           "levelBefore",
-          "levelAfter"
+          "levelAfter",
+          "mistakeId",
+          "review",
+          "mistakeResolved"
         ],
         "title": "AnswerResultOut",
         "type": "object"
@@ -465,6 +490,32 @@
           "specifications"
         ],
         "title": "CatalogueSubjectOut",
+        "type": "object"
+      },
+      "DailyActivity": {
+        "additionalProperties": false,
+        "description": "Answers on one London calendar day.",
+        "properties": {
+          "attempts": {
+            "title": "Attempts",
+            "type": "integer"
+          },
+          "correct": {
+            "title": "Correct",
+            "type": "integer"
+          },
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "attempts",
+          "correct"
+        ],
+        "title": "DailyActivity",
         "type": "object"
       },
       "EnrolmentOut": {
@@ -672,6 +723,16 @@
         "title": "ErrorResponse",
         "type": "object"
       },
+      "ExplanationStatus": {
+        "description": "Whether the \"where it went wrong\" explanation is ready.",
+        "enum": [
+          "pending",
+          "ready",
+          "unavailable"
+        ],
+        "title": "ExplanationStatus",
+        "type": "string"
+      },
       "FlagRequest": {
         "additionalProperties": false,
         "description": "A \"this looks wrong\" report.",
@@ -717,6 +778,245 @@
         "title": "LoginRequest",
         "type": "object"
       },
+      "MisconceptionCount": {
+        "additionalProperties": false,
+        "description": "Open mistakes with one misconception label.",
+        "properties": {
+          "count": {
+            "title": "Count",
+            "type": "integer"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "count"
+        ],
+        "title": "MisconceptionCount",
+        "type": "object"
+      },
+      "MistakeOut": {
+        "additionalProperties": false,
+        "description": "A mistake as the student sees it on \"My mistakes\".",
+        "properties": {
+          "assisted": {
+            "title": "Assisted",
+            "type": "boolean"
+          },
+          "correctAnswer": {
+            "title": "Correctanswer",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "enrolmentId": {
+            "format": "uuid",
+            "title": "Enrolmentid",
+            "type": "string"
+          },
+          "explanation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanation"
+          },
+          "explanationStatus": {
+            "$ref": "#/components/schemas/ExplanationStatus"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "misconception": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Misconception"
+          },
+          "nextReviewOn": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Null once fixed",
+            "title": "Nextreviewon"
+          },
+          "objectiveRef": {
+            "title": "Objectiveref",
+            "type": "string"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/OptionOut"
+            },
+            "title": "Options",
+            "type": "array"
+          },
+          "questionStem": {
+            "title": "Questionstem",
+            "type": "string"
+          },
+          "resolved": {
+            "title": "Resolved",
+            "type": "boolean"
+          },
+          "studentAnswer": {
+            "title": "Studentanswer",
+            "type": "string"
+          },
+          "subjectName": {
+            "title": "Subjectname",
+            "type": "string"
+          },
+          "topicId": {
+            "format": "uuid",
+            "title": "Topicid",
+            "type": "string"
+          },
+          "topicRef": {
+            "title": "Topicref",
+            "type": "string"
+          },
+          "topicTitle": {
+            "title": "Topictitle",
+            "type": "string"
+          },
+          "workedSolution": {
+            "title": "Workedsolution",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "enrolmentId",
+          "subjectName",
+          "topicId",
+          "topicRef",
+          "topicTitle",
+          "objectiveRef",
+          "questionStem",
+          "options",
+          "studentAnswer",
+          "correctAnswer",
+          "workedSolution",
+          "explanation",
+          "explanationStatus",
+          "misconception",
+          "assisted",
+          "nextReviewOn",
+          "resolved",
+          "createdAt"
+        ],
+        "title": "MistakeOut",
+        "type": "object"
+      },
+      "MistakePage": {
+        "additionalProperties": false,
+        "description": "A page of mistakes, newest first.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/MistakeOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nextcursor"
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "title": "MistakePage",
+        "type": "object"
+      },
+      "MistakeTopicGroup": {
+        "additionalProperties": false,
+        "description": "Mistake counts for one topic.",
+        "properties": {
+          "enrolmentId": {
+            "format": "uuid",
+            "title": "Enrolmentid",
+            "type": "string"
+          },
+          "fixed": {
+            "title": "Fixed",
+            "type": "integer"
+          },
+          "misconceptions": {
+            "items": {
+              "$ref": "#/components/schemas/MisconceptionCount"
+            },
+            "title": "Misconceptions",
+            "type": "array"
+          },
+          "open": {
+            "title": "Open",
+            "type": "integer"
+          },
+          "subjectName": {
+            "title": "Subjectname",
+            "type": "string"
+          },
+          "topicId": {
+            "format": "uuid",
+            "title": "Topicid",
+            "type": "string"
+          },
+          "topicRef": {
+            "title": "Topicref",
+            "type": "string"
+          },
+          "topicTitle": {
+            "title": "Topictitle",
+            "type": "string"
+          }
+        },
+        "required": [
+          "enrolmentId",
+          "subjectName",
+          "topicId",
+          "topicRef",
+          "topicTitle",
+          "open",
+          "fixed",
+          "misconceptions"
+        ],
+        "title": "MistakeTopicGroup",
+        "type": "object"
+      },
       "MySubjectsOut": {
         "additionalProperties": false,
         "description": "The student's subjects.",
@@ -738,6 +1038,36 @@
           "subjects"
         ],
         "title": "MySubjectsOut",
+        "type": "object"
+      },
+      "ObjectiveStat": {
+        "additionalProperties": false,
+        "description": "A practised skill with its mastery.",
+        "properties": {
+          "attempts": {
+            "title": "Attempts",
+            "type": "integer"
+          },
+          "mastery": {
+            "title": "Mastery",
+            "type": "number"
+          },
+          "ref": {
+            "title": "Ref",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref",
+          "text",
+          "mastery",
+          "attempts"
+        ],
+        "title": "ObjectiveStat",
         "type": "object"
       },
       "OptionOut": {
@@ -808,6 +1138,11 @@
           "questionType": {
             "$ref": "#/components/schemas/QuestionType"
           },
+          "review": {
+            "description": "True when this is a spaced review of an earlier mistake",
+            "title": "Review",
+            "type": "boolean"
+          },
           "stem": {
             "title": "Stem",
             "type": "string"
@@ -835,9 +1170,63 @@
           "difficulty",
           "objectiveRef",
           "hints",
-          "hintsRemaining"
+          "hintsRemaining",
+          "review"
         ],
         "title": "PracticeItemOut",
+        "type": "object"
+      },
+      "ProgressOut": {
+        "additionalProperties": false,
+        "description": "Everything the progress page charts for one subject.",
+        "properties": {
+          "daily": {
+            "items": {
+              "$ref": "#/components/schemas/DailyActivity"
+            },
+            "title": "Daily",
+            "type": "array"
+          },
+          "enrolmentId": {
+            "format": "uuid",
+            "title": "Enrolmentid",
+            "type": "string"
+          },
+          "strongest": {
+            "items": {
+              "$ref": "#/components/schemas/ObjectiveStat"
+            },
+            "title": "Strongest",
+            "type": "array"
+          },
+          "subjectName": {
+            "title": "Subjectname",
+            "type": "string"
+          },
+          "topics": {
+            "items": {
+              "$ref": "#/components/schemas/TopicProgress"
+            },
+            "title": "Topics",
+            "type": "array"
+          },
+          "weakest": {
+            "items": {
+              "$ref": "#/components/schemas/ObjectiveStat"
+            },
+            "title": "Weakest",
+            "type": "array"
+          }
+        },
+        "required": [
+          "enrolmentId",
+          "subjectName",
+          "topics",
+          "daily",
+          "strongest",
+          "weakest"
+        ],
+        "title": "ProgressOut",
         "type": "object"
       },
       "QuestionType": {
@@ -865,6 +1254,34 @@
           "newPassword"
         ],
         "title": "ResetPasswordRequest",
+        "type": "object"
+      },
+      "ReviewSummaryOut": {
+        "additionalProperties": false,
+        "description": "Reviews due.",
+        "properties": {
+          "dueToday": {
+            "title": "Duetoday",
+            "type": "integer"
+          },
+          "nextDueOn": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nextdueon"
+          }
+        },
+        "required": [
+          "dueToday",
+          "nextDueOn"
+        ],
+        "title": "ReviewSummaryOut",
         "type": "object"
       },
       "Role": {
@@ -1329,6 +1746,66 @@
           "subtopics"
         ],
         "title": "TopicOut",
+        "type": "object"
+      },
+      "TopicProgress": {
+        "additionalProperties": false,
+        "description": "Mastery and accuracy for one topic.",
+        "properties": {
+          "accuracy": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Share answered correctly, or null if none yet",
+            "title": "Accuracy"
+          },
+          "attempts": {
+            "title": "Attempts",
+            "type": "integer"
+          },
+          "mastery": {
+            "description": "Average BKT mastery over the topic's skills, 0-1",
+            "title": "Mastery",
+            "type": "number"
+          },
+          "objectivesPractised": {
+            "title": "Objectivespractised",
+            "type": "integer"
+          },
+          "objectivesTotal": {
+            "title": "Objectivestotal",
+            "type": "integer"
+          },
+          "ref": {
+            "title": "Ref",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "topicId": {
+            "format": "uuid",
+            "title": "Topicid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "topicId",
+          "ref",
+          "title",
+          "mastery",
+          "objectivesTotal",
+          "objectivesPractised",
+          "attempts",
+          "accuracy"
+        ],
+        "title": "TopicProgress",
         "type": "object"
       },
       "TopicSettingUpdate": {
@@ -2818,6 +3295,433 @@
         ]
       }
     },
+    "/api/v1/me/mistakes": {
+      "get": {
+        "description": "The student's mistakes, newest first.",
+        "operationId": "listMyMistakes",
+        "parameters": [
+          {
+            "description": "Fixed mistakes instead of open ones",
+            "in": "query",
+            "name": "fixed",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Fixed mistakes instead of open ones",
+              "title": "Fixed",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MistakePage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "List Mistakes",
+        "tags": [
+          "progress"
+        ]
+      }
+    },
+    "/api/v1/me/mistakes/summary": {
+      "get": {
+        "description": "Mistake counts by topic and misconception (bounded by the number of topics).",
+        "operationId": "myMistakeGroups",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MistakeTopicGroup"
+                  },
+                  "title": "Response Mymistakegroups",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Mistake Summary",
+        "tags": [
+          "progress"
+        ]
+      }
+    },
+    "/api/v1/me/mistakes/{mistake_id}": {
+      "get": {
+        "description": "One mistake, including its explanation once ready.",
+        "operationId": "getMyMistake",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "mistake_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Mistake Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MistakeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get Mistake",
+        "tags": [
+          "progress"
+        ]
+      }
+    },
+    "/api/v1/me/reviews/summary": {
+      "get": {
+        "description": "How many mistakes are due for review today.",
+        "operationId": "myReviewSummary",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewSummaryOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Review Summary",
+        "tags": [
+          "progress"
+        ]
+      }
+    },
     "/api/v1/me/subjects": {
       "get": {
         "description": "The student's chosen subjects and their status.",
@@ -3007,6 +3911,110 @@
         "summary": "Replace My Subjects",
         "tags": [
           "subjects"
+        ]
+      }
+    },
+    "/api/v1/me/subjects/{enrolment_id}/progress": {
+      "get": {
+        "description": "Mastery by topic, 30 days of activity, strongest and weakest skills.",
+        "operationId": "mySubjectProgress",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "enrolment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Enrolment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Subject Progress",
+        "tags": [
+          "progress"
         ]
       }
     },
@@ -3560,6 +4568,202 @@
           }
         },
         "summary": "Reveal Hint",
+        "tags": [
+          "practice"
+        ]
+      }
+    },
+    "/api/v1/practice/items/{item_id}/similar": {
+      "post": {
+        "description": "Another question on the same skill, straight after a wrong answer.",
+        "operationId": "similarPracticeItem",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeItemOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Similar",
+        "tags": [
+          "practice"
+        ]
+      }
+    },
+    "/api/v1/practice/reviews/next": {
+      "post": {
+        "description": "The next mistake due for review today (resumes an open one). Safe to repeat.",
+        "operationId": "nextReviewItem",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeItemOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Next Review",
         "tags": [
           "practice"
         ]

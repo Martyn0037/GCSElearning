@@ -73,7 +73,8 @@ def decode_access_token(settings: Settings, token: str, now: datetime) -> Access
             algorithms=[JWT_ALGORITHM],
             audience=settings.jwt_audience,
             issuer=settings.jwt_issuer,
-            options={"require": _REQUIRED_CLAIMS, "verify_exp": False},
+            # Time checks use the injected clock below, not the system clock.
+            options={"require": _REQUIRED_CLAIMS, "verify_exp": False, "verify_iat": False},
         )
         expires_at = datetime.fromtimestamp(payload["exp"], tz=now.tzinfo)
         if expires_at <= now:
