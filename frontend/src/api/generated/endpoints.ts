@@ -24,15 +24,19 @@ import {
   AdminEnrolmentOut,
   AdminEnrolmentPage,
   AdminSpecificationOut,
+  AnswerResultOut,
   CatalogueOut,
   MySubjectsOut,
+  PracticeItemOut,
   SessionOut,
   TopicMapOut,
   UserOut,
 } from "./model";
 import type {
+  AnswerRequest,
   EnrolmentUpdate,
   ErrorResponse,
+  FlagRequest,
   ListEnrolmentsParams,
   LoginRequest,
   ResetPasswordRequest,
@@ -1760,6 +1764,364 @@ export function useGetMyTopicMap<
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+export const getNextPracticeItemUrl = (enrolmentId: string, topicId: string) => {
+  return `/api/v1/practice/enrolments/${enrolmentId}/topics/${topicId}/next`;
+};
+
+/**
+ * The current question for this topic, or a new one. Safe to repeat.
+ * @summary Next Item
+ */
+export const nextPracticeItem = async (
+  enrolmentId: string,
+  topicId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<PracticeItemOut> => {
+  return apiFetch<PracticeItemOut>(getNextPracticeItemUrl(enrolmentId, topicId), {
+    ...options,
+    method: "POST",
+
+    schema: PracticeItemOut,
+  });
+};
+
+export const getNextPracticeItemMutationKey = () => ["nextPracticeItem"] as const;
+
+export const getNextPracticeItemMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof nextPracticeItem>>,
+    TError,
+    NextPracticeItemMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof nextPracticeItem>>,
+  TError,
+  NextPracticeItemMutationVariables,
+  TContext
+> => {
+  const mutationKey = getNextPracticeItemMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof nextPracticeItem>>,
+    NextPracticeItemMutationVariables
+  > = (props) => {
+    const { enrolmentId, topicId } = props ?? {};
+
+    return nextPracticeItem(enrolmentId, topicId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type NextPracticeItemMutationResult = NonNullable<
+  Awaited<ReturnType<typeof nextPracticeItem>>
+>;
+
+export type NextPracticeItemMutationError = ErrorType<ErrorResponse>;
+export type NextPracticeItemMutationVariables = { enrolmentId: string; topicId: string };
+
+/**
+ * The current question for this topic, or a new one. Safe to repeat.
+ * @summary Next Item
+ */
+export const useNextPracticeItem = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof nextPracticeItem>>,
+      TError,
+      NextPracticeItemMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof nextPracticeItem>>,
+  TError,
+  NextPracticeItemMutationVariables,
+  TContext
+> => {
+  return useMutation(getNextPracticeItemMutationOptions(options), queryClient);
+};
+
+export const getAnswerPracticeItemUrl = (itemId: string) => {
+  return `/api/v1/practice/items/${itemId}/answer`;
+};
+
+/**
+ * Mark an answer. Repeating with the same Idempotency-Key returns the same result.
+ * @summary Answer
+ */
+export const answerPracticeItem = async (
+  itemId: string,
+  answerRequest: AnswerRequest,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<AnswerResultOut> => {
+  return apiFetch<AnswerResultOut>(getAnswerPracticeItemUrl(itemId), {
+    ...options,
+    method: "POST",
+    headers: getHeaders({ "Content-Type": "application/json" }, options?.headers),
+    body: JSON.stringify(answerRequest),
+    schema: AnswerResultOut,
+  });
+};
+
+export const getAnswerPracticeItemMutationKey = () => ["answerPracticeItem"] as const;
+
+export const getAnswerPracticeItemMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof answerPracticeItem>>,
+    TError,
+    AnswerPracticeItemMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof answerPracticeItem>>,
+  TError,
+  AnswerPracticeItemMutationVariables,
+  TContext
+> => {
+  const mutationKey = getAnswerPracticeItemMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof answerPracticeItem>>,
+    AnswerPracticeItemMutationVariables
+  > = (props) => {
+    const { itemId, data } = props ?? {};
+
+    return answerPracticeItem(itemId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AnswerPracticeItemMutationResult = NonNullable<
+  Awaited<ReturnType<typeof answerPracticeItem>>
+>;
+export type AnswerPracticeItemMutationBody = BodyType<AnswerRequest>;
+export type AnswerPracticeItemMutationError = ErrorType<ErrorResponse>;
+export type AnswerPracticeItemMutationVariables = { itemId: string; data: BodyType<AnswerRequest> };
+
+/**
+ * Mark an answer. Repeating with the same Idempotency-Key returns the same result.
+ * @summary Answer
+ */
+export const useAnswerPracticeItem = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof answerPracticeItem>>,
+      TError,
+      AnswerPracticeItemMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof answerPracticeItem>>,
+  TError,
+  AnswerPracticeItemMutationVariables,
+  TContext
+> => {
+  return useMutation(getAnswerPracticeItemMutationOptions(options), queryClient);
+};
+
+export const getFlagPracticeItemUrl = (itemId: string) => {
+  return `/api/v1/practice/items/${itemId}/flag`;
+};
+
+/**
+ * Report "this looks wrong". The question is hidden until reviewed.
+ * @summary Flag
+ */
+export const flagPracticeItem = async (
+  itemId: string,
+  flagRequest: FlagRequest,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<void> => {
+  return apiFetch<void>(getFlagPracticeItemUrl(itemId), {
+    ...options,
+    method: "POST",
+    headers: getHeaders({ "Content-Type": "application/json" }, options?.headers),
+    body: JSON.stringify(flagRequest),
+  });
+};
+
+export const getFlagPracticeItemMutationKey = () => ["flagPracticeItem"] as const;
+
+export const getFlagPracticeItemMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof flagPracticeItem>>,
+    TError,
+    FlagPracticeItemMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof flagPracticeItem>>,
+  TError,
+  FlagPracticeItemMutationVariables,
+  TContext
+> => {
+  const mutationKey = getFlagPracticeItemMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof flagPracticeItem>>,
+    FlagPracticeItemMutationVariables
+  > = (props) => {
+    const { itemId, data } = props ?? {};
+
+    return flagPracticeItem(itemId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type FlagPracticeItemMutationResult = NonNullable<
+  Awaited<ReturnType<typeof flagPracticeItem>>
+>;
+export type FlagPracticeItemMutationBody = BodyType<FlagRequest>;
+export type FlagPracticeItemMutationError = ErrorType<ErrorResponse>;
+export type FlagPracticeItemMutationVariables = { itemId: string; data: BodyType<FlagRequest> };
+
+/**
+ * Report "this looks wrong". The question is hidden until reviewed.
+ * @summary Flag
+ */
+export const useFlagPracticeItem = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof flagPracticeItem>>,
+      TError,
+      FlagPracticeItemMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof flagPracticeItem>>,
+  TError,
+  FlagPracticeItemMutationVariables,
+  TContext
+> => {
+  return useMutation(getFlagPracticeItemMutationOptions(options), queryClient);
+};
+
+export const getRevealHintUrl = (itemId: string) => {
+  return `/api/v1/practice/items/${itemId}/hints`;
+};
+
+/**
+ * Reveal the next hint ("I'm stuck"). The fourth is the full solution.
+ * @summary Reveal Hint
+ */
+export const revealHint = async (
+  itemId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<PracticeItemOut> => {
+  return apiFetch<PracticeItemOut>(getRevealHintUrl(itemId), {
+    ...options,
+    method: "POST",
+
+    schema: PracticeItemOut,
+  });
+};
+
+export const getRevealHintMutationKey = () => ["revealHint"] as const;
+
+export const getRevealHintMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof revealHint>>,
+    TError,
+    RevealHintMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof revealHint>>,
+  TError,
+  RevealHintMutationVariables,
+  TContext
+> => {
+  const mutationKey = getRevealHintMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof revealHint>>,
+    RevealHintMutationVariables
+  > = (props) => {
+    const { itemId } = props ?? {};
+
+    return revealHint(itemId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RevealHintMutationResult = NonNullable<Awaited<ReturnType<typeof revealHint>>>;
+
+export type RevealHintMutationError = ErrorType<ErrorResponse>;
+export type RevealHintMutationVariables = { itemId: string };
+
+/**
+ * Reveal the next hint ("I'm stuck"). The fourth is the full solution.
+ * @summary Reveal Hint
+ */
+export const useRevealHint = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof revealHint>>,
+      TError,
+      RevealHintMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof revealHint>>,
+  TError,
+  RevealHintMutationVariables,
+  TContext
+> => {
+  return useMutation(getRevealHintMutationOptions(options), queryClient);
+};
 
 export const getGetCurrentUserUrl = () => {
   return `/api/v1/users/me`;

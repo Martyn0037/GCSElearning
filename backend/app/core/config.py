@@ -7,6 +7,7 @@ environment. Nothing here has a production-usable default for a secret.
 
 from __future__ import annotations
 
+from decimal import Decimal
 from enum import StrEnum
 from functools import lru_cache
 from typing import Annotated
@@ -79,6 +80,35 @@ class Settings(BaseSettings):
     login_ip_limit_per_minute: int = Field(default=10, ge=1)
 
     audit_ip_salt: SecretStr
+
+    # --- Claude (Phase 3). Without a key the app runs from the question bank only.
+    anthropic_api_key: SecretStr | None = None
+    model_generation: str = "claude-haiku-5-5"
+    model_verification: str = "claude-haiku-5-5"
+    model_reasoning: str = "claude-sonnet-5-5"
+    ai_timeout_seconds: float = Field(default=60.0, gt=0, le=600)
+    ai_max_validation_retries: int = Field(default=2, ge=0, le=5)
+    # Budgets are in pounds; Claude bills in dollars, converted at usd_to_gbp
+    # (set it slightly high so the cap errs on the safe side).
+    ai_monthly_budget_gbp: Decimal = Field(default=Decimal("25"), ge=0)
+    ai_daily_budget_gbp: Decimal = Field(default=Decimal("2.50"), ge=0)
+    usd_to_gbp: Decimal = Field(default=Decimal("0.85"), gt=0)
+    # Dollars per million tokens: {model: [input, output]}. Check current
+    # prices before changing models. Cache writes bill 1.25x input, reads 0.1x.
+    ai_prices_usd_per_mtok: dict[str, tuple[Decimal, Decimal]] = Field(
+        default_factory=lambda: {
+            "claude-haiku-5-5": (Decimal("0.10"), Decimal("0.50")),
+            "claude-sonnet-5-5": (Decimal("2.00"), Decimal("10.00")),
+        }
+    )
+    ai_circuit_failure_threshold: int = Field(default=5, ge=1)
+    ai_circuit_reset_seconds: float = Field(default=60.0, gt=0)
+
+    # --- Question bank
+    question_min_confidence: float = Field(default=0.8, ge=0, le=1)
+    question_strict_mode: bool = False  # True: new questions wait for admin approval
+    question_bank_target: int = Field(default=3, ge=1, le=20)  # unseen per objective+level
+    worker_poll_seconds: float = Field(default=3.0, gt=0)
 
     @field_validator("cors_origins", mode="before")
     @classmethod

@@ -141,3 +141,53 @@ async def import_fixture_curriculum(session: AsyncSession) -> CurriculumIds:
     }
     set_texts = {o.title: o.id for o in (await session.scalars(select(SetTextOption))).all()}
     return CurriculumIds(boards, subjects, spec_ids, topics, set_texts)
+
+
+async def create_question(
+    session: AsyncSession,
+    objective_id: uuid.UUID,
+    *,
+    difficulty: int = 1,
+    tier: object = None,
+    question_type: str = "multiple_choice",
+    status: str = "active",
+    stem: str | None = None,
+) -> uuid.UUID:
+    """Insert a bank question with four hints and commit; returns its ID."""
+    from app.models.curriculum import Tier
+    from app.models.question import Hint, Question, QuestionStatus, QuestionType
+
+    qtype = QuestionType(question_type)
+    keys: dict[QuestionType, dict[str, object]] = {
+        QuestionType.MULTIPLE_CHOICE: {"correct_option": "C"},
+        QuestionType.NUMERIC: {"value": "4.75", "tolerance": "0", "unit": "cm"},
+        QuestionType.SHORT_TEXT: {"accepted": ["prime", "prime number"]},
+    }
+    answer = keys[qtype]
+    question = Question(
+        id=uuid.uuid4(),
+        objective_id=objective_id,
+        tier=Tier(tier) if isinstance(tier, str) else tier,
+        difficulty=difficulty,
+        question_type=qtype,
+        command_word="Work out",
+        stem=stem or f"Question {uuid.uuid4().hex[:6]}",
+        options=[
+            {"label": x, "text": t} for x, t in zip("ABCD", ["2", "3", "6", "36"], strict=True)
+        ]
+        if qtype is QuestionType.MULTIPLE_CHOICE
+        else None,
+        answer=answer,
+        marks=1,
+        worked_solution="The worked solution.",
+        status=QuestionStatus(status),
+        verified=True,
+        confidence=0.95,
+        generator_model="test",
+        content_hash=uuid.uuid4().hex,
+    )
+    session.add(question)
+    await session.flush()
+    session.add_all(Hint(question_id=question.id, level=i, text=f"Hint {i}") for i in range(1, 5))
+    await session.commit()
+    return question.id

@@ -230,6 +230,69 @@
         "title": "AdminSpecificationOut",
         "type": "object"
       },
+      "AnswerRequest": {
+        "additionalProperties": false,
+        "description": "The student's answer: an option label, a number, or a short phrase.",
+        "properties": {
+          "answer": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Answer",
+            "type": "string"
+          }
+        },
+        "required": [
+          "answer"
+        ],
+        "title": "AnswerRequest",
+        "type": "object"
+      },
+      "AnswerResultOut": {
+        "additionalProperties": false,
+        "description": "The marked answer.",
+        "properties": {
+          "assisted": {
+            "title": "Assisted",
+            "type": "boolean"
+          },
+          "correct": {
+            "title": "Correct",
+            "type": "boolean"
+          },
+          "correctAnswer": {
+            "title": "Correctanswer",
+            "type": "string"
+          },
+          "itemId": {
+            "format": "uuid",
+            "title": "Itemid",
+            "type": "string"
+          },
+          "levelAfter": {
+            "title": "Levelafter",
+            "type": "integer"
+          },
+          "levelBefore": {
+            "title": "Levelbefore",
+            "type": "integer"
+          },
+          "workedSolution": {
+            "title": "Workedsolution",
+            "type": "string"
+          }
+        },
+        "required": [
+          "itemId",
+          "correct",
+          "assisted",
+          "correctAnswer",
+          "workedSolution",
+          "levelBefore",
+          "levelAfter"
+        ],
+        "title": "AnswerResultOut",
+        "type": "object"
+      },
       "AttentionReason": {
         "description": "Why an admin should look at an enrolment.",
         "enum": [
@@ -609,6 +672,26 @@
         "title": "ErrorResponse",
         "type": "object"
       },
+      "FlagRequest": {
+        "additionalProperties": false,
+        "description": "A \"this looks wrong\" report.",
+        "properties": {
+          "reason": {
+            "anyOf": [
+              {
+                "maxLength": 500,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "title": "FlagRequest",
+        "type": "object"
+      },
       "LoginRequest": {
         "additionalProperties": false,
         "description": "Credentials for signing in.",
@@ -656,6 +739,116 @@
         ],
         "title": "MySubjectsOut",
         "type": "object"
+      },
+      "OptionOut": {
+        "additionalProperties": false,
+        "description": "A multiple-choice option.",
+        "properties": {
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "text"
+        ],
+        "title": "OptionOut",
+        "type": "object"
+      },
+      "PracticeItemOut": {
+        "additionalProperties": false,
+        "description": "A question as the student sees it. Never includes the answer.",
+        "properties": {
+          "commandWord": {
+            "title": "Commandword",
+            "type": "string"
+          },
+          "difficulty": {
+            "description": "1 recall ... 5 exam-style",
+            "title": "Difficulty",
+            "type": "integer"
+          },
+          "hints": {
+            "description": "Hints revealed so far, in order",
+            "items": {
+              "type": "string"
+            },
+            "title": "Hints",
+            "type": "array"
+          },
+          "hintsRemaining": {
+            "title": "Hintsremaining",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "marks": {
+            "title": "Marks",
+            "type": "integer"
+          },
+          "objectiveRef": {
+            "title": "Objectiveref",
+            "type": "string"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/OptionOut"
+            },
+            "title": "Options",
+            "type": "array"
+          },
+          "questionType": {
+            "$ref": "#/components/schemas/QuestionType"
+          },
+          "stem": {
+            "title": "Stem",
+            "type": "string"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          }
+        },
+        "required": [
+          "id",
+          "questionType",
+          "commandWord",
+          "stem",
+          "options",
+          "unit",
+          "marks",
+          "difficulty",
+          "objectiveRef",
+          "hints",
+          "hintsRemaining"
+        ],
+        "title": "PracticeItemOut",
+        "type": "object"
+      },
+      "QuestionType": {
+        "description": "How a question is answered and marked.",
+        "enum": [
+          "multiple_choice",
+          "numeric",
+          "short_text"
+        ],
+        "title": "QuestionType",
+        "type": "string"
       },
       "ResetPasswordRequest": {
         "additionalProperties": false,
@@ -2918,6 +3111,457 @@
         "summary": "Get My Topic Map",
         "tags": [
           "subjects"
+        ]
+      }
+    },
+    "/api/v1/practice/enrolments/{enrolment_id}/topics/{topic_id}/next": {
+      "post": {
+        "description": "The current question for this topic, or a new one. Safe to repeat.",
+        "operationId": "nextPracticeItem",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "enrolment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Enrolment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "topic_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Topic Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeItemOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Next Item",
+        "tags": [
+          "practice"
+        ]
+      }
+    },
+    "/api/v1/practice/items/{item_id}/answer": {
+      "post": {
+        "description": "Mark an answer. Repeating with the same Idempotency-Key returns the same result.",
+        "operationId": "answerPracticeItem",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "Idempotency-Key",
+            "required": true,
+            "schema": {
+              "maxLength": 64,
+              "minLength": 8,
+              "pattern": "^[A-Za-z0-9-]+$",
+              "title": "Idempotency-Key",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnswerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnswerResultOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Answer",
+        "tags": [
+          "practice"
+        ]
+      }
+    },
+    "/api/v1/practice/items/{item_id}/flag": {
+      "post": {
+        "description": "Report \"this looks wrong\". The question is hidden until reviewed.",
+        "operationId": "flagPracticeItem",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FlagRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Flag",
+        "tags": [
+          "practice"
+        ]
+      }
+    },
+    "/api/v1/practice/items/{item_id}/hints": {
+      "post": {
+        "description": "Reveal the next hint (\"I'm stuck\"). The fourth is the full solution.",
+        "operationId": "revealHint",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeItemOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Reveal Hint",
+        "tags": [
+          "practice"
         ]
       }
     },

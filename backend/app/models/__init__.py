@@ -14,16 +14,38 @@ from app.models.curriculum import (
     Topic,
 )
 from app.models.enrolment import StudentSetText, StudentSubject, StudentTopicSetting
+from app.models.ops import AiUsage, Job, JobStatus, UsageStatus
+from app.models.question import (
+    Difficulty,
+    Hint,
+    ObjectiveProgress,
+    PracticeItem,
+    Question,
+    QuestionFlag,
+    QuestionStatus,
+    QuestionType,
+)
 from app.models.rate_limit import RateLimitCounter
 from app.models.refresh_token import RefreshToken
 from app.models.user import GuardianLink, Role, User
 
 __all__ = [
+    "AiUsage",
     "AuditLog",
     "Consent",
+    "Difficulty",
     "ExamBoard",
     "GuardianLink",
+    "Hint",
+    "Job",
+    "JobStatus",
     "LearningObjective",
+    "ObjectiveProgress",
+    "PracticeItem",
+    "Question",
+    "QuestionFlag",
+    "QuestionStatus",
+    "QuestionType",
     "RateLimitCounter",
     "RefreshToken",
     "Role",
@@ -36,5 +58,6 @@ __all__ = [
     "Subtopic",
     "Tier",
     "Topic",
+    "UsageStatus",
     "User",
 ]

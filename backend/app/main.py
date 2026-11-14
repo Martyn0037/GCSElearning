@@ -10,8 +10,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.admin.router import router as admin_router
+from app.ai.factory import build_breaker, build_llm_client
 from app.auth.cookies import CSRF_HEADER
 from app.auth.router import router as auth_router
+from app.core.clock import SystemClock
 from app.core.config import Environment, Settings, get_settings
 from app.core.errors import register_error_handlers
 from app.core.logging import configure_logging
@@ -19,6 +21,7 @@ from app.core.middleware import RequestContextMiddleware, SecurityHeadersMiddlew
 from app.db.session import create_engine, create_session_factory
 from app.enrolment.router import router as enrolment_router
 from app.health.router import router as health_router
+from app.practice.router import router as practice_router
 from app.users.router import router as users_router
 
 
@@ -39,6 +42,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         engine = create_engine(settings)
         app.state.engine = engine
         app.state.session_factory = create_session_factory(engine)
+        # Claude client (None without an API key: bank-only mode) and this
+        # process's circuit breaker.
+        app.state.llm_client = build_llm_client(settings)
+        app.state.circuit = build_breaker(settings, SystemClock())
         try:
             yield
         finally:
@@ -72,7 +79,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     # Each router carries its full /api/v1/... prefix so route templates (used
     # as metric labels) are complete paths.
-    for router in (auth_router, users_router, enrolment_router, admin_router):
+    for router in (auth_router, users_router, enrolment_router, practice_router, admin_router):
         app.include_router(router)
     app.include_router(health_router)
     return app

@@ -16,6 +16,8 @@ dependencies = [
     "pyjwt>=2.15,<3",
     "prometheus-client>=0.26,<0.27",
     "pyyaml>=6.0.3,<7",
+    "anthropic>=2.8,<3",
+    "sympy>=1.14,<2",
 ]
 
 [dependency-groups]
@@ -51,6 +53,8 @@ known-third-party = ["alembic"]
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101", "S105", "S106", "S107"]
 "alembic/**" = ["N999"]
+# Prompt text is kept one rule per line for readability.
+"app/questions/prompts.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.12"
