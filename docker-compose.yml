@@ -1,0 +1,96 @@
+# docker-compose.yml
+# Single-host deployment (ADR-001): Caddy (TLS + static app + /api proxy),
+# the FastAPI service, a one-shot migration job, and PostgreSQL 16.
+# All configuration and secrets come from .env (see .env.example).
+
+x-logging: &logging
+  # Size-based rotation keeps disk use bounded; ~200 MB per service covers
+  # well over 30 days at this app's volume (ADR-009).
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "10"
+
+x-api-env: &api-env
+  ENVIRONMENT: ${ENVIRONMENT:-production}
+  DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+  JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
+  AUDIT_IP_SALT: ${AUDIT_IP_SALT:?AUDIT_IP_SALT must be set}
+  CORS_ORIGINS: https://${DOMAIN}
+  COOKIE_SECURE: "true"
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER must be set}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB must be set}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    deploy:
+      resources:
+        limits: { cpus: "1.0", memory: 512M }
+    logging: *logging
+
+  migrate:
+    image: ${API_IMAGE:-gcse-coach-api:local}
+    build: ./backend
+    command: ["alembic", "upgrade", "head"]
+    environment: *api-env
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: "no"
+    logging: *logging
+
+  api:
+    image: ${API_IMAGE:-gcse-coach-api:local}
+    build: ./backend
+    restart: unless-stopped
+    environment: *api-env
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    deploy:
+      resources:
+        limits: { cpus: "1.0", memory: 512M }
+    logging: *logging
+
+  caddy:
+    image: ${WEB_IMAGE:-gcse-coach-web:local}
+    build:
+      context: ./frontend
+      additional_contexts:
+        caddyfile: ./infra/caddy
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN must be set}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api: { condition: service_healthy }
+    security_opt: ["no-new-privileges:true"]
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 256M }
+    logging: *logging
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

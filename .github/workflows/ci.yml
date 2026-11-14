@@ -1,0 +1,92 @@
+# .github/workflows/ci.yml
+# Lint, type-check, test (with coverage gates), build images and scan them.
+# Third-party actions are pinned to commit SHAs (tag in the trailing comment)
+# so a moved or compromised tag can't change what runs here.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.11.32"
+          enable-cache: true
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Format check
+        run: uv run ruff format --check .
+      - name: Lint
+        run: uv run ruff check .
+      - name: Type check
+        run: uv run mypy
+      - name: Tests (unit + integration against PostgreSQL via testcontainers)
+        run: uv run pytest --cov --cov-report=term-missing
+      - name: OpenAPI is up to date
+        run: |
+          uv run python -m app.cli.export_openapi ../frontend/openapi.json
+          git diff --exit-code -- ../frontend/openapi.json
+
+  frontend:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - name: Generated API client is up to date
+        run: npm run api:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - name: Format check
+        run: npx prettier --check "src/**/*.{ts,tsx}"
+      - name: Tests with coverage gate
+        run: npm run test:coverage
+      - run: npm run build
+
+  images:
+    needs: [backend, frontend]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      TRIVY_IMAGE: aquasec/trivy:0.76.2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build images
+        run: |
+          docker build -t gcse-coach-api:ci backend
+          docker build -t gcse-coach-web:ci --build-context caddyfile=infra/caddy frontend
+      - name: Scan images (fail on fixable HIGH/CRITICAL)
+        run: |
+          for image in gcse-coach-api:ci gcse-coach-web:ci; do
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+              -v "$PWD/.trivyignore:/trivyignore:ro" "$TRIVY_IMAGE" \
+              image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --no-progress \
+              --ignorefile /trivyignore "$image"
+          done

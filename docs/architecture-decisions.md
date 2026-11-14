@@ -1,0 +1,210 @@
+# Architecture decisions
+
+A log of the significant technical decisions and why they were made. Each entry is
+**Accepted** unless marked otherwise. To change a decision, add a new entry that
+supersedes the old one; don't edit history.
+
+---
+
+## ADR-001 — Docker Compose on one Lightsail instance, not Kubernetes
+
+**Status:** Accepted (2026-11-14). **This is a deliberate exception to the standing
+engineering rule that every service ships with Kubernetes manifests.**
+
+**Context.** The app serves one student, one guardian and one admin. The budget is about £10–15 a month
+for hosting. A managed Kubernetes control plane on its own costs more than the whole budget,
+and running it would cost more effort than the rest of the system.
+
+**Decision.** Run everything on one AWS Lightsail instance with Docker Compose: `caddy`
+(TLS, static app, `/api` reverse proxy), `api`, a one-shot `migrate` job and
+`postgres`. The `worker` service will be added in Phase 3.
+
+**Kept from the standing rules**, so a later move to Kubernetes is cheap:
+- The services are stateless and containerised. All state lives in Postgres, with no in-process sessions or caches that hold correctness.
+- Config comes only from the environment, with nothing baked into images.
+- Each container has health endpoints (`/health/live`, `/health/ready`), resource limits, a non-root user, a read-only root filesystem (api) and `no-new-privileges`.
+- The API can run as several processes (2 Uvicorn workers today), so rate limits and refresh-token state live in the database.
+
+**Consequences.** There's a single point of failure: it's accepted, mitigated by nightly
+`pg_dump` to S3 plus Lightsail snapshots (Phase 8). There's no rolling deploy, so deploys
+cause a few seconds of downtime, which is acceptable for this user base.
+
+**Revisit if** there are more than about 50 active users, uptime needs above about 99%, or more than one
+host is needed.
+
+---
+
+## ADR-002 — Secrets in a `chmod 600` `.env` file; SSM Parameter Store as the upgrade path
+
+**Status:** Accepted (2026-11-14). This is an exception to the standing "dedicated secrets manager" rule.
+
+**Context.** Lightsail instances can't take an IAM instance role. Reading SSM Parameter Store
+from the box would need a long-lived AWS access key stored on the same box. That only
+moves the secret: whoever can read `.env` could read the key too.
+
+**Decision.** Keep secrets in `.env` next to `docker-compose.yml`, owned by the deploy
+user, with `chmod 600`. Never commit it (it's in `.gitignore`); `.env.example` documents
+every variable. The API refuses to start if `JWT_SECRET` or `AUDIT_IP_SALT` is shorter than
+32 characters, so placeholder values can't reach production.
+
+**Upgrade path.** Move to SSM Parameter Store (SecureString) if the app moves to EC2/ECS
+with an instance or task role. The code needs no change, because settings are read from the environment.
+
+**Rotation.**
+- `JWT_SECRET`: rotating it signs everyone out, and nothing else.
+- `AUDIT_IP_SALT`: rotating it breaks correlation with older audit rows, which is acceptable.
+- Postgres password: rotate it with `ALTER USER`, then update `.env`.
+
+---
+
+## ADR-003 — Postgres-backed job queue (no Redis)
+
+**Status:** Accepted (2026-11-14); implementation lands in Phase 3.
+
+**Decision.** Use a small `jobs` table that the worker claims from with
+`SELECT … FOR UPDATE SKIP LOCKED`. It has retries with exponential backoff and a dead-letter status for
+jobs that keep failing. About 200 lines that we own and test.
+
+**Trade-offs.**
+- (+) No extra service to run or back up.
+- (+) Jobs are transactional with the data they relate to.
+- (+) One database driver.
+- (−) The worker checks for jobs every few seconds. That's negligible at one student, and
+  `LISTEN/NOTIFY` can be added if latency matters.
+- (−) We maintain the queue ourselves.
+
+**Rejected alternatives.**
+- `procrastinate`: mature, but needs a second driver (psycopg 3) and its own schema.
+- ARQ + Redis: another stateful service.
+
+---
+
+## ADR-004 — Rate limiting with fixed-window counters in Postgres
+
+**Status:** Accepted (2026-11-14). Implemented in Phase 1.
+
+**Decision.** `rate_limit_counters(key, window_start, count)` is incremented with one atomic
+`INSERT … ON CONFLICT DO UPDATE … RETURNING count`. The increment commits immediately,
+so a rejected request still counts.
+
+**Limits in force.**
+- Login: 10 per minute per IP, plus 20 per hour per identifier.
+- Refresh: 30 per minute per IP.
+- An account locks for 15 minutes after 5 failed logins.
+
+**Trade-offs.**
+- (+) Limits are shared across API processes and survive restarts.
+- (−) Fixed windows allow up to 2× the limit across a window boundary. That's acceptable
+  for brute-force protection when combined with account lockout.
+- (−) One extra write per limited request.
+- Old windows are purged by `rate_limit.purge_expired`, which the worker will run on a schedule (Phase 3).
+
+---
+
+## ADR-005 — Mastery with Bayesian Knowledge Tracing, kept separate from the level ladder
+
+**Status:** Accepted (2026-11-14); implementation lands in Phase 3/4.
+
+**Decision.** Use BKT with fixed default parameters for each difficulty level (no fitting) to estimate
+P(mastered) per learning objective. This drives the mastery rings and "exam ready".
+
+The **level ladder** is a separate rule-based state machine:
+- Up a level after 3 correct in a row, or 80% of the last 5.
+- Down a level after 2 misses in a row at the same level.
+
+**Why.**
+- BKT updates with a simple formula, so tests can assert exact hand-calculated values.
+- It's easy to explain: "85% sure he's got this".
+- Elo would also rate question difficulty, but one student never produces enough attempts
+  for question ratings to settle.
+
+---
+
+## ADR-006 — Fixed-interval review scheduler behind an interface
+
+**Status:** Accepted (2026-11-14); implementation lands in Phase 4.
+
+**Decision.** A `ReviewScheduler` protocol, with `FixedIntervalScheduler` as the first implementation:
+- It brings a mistake back after 1, 3, 7 and 14 days.
+- The mistake is resolved after 2 correct answers in a row.
+- Days are calendar days in Europe/London.
+
+FSRS (`py-fsrs`) can be swapped in later without changing the code that uses the scheduler.
+
+---
+
+## ADR-007 — Students sign in with a username; no student email
+
+**Status:** Accepted (2026-11-14).
+
+**Context.** The student is a minor. The UK GDPR and the Age Appropriate Design Code
+favour data minimisation.
+
+**Decision.**
+- Students have a username and password, and no email is stored.
+- Guardians and admins sign in with email.
+- A database `CHECK` constraint enforces this split, and that usernames and emails are stored lower-case.
+- Student password resets are done by the admin (`POST /api/v1/admin/students/{id}/password`). A reset also signs the student out on every device.
+
+---
+
+## ADR-008 — Grades shown only as a band
+
+**Status:** Accepted (2026-11-14); used from Phase 5.
+
+**Decision.** An admin-editable `grade_boundaries` table is filled from the exam board's published boundaries.
+- Estimates are always shown as a band ("around 5–6"), never a single grade, and labelled as an estimate.
+- Until boundaries exist, the app shows a percentage and "secure / developing / not yet".
+
+---
+
+## ADR-009 — Right-sized observability
+
+**Status:** Accepted (2026-11-14). This is a partial exception to the standing observability rules.
+
+**Kept:**
+- Structured JSON logs on stdout with `timestamp`, `level`, `service`, `environment`, `trace_id` and `span_id`.
+- A trace ID from `X-Trace-Id`/`X-Request-ID` if it's well-formed, otherwise generated. It's returned on every response and included in every error body.
+- Redaction of sensitive keys, including passwords, tokens, cookies, emails and the student's answers.
+- Prometheus `/metrics` with request count and latency by route template, DB pool saturation and login outcomes.
+- `/health/live` and `/health/ready`.
+
+**Skipped:** an OpenTelemetry collector and distributed tracing backend. With only one service
+calling Claude, trace IDs in logs are enough.
+
+**Retention:**
+- Docker `json-file` rotation (20 MB × 10 files per service) keeps more than 30 days at this volume.
+- Database backups are kept for 30 days in S3 (Phase 8).
+- The audit log stays in Postgres.
+
+---
+
+## ADR-010 — Session tokens in httpOnly cookies, with CSRF double-submit
+
+**Status:** Accepted (2026-11-14). Implemented in Phase 1.
+
+**Decision.**
+- **Access token:** a JWT (HS256) that lasts 15 minutes. Its signature, expiry, issuer and audience are checked on every request, and the user is re-loaded so deactivation takes effect immediately. Cookie: `gc_access`, `Path=/api`.
+- **Refresh token:** 256 random bits that last 14 days. Only its SHA-256 is stored. Cookie: `gc_refresh`, `Path=/api/v1/auth`.
+  - It rotates on every use.
+  - Presenting an already-rotated token revokes the whole token family (theft detection).
+  - Reuse within 10 seconds of a rotation is treated as a two-tab race (`REFRESH_RACE`) and doesn't revoke anything.
+- **CSRF token:** the `gc_csrf` cookie is readable by JavaScript, and the client echoes it in `X-CSRF-Token` on every non-GET request.
+- All cookies are `Secure` and `SameSite=Strict`.
+
+**Trade-off.** Access JWTs are stateless, so logout can't kill an access token that has already been issued.
+It stays valid for up to 15 minutes. Deactivating an account cuts access immediately, because the user is re-checked on every request.
+
+---
+
+## ADR-011 — OpenAPI-generated client (Orval) with runtime Zod validation
+
+**Status:** Accepted (2026-11-14).
+
+**Decision.**
+- The backend's OpenAPI document is exported to `frontend/openapi.json`. Orval generates TanStack Query hooks and Zod schemas from it into `src/api/generated/`.
+- The single fetch client, `src/api/http.ts`, validates every response against its schema. It also handles CSRF, the shared refresh-and-retry, timeouts and the `ApiError` type.
+- CI fails if either generated artefact is out of date.
+
+**Trade-off.** It adds one dev dependency (Orval, which is actively maintained) but removes hand-written
+API types that could drift from the backend.
