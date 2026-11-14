@@ -29,6 +29,7 @@ const NUMERIC: PracticeItemOut = {
   objectiveRef: "N10",
   hints: [],
   hintsRemaining: 4,
+  review: false,
 };
 
 function setup(item: PracticeItemOut = NUMERIC) {

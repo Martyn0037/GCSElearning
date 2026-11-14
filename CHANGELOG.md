@@ -6,6 +6,21 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- **Maths keypad:** number answers, and short answers on maths questions, get on-screen keys (digits, decimal point, minus, a/b fraction bar, ratio, percent, delete, clear). A typed fraction is previewed stacked. On phones the keys replace the system keyboard until "Use keyboard instead" is tapped.
+
+### Changed
+- **Easier-to-read numbers in questions:**
+  - Digits use the same font as the words, as on exam papers.
+  - Fractions are drawn full size instead of shrunk.
+  - The small number on a root (the 3 in a cube root) is larger.
+  - Whole numbers of five or more digits are grouped in threes ("245 000").
+  - A hyphen used as a minus sign shows as a true minus ("−5").
+  - Punctuation stays next to the maths before it, with no gap and no line break.
+
+### Fixed
+- The question verifier no longer rejects good questions. It had treated hint 4 (the full solution, by design) as a leak, and compared its own answer word for word. About 4 in 5 generated questions were being thrown away.
+
 ### Added — Phase 4 (Memory and mistakes)
 - **Mistakes:** every wrong or full-solution answer creates (or re-opens) a mistake, with his answer, the correct answer and a review schedule.
 - **"Where it went wrong":**
