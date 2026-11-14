@@ -123,6 +123,8 @@ jobs:
             -e SEED_STUDENT_PASSWORD api python -m app.cli.seed_users \
             --admin-email "$E2E_ADMIN_EMAIL" --guardian-email e2e-guardian@example.test \
             --guardian-name Guardian --student-username "$E2E_STUDENT_USERNAME" --student-name Sam
+      - name: Seed end-to-end fixture questions (test data; refused in production)
+        run: docker compose run --rm -T api python -m app.cli.seed_test_questions --spec 1MA1 --objective N4
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 22

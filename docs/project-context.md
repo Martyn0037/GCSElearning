@@ -61,7 +61,7 @@ references. Anything unclear is marked `TODO`; nothing is invented.
 ## Build phases
 1. Foundations ✅
 2. Curriculum ✅
-3. Question engine
+3. Question engine ✅
 4. Memory and mistakes
 5. Gamification
 6. Extended answers and tutor chat

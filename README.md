@@ -29,6 +29,8 @@ You need Docker with the Compose plugin.
    openssl rand -base64 48
    ```
 
+   To have Claude write questions, also set `ANTHROPIC_API_KEY` (from <https://console.anthropic.com>). Without it the app runs, but serves only questions already in the bank. Spending is capped by `AI_MONTHLY_BUDGET_GBP` (default £25) and `AI_DAILY_BUDGET_GBP` (default £2.50).
+
 3. Restrict who can read the file:
 
    ```bash

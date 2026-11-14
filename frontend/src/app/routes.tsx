@@ -6,6 +6,7 @@ import { RequireRole } from "../auth/RequireRole";
 import { GuardianHomePage } from "../pages/HomePages";
 import { LoginPage } from "../pages/LoginPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
+import { LazyPracticePage } from "../practice/LazyPracticePage";
 import { SetupPage } from "../setup/SetupPage";
 import { StudentHomePage } from "../subjects/StudentHomePage";
 import { TopicMapPage } from "../subjects/TopicMapPage";
@@ -27,6 +28,12 @@ export const routes: RouteObject[] = [
     path: "/subjects/:enrolmentId",
     element: (
       <RequireRole roles={["student"]}>{(user) => <TopicMapPage user={user} />}</RequireRole>
+    ),
+  },
+  {
+    path: "/practice/:enrolmentId/:topicId",
+    element: (
+      <RequireRole roles={["student"]}>{(user) => <LazyPracticePage user={user} />}</RequireRole>
     ),
   },
   {

@@ -40,7 +40,7 @@ export function TopicMapPage({ user }: { user: UserOut }) {
               to tick off what you&apos;ve done so far.
             </p>
           )}
-          <TopicList topics={map.data.topics} />
+          <TopicList topics={map.data.topics} enrolmentId={map.data.enrolmentId} />
         </>
       )}
     </AppShell>

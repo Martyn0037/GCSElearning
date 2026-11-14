@@ -1,4 +1,4 @@
-// frontend/e2e/subjects.spec.ts
+// frontend/e2e/01-subjects.spec.ts
 /**
  * End-to-end: subject setup and topic unlocking, against the real stack.
  *

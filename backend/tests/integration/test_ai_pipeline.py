@@ -15,7 +15,8 @@ Covers:
   then dead; stale running jobs reclaimed
 - worker: main loop heartbeats and stops cleanly on SIGTERM;
   runs a generation job; Claude outage -> retried later; missing key
-  -> skipped; periodic top-up queues jobs only for topics covered at school
+  -> skipped; periodic top-up queues jobs only for topics covered at school,
+  and nothing at all without an API key
 """
 
 from __future__ import annotations
@@ -606,3 +607,24 @@ async def test_worker_main_should_heartbeat_and_stop_on_sigterm(
     async with asyncio.timeout(10):
         await task
     assert task.exception() is None
+
+
+async def test_top_up_should_do_nothing_without_api_key(
+    factory: async_sessionmaker[AsyncSession],
+    session: AsyncSession,
+    database_url: str,
+    clock: FakeClock,
+) -> None:
+    ctx = await _ctx(factory, make_settings(database_url), None, clock)
+
+    await run_once(ctx, Scheduler(last_run={"purge_rate_limits": clock.now()}))
+    await run_once(
+        ctx, Scheduler(last_run={"purge_rate_limits": clock.now(), "top_up_bank": clock.now()})
+    )
+
+    assert (
+        await session.scalar(
+            select(func.count()).select_from(Job).where(Job.kind == "generate_question")
+        )
+        == 0
+    )

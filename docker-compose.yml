@@ -19,6 +19,11 @@ x-api-env: &api-env
   CORS_ORIGINS: https://${DOMAIN}
   COOKIE_SECURE: "true"
   LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  # Optional: without a key the app serves only questions already in the bank.
+  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+  AI_MONTHLY_BUDGET_GBP: ${AI_MONTHLY_BUDGET_GBP:-25}
+  AI_DAILY_BUDGET_GBP: ${AI_DAILY_BUDGET_GBP:-2.50}
+  QUESTION_STRICT_MODE: ${QUESTION_STRICT_MODE:-false}
 
 services:
   postgres:
@@ -71,6 +76,30 @@ services:
     deploy:
       resources:
         limits: { cpus: "1.0", memory: 512M }
+    logging: *logging
+
+  worker:
+    image: ${API_IMAGE:-gcse-coach-api:local}
+    build: ./backend
+    command: ["python", "-m", "app.worker"]
+    restart: unless-stopped
+    environment: *api-env
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    healthcheck:
+      # The worker touches /tmp/worker-heartbeat every loop; stale = stuck.
+      test: ["CMD", "python", "-c", "import os,sys,time; sys.exit(0 if time.time() - os.path.getmtime('/tmp/worker-heartbeat') < 120 else 1)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 384M }
     logging: *logging
 
   caddy:

@@ -257,3 +257,38 @@ curriculum content comes only from the exam board's spec, never from model knowl
 - (+) Content changes are reviewable diffs in git, and deploys can't half-apply them.
 - (+) The app always matches the repo.
 - (−) Editing content needs a commit and a restart rather than an admin web form. That's acceptable for one admin; an upload form can be added later and would reuse the same importer.
+
+---
+
+## ADR-014 — Question pipeline: constrained generation, independent verification, bank first
+
+**Status:** Accepted (2026-11-14). Implemented in Phase 3.
+
+**Decision.**
+- **Generation** (`claude-haiku-5-5`, set in config):
+  - Each call covers one learning objective at one difficulty and one question type.
+  - The prompt holds only curriculum facts from the repo: the objective's wording for the student's tier, keywords, out-of-scope notes, the difficulty description and allowed command words. No student data is ever sent.
+  - Output is structured JSON, checked by Pydantic and by rules, with up to 2 retries. The rules cover the type's fields, four hints, hints 1–3 not containing the answer, no HTML, an allowed command word, and 1–6 marks.
+- **Verification** (a second Haiku call):
+  - It solves the question *before* reading the key, then checks correctness, scope, tier, difficulty, hints and mark-scheme consistency, and gives a confidence.
+  - The app also compares the verifier's own answer with the key, regardless of its yes/no verdict.
+- **SymPy** re-computes numeric answers from a `check_expression`. The expression must match an allowlist (digits, operators, `sqrt`, `pi`) and runs in an isolated `python -I` subprocess with a 5-second timeout, because the expression comes from the model.
+- A question goes **live** only if every check passes and confidence ≥ 0.8 (configurable).
+  - Strict mode holds new questions for admin approval.
+  - Rejected questions are kept, but never served, for the evaluation report.
+- **The bank comes first.** Students are served from stored questions. The worker tops up each objective the student can practise (current level and the next) to 3 unseen questions. On-the-spot generation happens only when the bank is empty, limited to 25 seconds.
+  - Without a key, over budget, or with the circuit open, the app serves the bank only. If the bank is empty it says "preparing questions" and queues the work.
+- **Spending:**
+  - Each call reserves its worst-case cost under a Postgres advisory lock before running.
+  - Daily and monthly caps are set in pounds and converted to dollars at a deliberately high rate.
+  - Every call is recorded (tokens, cost, request ID); prompts and answers are never stored.
+- **Marking** of multiple choice, numeric (with tolerance, fractions and units) and short text is deterministic: no AI is involved in marking these types.
+- **Maths display:** KaTeX in MathML mode with `trust: false`.
+  - Browsers render MathML natively, so the CSP needs no inline-style exception and no fonts.
+  - Plain text is escaped by React.
+  - The practice screen is code-split, so KaTeX loads only when needed.
+
+**Trade-offs.**
+- Two model calls per question roughly doubles generation cost, but on Haiku 5.5 it's around a tenth of a penny per question.
+- A strict verifier rejects some good questions, so the bank fills more slowly, which pre-generation hides.
+- MathML rendering is slightly less polished than KaTeX's HTML mode.

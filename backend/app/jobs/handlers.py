@@ -65,7 +65,13 @@ async def generate_question(ctx: JobContext, payload: dict[str, Any]) -> None:
 
 
 async def top_up_bank(ctx: JobContext, payload: dict[str, Any]) -> None:
-    """Queue generation wherever a student is running low on unseen questions."""
+    """Queue generation wherever a student is running low on unseen questions.
+
+    Does nothing without an API key: the jobs could only be skipped.
+    """
+    if ctx.settings.anthropic_api_key is None:
+        logger.info("bank_top_up_skipped", extra={"reason": "no_api_key"})
+        return
     async with ctx.session_factory() as session:
         queued = await plan_top_up(session, ctx.clock.now(), ctx.settings.question_bank_target)
     logger.info("bank_top_up", extra={"queued": queued})

@@ -6,6 +6,37 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added — Phase 3 (Question engine)
+- **Claude gateway:**
+  - Structured output checked with Pydantic plus rules, retried up to twice.
+  - A per-process circuit breaker.
+  - A daily and monthly budget in pounds, using reserve-then-settle with an advisory lock.
+  - An `ai_usage` table recording tokens and cost for every call.
+- **Question generation** (Haiku 5.5): one objective at one difficulty, with a marking key, worked solution and four-level hint ladder.
+  - A second Haiku call independently verifies each question.
+  - Numeric answers are re-computed by SymPy in a sandboxed subprocess.
+  - Only questions that pass every check go live; strict mode holds them for admin approval.
+- **Question bank and worker:**
+  - A Postgres job queue with deduplication, backoff, dead letters and recovery of stuck jobs.
+  - A `worker` Compose service with a heartbeat health check.
+  - A periodic top-up keeps 3 unseen questions ready per objective and level.
+  - Serving falls back to the bank only when Claude is unavailable or over budget.
+- **Practice API:**
+  - "Next question" resumes the open item and is safe to repeat.
+  - The "I'm stuck" hint ladder; the fourth hint is the full solution, after which the answer counts as assisted.
+  - Deterministic marking; answers are idempotent via `Idempotency-Key`.
+  - The difficulty ladder (ADR-005).
+  - "This looks wrong" flags hide a question.
+- **Question screen:** maths rendered by KaTeX as MathML; big tap targets; hints; results with the worked solution and level changes; a reporting control. It's lazy-loaded.
+- **Tools and tests:**
+  - An evaluation command (`app.cli.eval_questions`) reports pass rates and rejected questions for spot-checking.
+  - The Anthropic adapter is tested against recorded-style API responses.
+  - Playwright covers login → answer → hint → wrong answer → next question.
+- **Docs:** ADR-014; `.env.example` gains `ANTHROPIC_API_KEY`, budget caps and strict mode.
+
+### Fixed
+- An empty `ANTHROPIC_API_KEY=` now means "not configured" rather than a blank key.
+
 ### Added — Phase 2 (Curriculum)
 - **Curriculum format:** `curriculum/` holds YAML files: a catalogue of boards and subjects, and one file per spec version. There's a template and a README on how to copy content from a spec PDF.
 - **Worked example:** Pearson Edexcel GCSE Maths 1MA1 (Issue 2, June 2015), topic 1 Number (N1–N16). It's copied word for word, with the Foundation and Higher wording kept separately.

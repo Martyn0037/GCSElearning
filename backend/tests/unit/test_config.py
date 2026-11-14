@@ -6,6 +6,7 @@ Covers:
 - wildcard CORS origin is rejected
 - short JWT secret / IP salt are rejected
 - defaults: secure cookies on, 15-minute access tokens
+- a blank Anthropic key counts as not configured
 """
 
 from __future__ import annotations
@@ -38,3 +39,8 @@ def test_should_default_to_secure_cookies_and_short_access_tokens() -> None:
 
     assert settings.cookie_secure is True
     assert settings.access_token_ttl_seconds == 900
+
+
+@pytest.mark.parametrize("value", ["", "   "])
+def test_blank_anthropic_key_should_mean_not_configured(value: str) -> None:
+    assert make_settings(anthropic_api_key=value).anthropic_api_key is None

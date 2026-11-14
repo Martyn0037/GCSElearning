@@ -14,6 +14,7 @@ src/
   setup/              subject setup screen (choices model + UI)
   subjects/           student home and topic map
   admin/              admin screen
+  practice/           question screen, hints, results; maths via KaTeX (MathML), lazy-loaded
   pages/              login, guardian placeholder, not found
   test/               test setup, fake API, render helpers
 ```

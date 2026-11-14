@@ -110,6 +110,14 @@ class Settings(BaseSettings):
     question_bank_target: int = Field(default=3, ge=1, le=20)  # unseen per objective+level
     worker_poll_seconds: float = Field(default=3.0, gt=0)
 
+    @field_validator("anthropic_api_key", mode="before")
+    @classmethod
+    def _blank_key_is_none(cls, value: object) -> object:
+        """Treat an empty ``ANTHROPIC_API_KEY=`` (as Compose passes it) as not set."""
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def _split_origins(cls, value: object) -> object:

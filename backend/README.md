@@ -14,6 +14,10 @@ app/
   admin/    /admin endpoints (admin role only)
   curriculum/  YAML schema and importer
   enrolment/   catalogue, subject choice, topic map, admin enrolment tools
+  ai/          Claude client, gateway (budget, circuit breaker, retries), pricing
+  questions/   prompts, generation + verification, SymPy check, marking, bank
+  practice/    next question, hints, answers, difficulty ladder, flags
+  jobs/        Postgres job queue and job handlers (worker: app/worker.py)
   health/   /health/live, /health/ready, /metrics (internal only)
   cli/      seed_users, export_openapi
 alembic/    migrations
@@ -84,6 +88,13 @@ Interactive API docs are at <http://localhost:8000/api/docs> outside production.
 | `REFRESH_TOKEN_TTL_SECONDS` | no | `1209600` | Refresh token lifetime (14 days) |
 | `LOGIN_MAX_FAILURES` / `LOGIN_LOCKOUT_SECONDS` | no | `5` / `900` | Account lockout |
 | `LOGIN_IP_LIMIT_PER_MINUTE` | no | `10` | Login attempts per IP per minute |
+| `ANTHROPIC_API_KEY` | no | none | Claude API key; without it the app serves from the question bank only |
+| `AI_MONTHLY_BUDGET_GBP` / `AI_DAILY_BUDGET_GBP` | no | `25` / `2.50` | Spending caps; Claude isn't called past either |
+| `USD_TO_GBP` | no | `0.85` | Conversion used for the caps (set slightly high so it errs safe) |
+| `MODEL_GENERATION` / `MODEL_VERIFICATION` / `MODEL_REASONING` | no | `claude-haiku-5-5` ×2 / `claude-sonnet-5-5` | Models used for each job |
+| `QUESTION_STRICT_MODE` | no | `false` | `true`: new questions wait for admin approval |
+| `QUESTION_MIN_CONFIDENCE` | no | `0.8` | Verifier confidence needed to go live |
+| `QUESTION_BANK_TARGET` | no | `3` | Unseen questions kept ready per objective and level |
 
 ## Tests
 
@@ -134,6 +145,28 @@ uv run python -m app.cli.import_curriculum --check ../curriculum
 ```
 
 See `curriculum/README.md` for the file format.
+
+## Worker and question generation
+
+The worker runs background jobs: question generation and the periodic bank top-up. Start it locally with:
+
+```bash
+uv run python -m app.worker
+```
+
+In Docker it's the `worker` service. Without `ANTHROPIC_API_KEY` the app serves only questions already in the bank.
+
+To evaluate question quality, run the following. It generates questions through the full pipeline, prints the pass rate and lists rejected questions to spot-check. It spends real money within your caps, which is why it needs `--yes`:
+
+```bash
+uv run python -m app.cli.eval_questions --spec 1MA1 --count 3 --difficulty 2 --tier higher --yes
+```
+
+For end-to-end tests only, this inserts a few fixed questions. It refuses to run when `ENVIRONMENT=production`:
+
+```bash
+uv run python -m app.cli.seed_test_questions --spec 1MA1 --objective N4
+```
 
 ## OpenAPI
 

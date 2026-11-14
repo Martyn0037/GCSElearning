@@ -1,8 +1,19 @@
 // frontend/src/subjects/TopicList.tsx
+import { Link } from "react-router";
+
 import type { TopicOut } from "../api/generated/model";
 
-/** A subject's topics in study order, showing which are unlocked. */
-export function TopicList({ topics }: { topics: readonly TopicOut[] }) {
+/**
+ * A subject's topics in study order, showing which are unlocked.
+ * With ``enrolmentId``, unlocked topics get a "Practise" button.
+ */
+export function TopicList({
+  topics,
+  enrolmentId,
+}: {
+  topics: readonly TopicOut[];
+  enrolmentId?: string;
+}) {
   if (topics.length === 0) {
     return <p className="text-slate-700">No topics have been added for this subject yet.</p>;
   }
@@ -37,6 +48,14 @@ export function TopicList({ topics }: { topics: readonly TopicOut[] }) {
               </li>
             ))}
           </ul>
+          {enrolmentId && topic.unlocked && (
+            <Link
+              to={`/practice/${enrolmentId}/${topic.id}`}
+              className="mt-3 flex min-h-12 items-center justify-center rounded-lg bg-brand-700 font-semibold text-white hover:bg-brand-800"
+            >
+              Practise {topic.title}
+            </Link>
+          )}
         </li>
       ))}
     </ol>
