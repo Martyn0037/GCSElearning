@@ -10,7 +10,10 @@ Covers:
 - ladder: up on 3-in-a-row and 4-of-5, down on 2 misses, assisted neither,
   limits at levels 1 and 5
 - SymPy: allowlist, isolated evaluation, match/mismatch/unchecked, timeout
-- decide: every failing check rejects; strict mode -> pending review
+- decide: every failing check rejects; strict mode -> pending review; the
+  verifier's answer is read from forms like "450 (option C)" or "b = 11 (...)"
+  without matching numbers in its working
+- the verification prompt treats hint 4 as the full solution, not a leak
 - prompts contain the objective and no placeholders; scheduler intervals
 """
 
@@ -27,7 +30,7 @@ from app.models.question import QuestionStatus, QuestionType
 from app.practice.ladder import LadderState, Outcome, advance
 from app.questions.generator import decide
 from app.questions.marking import mark, parse_number, split_number_and_unit
-from app.questions.prompts import ObjectiveContext, generation_user_prompt
+from app.questions.prompts import VERIFICATION_SYSTEM, ObjectiveContext, generation_user_prompt
 from app.questions.sympy_check import (
     CheckOutcome,
     check_numeric_answer,
@@ -274,13 +277,45 @@ def test_decide_should_reject_failures(
     assert reason in decision.notes
 
 
-def test_decide_should_accept_verifier_answers_in_other_forms() -> None:
-    assert decide(
-        numeric(), verification(solved_answer="4.75 exactly"), CheckOutcome.MATCH, SETTINGS
-    ).verified
-    assert decide(
-        short_text(), verification(solved_answer="Prime number"), CheckOutcome.UNCHECKED, SETTINGS
-    ).verified
+@pytest.mark.parametrize(
+    ("question", "solved"),
+    [
+        (numeric(), "4.75 exactly"),
+        (numeric(), "x = 4.75 (because 19/4 = 4.75)"),
+        (numeric(), "19/4"),
+        (mcq(), "c"),
+        (mcq(), "C)"),
+        (mcq(), "450 (option C)"),
+        (mcq(), "The answer is C"),
+        (short_text(), "Prime number"),
+        (short_text(), "prime (it has exactly two factors)"),
+    ],
+)
+def test_decide_should_accept_verifier_answers_in_other_forms(question: Any, solved: str) -> None:
+    sympy = CheckOutcome.MATCH if question.question_type == "numeric" else CheckOutcome.UNCHECKED
+
+    assert decide(question, verification(solved_answer=solved), sympy, SETTINGS).verified
+
+
+@pytest.mark.parametrize(
+    ("question", "solved"),
+    [
+        (numeric(), "b = 11 (because 27/99 = 4.75)"),
+        (mcq(), "450 (option B)"),
+        (mcq(), "450"),
+    ],
+)
+def test_decide_should_not_be_fooled_by_numbers_in_working(question: Any, solved: str) -> None:
+    sympy = CheckOutcome.MATCH if question.question_type == "numeric" else CheckOutcome.UNCHECKED
+
+    decision = decide(question, verification(solved_answer=solved), sympy, SETTINGS)
+
+    assert "differs from the key" in decision.notes
+
+
+def test_verification_prompt_should_say_the_last_hint_is_the_full_solution() -> None:
+    assert "hint 4 is deliberately the full worked solution" in VERIFICATION_SYSTEM
+    assert "only if hint 1, 2 or 3" in VERIFICATION_SYSTEM
 
 
 def test_decide_should_hold_for_review_in_strict_mode() -> None:

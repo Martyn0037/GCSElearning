@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import re
 import uuid
 from dataclasses import dataclass
 from decimal import Decimal
@@ -121,21 +122,45 @@ class Decision:
     notes: str
 
 
+_OPTION_WORD = re.compile(r"\boption\s*\(?([A-Da-d])\b", re.IGNORECASE)
+_OPTION_LETTER = re.compile(r"\b([A-D])\b")
+# An optional "x =" before the number, e.g. "b = 11 (because 27/99 = 3/11)".
+_LEADING_NUMBER = re.compile(r"^\s*(?:[A-Za-z]\w*\s*=\s*)?([-\u2212]?[\d.,]+(?:/[\d.,]+)?)")
+_PARENTHESES = re.compile(r"\([^)]*\)")
+
+
+def _solved_option(solved: str) -> str | None:
+    """The option letter in answers like "C", "c)", "450 (option C)"."""
+    if len(normalise_text(solved)) == 1:
+        return normalise_text(solved)
+    match = _OPTION_WORD.search(solved) or _OPTION_LETTER.search(solved)
+    return match.group(1).lower() if match else None
+
+
 def _verifier_agrees(q: GeneratedQuestion, v: Verification) -> bool:
-    """Check the verifier's own answer against the key, independently of its yes/no."""
+    """Check the verifier's own answer against the key, independently of its yes/no.
+
+    The verifier is asked for a bare answer but sometimes adds working, so the
+    letter or leading number is extracted rather than compared verbatim.
+    """
     solved = v.solved_answer.strip()
     if q.question_type == "multiple_choice":
-        return normalise_text(solved)[:1] == (q.correct_option or "").lower()
+        return _solved_option(solved) == (q.correct_option or "").lower()
     if q.question_type == "numeric":
         expected = parse_number(q.numeric_answer or "")
         tolerance = Fraction(Decimal(q.numeric_tolerance or "0"))
-        given = parse_number(solved.split()[0]) if solved else None
+        match = _LEADING_NUMBER.match(solved)
+        given = parse_number(match.group(1).rstrip(".,")) if match else None
         return (
             expected is not None
             and given is not None
             and abs(given - expected) <= max(tolerance, Fraction(1, 10**9))
         )
-    return normalise_text(solved) in {normalise_text(a) for a in q.accepted_answers}
+    accepted = {normalise_text(a) for a in q.accepted_answers}
+    return (
+        normalise_text(solved) in accepted
+        or normalise_text(_PARENTHESES.sub(" ", solved)) in accepted
+    )
 
 
 def decide(

@@ -65,11 +65,12 @@ Rules you must always follow:
 VERIFICATION_SYSTEM = """You check practice questions for a student in England studying the reformed (9-1) GCSE.
 
 Work in this order:
-1. Solve the question yourself from the stem (and options) alone, and record your answer in solved_answer, before looking at the proposed marking key.
+1. Solve the question yourself from the stem (and options) alone, before looking at the proposed marking key. Record only the bare answer in solved_answer, with no working: the option letter for multiple choice (e.g. "C"), the number for numeric (e.g. "2.25"), or the word or short phrase for short text.
 2. Compare with the proposed key. answer_is_correct is true only if the key is correct and the only correct answer.
 3. Judge whether the question tests only the stated specification objective (within_objective), suits the stated tier (suitable_for_tier) and matches the stated difficulty level (difficulty_matches).
-4. Check hints 1-3 do not give away the final answer (hints_reveal_answer_early) and that marks, worked solution and key agree (mark_scheme_consistent).
-5. Give a confidence from 0 to 1 and list any issues briefly. Be strict: a wrong question harms the student more than a missing one.
+4. Check the hints. They are a ladder the student climbs one at a time when stuck: hint 1 nudges, hint 2 gives the strategy, hint 3 shows most of the method, and hint 4 is deliberately the full worked solution including the final answer. Hint 4 stating the answer is correct and expected, never an issue, and hint 3 showing most of the method is expected too. Set hints_reveal_answer_early to true only if hint 1, 2 or 3 actually states the final answer (or the correct option letter).
+5. Check that marks, worked solution and key agree (mark_scheme_consistent).
+6. Give a confidence from 0 to 1 and list any issues briefly. Be strict: a wrong question harms the student more than a missing one.
 """
 
 
