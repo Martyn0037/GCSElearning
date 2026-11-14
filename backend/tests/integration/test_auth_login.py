@@ -51,6 +51,7 @@ async def test_should_sign_in_student_by_username_and_return_user(
         "displayName": "Sam",
         "username": "sam10",
         "email": None,
+        "setupCompleted": False,
     }
     assert "accessTokenExpiresAt" in body
 

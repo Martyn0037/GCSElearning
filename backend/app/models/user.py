@@ -65,9 +65,16 @@ class User(TimestampMixin, Base):
         Integer, nullable=False, server_default=text("0")
     )
     locked_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # When a student finished the subject setup screen; None until then.
+    setup_completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     timezone: Mapped[str] = mapped_column(
         String(64), nullable=False, server_default=text("'Europe/London'")
     )
+
+    @property
+    def setup_completed(self) -> bool:
+        """Whether the student has finished the subject setup screen."""
+        return self.setup_completed_at is not None
 
 
 class GuardianLink(Base):

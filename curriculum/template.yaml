@@ -1,0 +1,35 @@
+# curriculum/template.yaml
+# Copy to curriculum/specs/<board>-<code>.yaml and fill in from the board's PDF.
+# See curriculum/README.md for the rules. Files in this folder's root (like
+# this one) are not imported; only files in specs/ are.
+
+specification:
+  board: aqa                  # a board code from catalogue.yaml
+  subject: combined-science   # a subject slug from catalogue.yaml
+  code: "8464"                # the spec code printed on the PDF
+  title: Exact title from the PDF cover
+  version: Version 1.1 – September 2019   # exactly as printed in the PDF footer
+  source_url: https://www.example.org/link-to-the-pdf.pdf
+  tiered: true                # false for untiered subjects
+  current: true               # use this version for new and pending enrolments
+
+topics:
+  - ref: "4.1"
+    title: Section title as printed
+    subtopics:
+      - title: Subheading as printed
+        objectives:
+          - ref: 4.1.1.1
+            foundation: >-
+              The statement exactly as printed (Foundation wording for tiered specs).
+            higher: >-
+              Only if the Higher-tier wording differs. Delete this line otherwise.
+            keywords: [statement, printed]
+            # out_of_scope: Optional note copied from the spec.
+
+# English Literature only: the board's list of permitted set texts.
+# set_texts:
+#   - category: Shakespeare play
+#     options:
+#       - title: Macbeth
+#         author: William Shakespeare

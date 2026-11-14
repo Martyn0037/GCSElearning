@@ -1,6 +1,568 @@
 {
   "components": {
     "schemas": {
+      "AdminEnrolmentOut": {
+        "additionalProperties": false,
+        "description": "An enrolment as the admin sees it.",
+        "properties": {
+          "attention": {
+            "items": {
+              "$ref": "#/components/schemas/AttentionReason"
+            },
+            "title": "Attention",
+            "type": "array"
+          },
+          "boardConfirmed": {
+            "title": "Boardconfirmed",
+            "type": "boolean"
+          },
+          "boardId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boardid"
+          },
+          "boardName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boardname"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "isCustom": {
+            "title": "Iscustom",
+            "type": "boolean"
+          },
+          "setTexts": {
+            "items": {
+              "$ref": "#/components/schemas/StudentSetTextOut"
+            },
+            "title": "Settexts",
+            "type": "array"
+          },
+          "specification": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SpecificationOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/EnrolmentStatus"
+          },
+          "studentId": {
+            "format": "uuid",
+            "title": "Studentid",
+            "type": "string"
+          },
+          "studentName": {
+            "title": "Studentname",
+            "type": "string"
+          },
+          "subjectId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subjectid"
+          },
+          "subjectName": {
+            "title": "Subjectname",
+            "type": "string"
+          },
+          "tier": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Tier"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tierConfirmed": {
+            "title": "Tierconfirmed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "subjectId",
+          "subjectName",
+          "isCustom",
+          "boardId",
+          "boardName",
+          "boardConfirmed",
+          "tier",
+          "tierConfirmed",
+          "status",
+          "specification",
+          "setTexts",
+          "studentId",
+          "studentName",
+          "attention"
+        ],
+        "title": "AdminEnrolmentOut",
+        "type": "object"
+      },
+      "AdminEnrolmentPage": {
+        "additionalProperties": false,
+        "description": "A page of enrolments.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdminEnrolmentOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nextcursor"
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "title": "AdminEnrolmentPage",
+        "type": "object"
+      },
+      "AdminSpecificationOut": {
+        "additionalProperties": false,
+        "description": "An imported spec with content counts.",
+        "properties": {
+          "boardId": {
+            "format": "uuid",
+            "title": "Boardid",
+            "type": "string"
+          },
+          "boardName": {
+            "title": "Boardname",
+            "type": "string"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "isCurrent": {
+            "title": "Iscurrent",
+            "type": "boolean"
+          },
+          "objectiveCount": {
+            "title": "Objectivecount",
+            "type": "integer"
+          },
+          "sourceFile": {
+            "title": "Sourcefile",
+            "type": "string"
+          },
+          "subjectName": {
+            "title": "Subjectname",
+            "type": "string"
+          },
+          "tiered": {
+            "title": "Tiered",
+            "type": "boolean"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "topicCount": {
+            "title": "Topiccount",
+            "type": "integer"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "boardId",
+          "code",
+          "title",
+          "version",
+          "tiered",
+          "subjectName",
+          "boardName",
+          "isCurrent",
+          "topicCount",
+          "objectiveCount",
+          "sourceFile"
+        ],
+        "title": "AdminSpecificationOut",
+        "type": "object"
+      },
+      "AttentionReason": {
+        "description": "Why an admin should look at an enrolment.",
+        "enum": [
+          "no_specification",
+          "board_unconfirmed",
+          "tier_unconfirmed",
+          "set_text_pending"
+        ],
+        "title": "AttentionReason",
+        "type": "string"
+      },
+      "BoardOut": {
+        "additionalProperties": false,
+        "description": "An exam board.",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name"
+        ],
+        "title": "BoardOut",
+        "type": "object"
+      },
+      "CatalogueOut": {
+        "additionalProperties": false,
+        "description": "Everything the setup screen needs.",
+        "properties": {
+          "boards": {
+            "items": {
+              "$ref": "#/components/schemas/BoardOut"
+            },
+            "title": "Boards",
+            "type": "array"
+          },
+          "subjects": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogueSubjectOut"
+            },
+            "title": "Subjects",
+            "type": "array"
+          }
+        },
+        "required": [
+          "boards",
+          "subjects"
+        ],
+        "title": "CatalogueOut",
+        "type": "object"
+      },
+      "CatalogueSpecificationOut": {
+        "additionalProperties": false,
+        "description": "A current specification, with its set-text list (if any).",
+        "properties": {
+          "boardId": {
+            "format": "uuid",
+            "title": "Boardid",
+            "type": "string"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "setTexts": {
+            "items": {
+              "$ref": "#/components/schemas/SetTextOptionOut"
+            },
+            "title": "Settexts",
+            "type": "array"
+          },
+          "tiered": {
+            "title": "Tiered",
+            "type": "boolean"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "boardId",
+          "code",
+          "title",
+          "version",
+          "tiered",
+          "setTexts"
+        ],
+        "title": "CatalogueSpecificationOut",
+        "type": "object"
+      },
+      "CatalogueSubjectOut": {
+        "additionalProperties": false,
+        "description": "A subject the student can choose.",
+        "properties": {
+          "hasTiers": {
+            "title": "Hastiers",
+            "type": "boolean"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "mostCommonBoardId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mostcommonboardid"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "setTextCategories": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Settextcategories",
+            "type": "array"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "specifications": {
+            "description": "Current imported specs; a board without one is 'being set up'",
+            "items": {
+              "$ref": "#/components/schemas/CatalogueSpecificationOut"
+            },
+            "title": "Specifications",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "hasTiers",
+          "setTextCategories",
+          "mostCommonBoardId",
+          "specifications"
+        ],
+        "title": "CatalogueSubjectOut",
+        "type": "object"
+      },
+      "EnrolmentOut": {
+        "additionalProperties": false,
+        "description": "One of the student's subjects.",
+        "properties": {
+          "boardConfirmed": {
+            "title": "Boardconfirmed",
+            "type": "boolean"
+          },
+          "boardId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boardid"
+          },
+          "boardName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boardname"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "isCustom": {
+            "title": "Iscustom",
+            "type": "boolean"
+          },
+          "setTexts": {
+            "items": {
+              "$ref": "#/components/schemas/StudentSetTextOut"
+            },
+            "title": "Settexts",
+            "type": "array"
+          },
+          "specification": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SpecificationOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/EnrolmentStatus"
+          },
+          "subjectId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subjectid"
+          },
+          "subjectName": {
+            "title": "Subjectname",
+            "type": "string"
+          },
+          "tier": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Tier"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tierConfirmed": {
+            "title": "Tierconfirmed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "subjectId",
+          "subjectName",
+          "isCustom",
+          "boardId",
+          "boardName",
+          "boardConfirmed",
+          "tier",
+          "tierConfirmed",
+          "status",
+          "specification",
+          "setTexts"
+        ],
+        "title": "EnrolmentOut",
+        "type": "object"
+      },
+      "EnrolmentStatus": {
+        "description": "``active``: questions available. ``pending``: waiting for the admin/spec.",
+        "enum": [
+          "active",
+          "pending"
+        ],
+        "title": "EnrolmentStatus",
+        "type": "string"
+      },
+      "EnrolmentUpdate": {
+        "additionalProperties": false,
+        "description": "Admin corrections. Any field given counts as confirmed.",
+        "properties": {
+          "boardId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boardid"
+          },
+          "specificationId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specificationid"
+          },
+          "tier": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Tier"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "EnrolmentUpdate",
+        "type": "object"
+      },
       "ErrorDetail": {
         "additionalProperties": false,
         "description": "The body of an error.",
@@ -72,6 +634,29 @@
         "title": "LoginRequest",
         "type": "object"
       },
+      "MySubjectsOut": {
+        "additionalProperties": false,
+        "description": "The student's subjects.",
+        "properties": {
+          "setupCompleted": {
+            "title": "Setupcompleted",
+            "type": "boolean"
+          },
+          "subjects": {
+            "items": {
+              "$ref": "#/components/schemas/EnrolmentOut"
+            },
+            "title": "Subjects",
+            "type": "array"
+          }
+        },
+        "required": [
+          "setupCompleted",
+          "subjects"
+        ],
+        "title": "MySubjectsOut",
+        "type": "object"
+      },
       "ResetPasswordRequest": {
         "additionalProperties": false,
         "description": "An admin setting a student's new password.",
@@ -119,6 +704,441 @@
         "title": "SessionOut",
         "type": "object"
       },
+      "SetTextChoice": {
+        "additionalProperties": false,
+        "description": "One set text: an option from the board's list, or a typed-in title.",
+        "properties": {
+          "category": {
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Category",
+            "type": "string"
+          },
+          "customAuthor": {
+            "anyOf": [
+              {
+                "maxLength": 120,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customauthor"
+          },
+          "customTitle": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customtitle"
+          },
+          "optionId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Optionid"
+          }
+        },
+        "required": [
+          "category"
+        ],
+        "title": "SetTextChoice",
+        "type": "object"
+      },
+      "SetTextOptionOut": {
+        "additionalProperties": false,
+        "description": "A set text on a board's list.",
+        "properties": {
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author"
+          },
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "category",
+          "title",
+          "author"
+        ],
+        "title": "SetTextOptionOut",
+        "type": "object"
+      },
+      "SetTextUpdate": {
+        "additionalProperties": false,
+        "description": "Admin matching a typed-in set text to a board option.",
+        "properties": {
+          "optionId": {
+            "format": "uuid",
+            "title": "Optionid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "optionId"
+        ],
+        "title": "SetTextUpdate",
+        "type": "object"
+      },
+      "SpecificationOut": {
+        "additionalProperties": false,
+        "description": "An imported specification version.",
+        "properties": {
+          "boardId": {
+            "format": "uuid",
+            "title": "Boardid",
+            "type": "string"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "tiered": {
+            "title": "Tiered",
+            "type": "boolean"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "boardId",
+          "code",
+          "title",
+          "version",
+          "tiered"
+        ],
+        "title": "SpecificationOut",
+        "type": "object"
+      },
+      "StudentSetTextOut": {
+        "additionalProperties": false,
+        "description": "A set text the student studies.",
+        "properties": {
+          "author": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Author"
+          },
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EnrolmentStatus"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "category",
+          "title",
+          "author",
+          "status"
+        ],
+        "title": "StudentSetTextOut",
+        "type": "object"
+      },
+      "SubjectChoice": {
+        "additionalProperties": false,
+        "description": "One subject from the setup screen.\n\n``board_id`` null means \"I don't know\" (the most common board is used and\nflagged for the admin). ``tier`` null means \"not sure\" (Higher is used and\nflagged), or that the subject has no tiers.",
+        "properties": {
+          "boardId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boardid"
+          },
+          "customName": {
+            "anyOf": [
+              {
+                "maxLength": 80,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Customname"
+          },
+          "setTexts": {
+            "items": {
+              "$ref": "#/components/schemas/SetTextChoice"
+            },
+            "maxItems": 12,
+            "title": "Settexts",
+            "type": "array"
+          },
+          "subjectId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Subjectid"
+          },
+          "tier": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Tier"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "SubjectChoice",
+        "type": "object"
+      },
+      "SubjectChoices": {
+        "additionalProperties": false,
+        "description": "The full list of the student's subjects (replaces the previous list).",
+        "properties": {
+          "subjects": {
+            "items": {
+              "$ref": "#/components/schemas/SubjectChoice"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "title": "Subjects",
+            "type": "array"
+          }
+        },
+        "required": [
+          "subjects"
+        ],
+        "title": "SubjectChoices",
+        "type": "object"
+      },
+      "SubtopicOut": {
+        "additionalProperties": false,
+        "description": "A heading inside a topic.",
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "objectiveCount": {
+            "title": "Objectivecount",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "objectiveCount"
+        ],
+        "title": "SubtopicOut",
+        "type": "object"
+      },
+      "Tier": {
+        "description": "Exam tier. Untiered subjects use ``None`` instead.",
+        "enum": [
+          "foundation",
+          "higher"
+        ],
+        "title": "Tier",
+        "type": "string"
+      },
+      "TopicMapOut": {
+        "additionalProperties": false,
+        "description": "A subject's topics in the student's order.",
+        "properties": {
+          "enrolmentId": {
+            "format": "uuid",
+            "title": "Enrolmentid",
+            "type": "string"
+          },
+          "specification": {
+            "$ref": "#/components/schemas/SpecificationOut"
+          },
+          "subjectName": {
+            "title": "Subjectname",
+            "type": "string"
+          },
+          "tier": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Tier"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "topics": {
+            "items": {
+              "$ref": "#/components/schemas/TopicOut"
+            },
+            "title": "Topics",
+            "type": "array"
+          }
+        },
+        "required": [
+          "enrolmentId",
+          "subjectName",
+          "tier",
+          "specification",
+          "topics"
+        ],
+        "title": "TopicMapOut",
+        "type": "object"
+      },
+      "TopicOrderUpdate": {
+        "additionalProperties": false,
+        "description": "Admin: the full topic order for one enrolment.",
+        "properties": {
+          "topicIds": {
+            "items": {
+              "format": "uuid",
+              "type": "string"
+            },
+            "maxItems": 200,
+            "minItems": 1,
+            "title": "Topicids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "topicIds"
+        ],
+        "title": "TopicOrderUpdate",
+        "type": "object"
+      },
+      "TopicOut": {
+        "additionalProperties": false,
+        "description": "A topic on the student's map.",
+        "properties": {
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "ref": {
+            "title": "Ref",
+            "type": "string"
+          },
+          "subtopics": {
+            "items": {
+              "$ref": "#/components/schemas/SubtopicOut"
+            },
+            "title": "Subtopics",
+            "type": "array"
+          },
+          "taughtAtSchool": {
+            "title": "Taughtatschool",
+            "type": "boolean"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "unlocked": {
+            "title": "Unlocked",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "ref",
+          "title",
+          "taughtAtSchool",
+          "unlocked",
+          "subtopics"
+        ],
+        "title": "TopicOut",
+        "type": "object"
+      },
+      "TopicSettingUpdate": {
+        "additionalProperties": false,
+        "description": "Admin: whether a topic has been covered at school.",
+        "properties": {
+          "taughtAtSchool": {
+            "title": "Taughtatschool",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "taughtAtSchool"
+        ],
+        "title": "TopicSettingUpdate",
+        "type": "object"
+      },
       "UserOut": {
         "additionalProperties": false,
         "description": "A user as visible to themselves, their guardian, or an admin.",
@@ -146,6 +1166,10 @@
           "role": {
             "$ref": "#/components/schemas/Role"
           },
+          "setupCompleted": {
+            "title": "Setupcompleted",
+            "type": "boolean"
+          },
           "username": {
             "anyOf": [
               {
@@ -163,7 +1187,8 @@
           "role",
           "displayName",
           "username",
-          "email"
+          "email",
+          "setupCompleted"
         ],
         "title": "UserOut",
         "type": "object"
@@ -176,6 +1201,902 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/admin/enrolments": {
+      "get": {
+        "description": "Students' subjects, oldest first, with what needs attention.",
+        "operationId": "listEnrolments",
+        "parameters": [
+          {
+            "description": "Only those needing the admin",
+            "in": "query",
+            "name": "attention",
+            "required": false,
+            "schema": {
+              "default": false,
+              "description": "Only those needing the admin",
+              "title": "Attention",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminEnrolmentPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "List Enrolments",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/enrolments/{enrolment_id}": {
+      "patch": {
+        "description": "Confirm or correct a subject's board, tier or spec version.",
+        "operationId": "updateEnrolment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "enrolment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Enrolment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnrolmentUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminEnrolmentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Update Enrolment",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/enrolments/{enrolment_id}/topic-order": {
+      "put": {
+        "description": "Set the order topics are studied in. Idempotent.",
+        "operationId": "setTopicOrder",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "enrolment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Enrolment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TopicOrderUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicMapOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Set Topic Order",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/enrolments/{enrolment_id}/topics": {
+      "get": {
+        "description": "A student's topic map, for setting what's been covered at school.",
+        "operationId": "getEnrolmentTopics",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "enrolment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Enrolment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicMapOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get Enrolment Topics",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/enrolments/{enrolment_id}/topics/{topic_id}": {
+      "put": {
+        "description": "Mark a topic as covered (or not) at school. Idempotent.",
+        "operationId": "setTopicTaught",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "enrolment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Enrolment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "topic_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Topic Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TopicSettingUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicMapOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Set Topic Taught",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/set-texts/{set_text_id}": {
+      "delete": {
+        "description": "Remove a set text (e.g. a typo). Idempotent.",
+        "operationId": "deleteSetText",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "set_text_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Set Text Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Delete Set Text",
+        "tags": [
+          "admin"
+        ]
+      },
+      "patch": {
+        "description": "Match a typed-in set text to the board's list.",
+        "operationId": "matchSetText",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "set_text_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Set Text Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetTextUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminEnrolmentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Match Set Text",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/specifications": {
+      "get": {
+        "description": "Every imported spec version with its content counts.",
+        "operationId": "listSpecifications",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminSpecificationOut"
+                  },
+                  "title": "Response Listspecifications",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "List Specifications",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/api/v1/admin/students/{student_id}/password": {
       "post": {
         "description": "Set a student's password and sign them out of every device.",
@@ -595,6 +2516,394 @@
         "summary": "Refresh",
         "tags": [
           "auth"
+        ]
+      }
+    },
+    "/api/v1/catalogue": {
+      "get": {
+        "description": "Boards, subjects and current specs for the setup screen.",
+        "operationId": "getCatalogue",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogueOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get Catalogue",
+        "tags": [
+          "subjects"
+        ]
+      }
+    },
+    "/api/v1/me/subjects": {
+      "get": {
+        "description": "The student's chosen subjects and their status.",
+        "operationId": "getMySubjects",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MySubjectsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get My Subjects",
+        "tags": [
+          "subjects"
+        ]
+      },
+      "put": {
+        "description": "Save the setup screen. Replaces the whole list; safe to repeat.",
+        "operationId": "replaceMySubjects",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubjectChoices"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MySubjectsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Replace My Subjects",
+        "tags": [
+          "subjects"
+        ]
+      }
+    },
+    "/api/v1/me/subjects/{enrolment_id}/topics": {
+      "get": {
+        "description": "The topic map for one of the student's active subjects.",
+        "operationId": "getMyTopicMap",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "enrolment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Enrolment Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicMapOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get My Topic Map",
+        "tags": [
+          "subjects"
         ]
       }
     },

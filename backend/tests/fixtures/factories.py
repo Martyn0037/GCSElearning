@@ -7,6 +7,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
 from functools import lru_cache
+from pathlib import Path
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -97,3 +98,46 @@ async def link(session: AsyncSession, guardian: User, student: User) -> None:
     """Link a guardian to a student and commit."""
     session.add(GuardianLink(guardian_id=guardian.id, student_id=student.id))
     await session.commit()
+
+
+FIXTURE_CURRICULUM = Path(__file__).parent / "curriculum"
+
+
+@dataclass(frozen=True)
+class CurriculumIds:
+    """IDs from the imported fixture curriculum, for building requests."""
+
+    boards: dict[str, uuid.UUID]
+    subjects: dict[str, uuid.UUID]
+    specs: dict[str, uuid.UUID]
+    topics: dict[str, uuid.UUID]
+    set_texts: dict[str, uuid.UUID]
+
+
+async def import_fixture_curriculum(session: AsyncSession) -> CurriculumIds:
+    """Import ``tests/fixtures/curriculum`` and return the IDs tests need."""
+    from sqlalchemy import select
+
+    from app.cli.import_curriculum import load_folder
+    from app.curriculum.importer import CurriculumImporter
+    from app.models.curriculum import ExamBoard, SetTextOption, Specification, Subject, Topic
+
+    catalogue, specs = load_folder(FIXTURE_CURRICULUM)
+    importer = CurriculumImporter(session, FIXED_NOW)
+    await importer.import_catalogue(catalogue, "catalogue.yaml")
+    for source, spec in specs:
+        await importer.import_specification(spec, source)
+    await session.commit()
+
+    boards = {b.code: b.id for b in (await session.scalars(select(ExamBoard))).all()}
+    subjects = {s.slug: s.id for s in (await session.scalars(select(Subject))).all()}
+    spec_ids = {s.code: s.id for s in (await session.scalars(select(Specification))).all()}
+    topics = {
+        f"{code}:{t.ref}": t.id
+        for code, spec_id in spec_ids.items()
+        for t in (
+            await session.scalars(select(Topic).where(Topic.specification_id == spec_id))
+        ).all()
+    }
+    set_texts = {o.title: o.id for o in (await session.scalars(select(SetTextOption))).all()}
+    return CurriculumIds(boards, subjects, spec_ids, topics, set_texts)

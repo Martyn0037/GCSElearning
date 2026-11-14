@@ -1,0 +1,76 @@
+# curriculum/catalogue.yaml
+# Exam boards and the subjects offered on the student's setup screen.
+#
+# most_common_board is only the pre-selected choice on the setup screen (the
+# board most English schools use for that subject). The student can pick a
+# different board, or "I don't know" (which keeps this one and flags it for the
+# admin to confirm). It is a starting guess, not a fact about his school.
+
+boards:
+  - code: aqa
+    name: AQA
+  - code: pearson-edexcel
+    name: Pearson Edexcel
+  - code: ocr
+    name: OCR
+  - code: eduqas
+    name: WJEC Eduqas
+
+subjects:
+  - slug: maths
+    name: Mathematics
+    has_tiers: true
+    most_common_board: pearson-edexcel
+  - slug: english-language
+    name: English Language
+    has_tiers: false
+    most_common_board: aqa
+  - slug: english-literature
+    name: English Literature
+    has_tiers: false
+    most_common_board: aqa
+    set_text_categories:
+      - Shakespeare play
+      - 19th-century novel
+      - Modern prose or drama
+      - Poetry anthology cluster
+  - slug: combined-science
+    name: Combined Science
+    has_tiers: true
+    most_common_board: aqa
+  - slug: biology
+    name: Biology
+    has_tiers: true
+    most_common_board: aqa
+  - slug: chemistry
+    name: Chemistry
+    has_tiers: true
+    most_common_board: aqa
+  - slug: physics
+    name: Physics
+    has_tiers: true
+    most_common_board: aqa
+  - slug: geography
+    name: Geography
+    has_tiers: false
+    most_common_board: aqa
+  - slug: history
+    name: History
+    has_tiers: false
+    most_common_board: pearson-edexcel
+  - slug: religious-studies
+    name: Religious Studies
+    has_tiers: false
+    most_common_board: aqa
+  - slug: computer-science
+    name: Computer Science
+    has_tiers: false
+    most_common_board: ocr
+  - slug: french
+    name: French
+    has_tiers: true
+    most_common_board: aqa
+  - slug: spanish
+    name: Spanish
+    has_tiers: true
+    most_common_board: aqa

@@ -66,6 +66,20 @@ class PermissionDeniedError(AppError):
         super().__init__(HTTPStatus.FORBIDDEN, "FORBIDDEN", message)
 
 
+class InvalidRequestError(AppError):
+    """The request is well-formed but breaks a business rule (HTTP 422)."""
+
+    def __init__(self, message: str, code: str = "INVALID_REQUEST") -> None:
+        super().__init__(HTTPStatus.UNPROCESSABLE_ENTITY, code, message)
+
+
+class ConflictError(AppError):
+    """The request conflicts with the current state of the resource (HTTP 409)."""
+
+    def __init__(self, message: str, code: str = "CONFLICT") -> None:
+        super().__init__(HTTPStatus.CONFLICT, code, message)
+
+
 class RateLimitedError(AppError):
     """Too many requests in the current window."""
 

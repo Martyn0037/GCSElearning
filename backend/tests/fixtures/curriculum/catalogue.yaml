@@ -1,0 +1,20 @@
+# backend/tests/fixtures/curriculum/catalogue.yaml
+# Test-only catalogue (not real exam board data).
+boards:
+  - code: board-a
+    name: Board A
+  - code: board-b
+    name: Board B
+subjects:
+  - slug: maths
+    name: Mathematics
+    has_tiers: true
+    most_common_board: board-a
+  - slug: english-literature
+    name: English Literature
+    has_tiers: false
+    most_common_board: board-b
+    set_text_categories: [Shakespeare play, Poetry anthology cluster]
+  - slug: geography
+    name: Geography
+    has_tiers: false

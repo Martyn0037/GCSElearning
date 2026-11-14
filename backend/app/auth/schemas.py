@@ -28,6 +28,7 @@ class UserOut(ApiModel):
     display_name: str
     username: str | None
     email: str | None
+    setup_completed: bool
 
 
 class SessionOut(ApiModel):

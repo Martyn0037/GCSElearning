@@ -43,8 +43,13 @@ services:
   migrate:
     image: ${API_IMAGE:-gcse-coach-api:local}
     build: ./backend
-    command: ["alembic", "upgrade", "head"]
+    # Apply migrations, then import curriculum/ (idempotent; aborts with no
+    # changes if any file is invalid).
+    command:
+      ["sh", "-c", "alembic upgrade head && python -m app.cli.import_curriculum /app/curriculum"]
     environment: *api-env
+    volumes:
+      - ./curriculum:/app/curriculum:ro
     depends_on:
       postgres: { condition: service_healthy }
     restart: "no"
@@ -55,6 +60,8 @@ services:
     build: ./backend
     restart: unless-stopped
     environment: *api-env
+    volumes:
+      - ./curriculum:/app/curriculum:ro
     depends_on:
       migrate: { condition: service_completed_successfully }
     read_only: true

@@ -1,0 +1,31 @@
+# backend/tests/fixtures/curriculum/specs/board-a-m1.yaml
+# Test-only tiered spec: two topics, one Higher-only statement.
+specification:
+  board: board-a
+  subject: maths
+  code: M1
+  title: Test Maths
+  version: Issue 1
+  tiered: true
+topics:
+  - ref: "1"
+    title: Number
+    subtopics:
+      - title: Calculation
+        objectives:
+          - ref: T1
+            foundation: order integers and decimals
+            keywords: [integers]
+          - ref: T2
+            foundation: calculate with roots
+            higher: calculate with roots and fractional indices
+          - ref: T3
+            higher: rationalise denominators of surds
+            keywords: [surds]
+  - ref: "2"
+    title: Algebra
+    subtopics:
+      - title: Notation
+        objectives:
+          - ref: A1
+            foundation: use algebraic notation
