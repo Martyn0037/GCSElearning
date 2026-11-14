@@ -670,6 +670,7 @@ class EnrolmentService:
                 StudentSetTextOut(
                     id=text.id,
                     category=text.category,
+                    option_id=option.id if option else None,
                     title=option.title if option else text.custom_title or "",
                     author=option.author if option else text.custom_author,
                     status=EnrolmentStatus.ACTIVE if option else EnrolmentStatus.PENDING,

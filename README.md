@@ -8,6 +8,7 @@ for the decisions behind the design.
 ```
 backend/    FastAPI API, Alembic migrations, CLI commands          → backend/README.md
 frontend/   React + TypeScript app (served by Caddy in production) → frontend/README.md
+curriculum/ Spec content as YAML, imported automatically on start  → curriculum/README.md
 infra/      Caddy configuration (backup scripts arrive in Phase 8)
 docs/       Project context, architecture decisions
 ```
@@ -62,6 +63,7 @@ port 8000, so cookies behave the same as in production.
 |---|---|---|
 | `backend/` | `uv run pytest --cov` | Unit and integration tests (real Postgres via testcontainers); 90% coverage gate |
 | `frontend/` | `npm run test:coverage` | Vitest + React Testing Library; 90% lines / 85% branches gate |
+| `frontend/` | `npm run test:e2e` | Playwright against the running stack (see `frontend/e2e/README.md`) |
 
 CI (`.github/workflows/ci.yml`) also runs lint, type checks, OpenAPI and client drift checks,
 the image build, and a Trivy scan.

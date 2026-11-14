@@ -23,6 +23,7 @@ export const STUDENT: UserOut = {
   displayName: "Sam",
   username: "sam10",
   email: null,
+  setupCompleted: true,
 };
 
 export const GUARDIAN: UserOut = {
@@ -31,6 +32,7 @@ export const GUARDIAN: UserOut = {
   displayName: "Alex",
   username: null,
   email: "alex@example.test",
+  setupCompleted: false,
 };
 
 /**
@@ -61,4 +63,10 @@ export function installFakeApi(routes: Record<string, Handler | Handler[]>) {
 export function headersOf(mock: ReturnType<typeof installFakeApi>, call: number): Headers {
   const init = mock.mock.calls[call]?.[1];
   return new Headers(init?.headers);
+}
+
+/** Parse the JSON body a request was sent with. */
+export function jsonBody(init: RequestInit): unknown {
+  if (typeof init.body !== "string") throw new Error("Expected a JSON string body");
+  return JSON.parse(init.body);
 }

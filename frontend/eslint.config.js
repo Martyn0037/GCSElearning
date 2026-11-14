@@ -21,5 +21,10 @@ export default tseslint.config(
       "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],
     },
   },
+  {
+    // Fixtures index into known arrays; a failed lookup fails the test anyway.
+    files: ["**/*.test.{ts,tsx}", "src/test/**"],
+    rules: { "@typescript-eslint/no-non-null-assertion": "off" },
+  },
   { files: ["*.config.{js,ts}"], languageOptions: { globals: globals.node } },
 );

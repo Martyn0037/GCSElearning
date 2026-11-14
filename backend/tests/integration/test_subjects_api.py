@@ -131,6 +131,8 @@ async def test_set_texts_from_list_are_active_and_typed_ones_pending(
         ("Love and relationships", "pending"),
     ]
     assert subject["setTexts"][0]["author"] == "William Shakespeare"
+    assert subject["setTexts"][0]["optionId"] == str(ids.set_texts["Macbeth"])
+    assert subject["setTexts"][1]["optionId"] is None
 
 
 async def test_typed_in_subject_should_be_pending(

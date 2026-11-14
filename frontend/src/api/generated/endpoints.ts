@@ -20,8 +20,29 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import { SessionOut, UserOut } from "./model";
-import type { ErrorResponse, LoginRequest, ResetPasswordRequest } from "./model";
+import {
+  AdminEnrolmentOut,
+  AdminEnrolmentPage,
+  AdminSpecificationOut,
+  CatalogueOut,
+  MySubjectsOut,
+  SessionOut,
+  TopicMapOut,
+  UserOut,
+} from "./model";
+import type {
+  EnrolmentUpdate,
+  ErrorResponse,
+  ListEnrolmentsParams,
+  LoginRequest,
+  ResetPasswordRequest,
+  SetTextUpdate,
+  SubjectChoices,
+  TopicOrderUpdate,
+  TopicSettingUpdate,
+} from "./model";
+
+import * as zod from "zod";
 
 import { apiFetch } from "../http";
 import type { ErrorType, BodyType } from "../http";
@@ -70,6 +91,883 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getListEnrolmentsUrl = (params?: ListEnrolmentsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/admin/enrolments?${stringifiedParams}`
+    : `/api/v1/admin/enrolments`;
+};
+
+/**
+ * Students' subjects, oldest first, with what needs attention.
+ * @summary List Enrolments
+ */
+export const listEnrolments = async (
+  params?: ListEnrolmentsParams,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<AdminEnrolmentPage> => {
+  return apiFetch<AdminEnrolmentPage>(getListEnrolmentsUrl(params), {
+    ...options,
+    method: "GET",
+
+    schema: AdminEnrolmentPage,
+  });
+};
+
+export const getListEnrolmentsQueryKey = (params?: ListEnrolmentsParams) => {
+  return [`/api/v1/admin/enrolments`, ...(params ? [params] : [])] as const;
+};
+
+export const getListEnrolmentsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listEnrolments>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params?: ListEnrolmentsParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listEnrolments>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListEnrolmentsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listEnrolments>>> = ({ signal }) =>
+    listEnrolments(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listEnrolments>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListEnrolmentsQueryResult = NonNullable<Awaited<ReturnType<typeof listEnrolments>>>;
+export type ListEnrolmentsQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * Students' subjects, oldest first, with what needs attention.
+ * @summary List Enrolments
+ */
+export function useListEnrolments<
+  TData = Awaited<ReturnType<typeof listEnrolments>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: undefined | ListEnrolmentsParams,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof listEnrolments>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listEnrolments>>,
+          TError,
+          Awaited<ReturnType<typeof listEnrolments>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Students' subjects, oldest first, with what needs attention.
+ * @summary List Enrolments
+ */
+export function useListEnrolments<
+  TData = Awaited<ReturnType<typeof listEnrolments>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params?: ListEnrolmentsParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listEnrolments>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listEnrolments>>,
+          TError,
+          Awaited<ReturnType<typeof listEnrolments>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Students' subjects, oldest first, with what needs attention.
+ * @summary List Enrolments
+ */
+export function useListEnrolments<
+  TData = Awaited<ReturnType<typeof listEnrolments>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params?: ListEnrolmentsParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listEnrolments>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Students' subjects, oldest first, with what needs attention.
+ * @summary List Enrolments
+ */
+export function useListEnrolments<
+  TData = Awaited<ReturnType<typeof listEnrolments>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params?: ListEnrolmentsParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listEnrolments>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListEnrolmentsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getUpdateEnrolmentUrl = (enrolmentId: string) => {
+  return `/api/v1/admin/enrolments/${enrolmentId}`;
+};
+
+/**
+ * Confirm or correct a subject's board, tier or spec version.
+ * @summary Update Enrolment
+ */
+export const updateEnrolment = async (
+  enrolmentId: string,
+  enrolmentUpdate: EnrolmentUpdate,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<AdminEnrolmentOut> => {
+  return apiFetch<AdminEnrolmentOut>(getUpdateEnrolmentUrl(enrolmentId), {
+    ...options,
+    method: "PATCH",
+    headers: getHeaders({ "Content-Type": "application/json" }, options?.headers),
+    body: JSON.stringify(enrolmentUpdate),
+    schema: AdminEnrolmentOut,
+  });
+};
+
+export const getUpdateEnrolmentMutationKey = () => ["updateEnrolment"] as const;
+
+export const getUpdateEnrolmentMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateEnrolment>>,
+    TError,
+    UpdateEnrolmentMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateEnrolment>>,
+  TError,
+  UpdateEnrolmentMutationVariables,
+  TContext
+> => {
+  const mutationKey = getUpdateEnrolmentMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateEnrolment>>,
+    UpdateEnrolmentMutationVariables
+  > = (props) => {
+    const { enrolmentId, data } = props ?? {};
+
+    return updateEnrolment(enrolmentId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateEnrolmentMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateEnrolment>>
+>;
+export type UpdateEnrolmentMutationBody = BodyType<EnrolmentUpdate>;
+export type UpdateEnrolmentMutationError = ErrorType<ErrorResponse>;
+export type UpdateEnrolmentMutationVariables = {
+  enrolmentId: string;
+  data: BodyType<EnrolmentUpdate>;
+};
+
+/**
+ * Confirm or correct a subject's board, tier or spec version.
+ * @summary Update Enrolment
+ */
+export const useUpdateEnrolment = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateEnrolment>>,
+      TError,
+      UpdateEnrolmentMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateEnrolment>>,
+  TError,
+  UpdateEnrolmentMutationVariables,
+  TContext
+> => {
+  return useMutation(getUpdateEnrolmentMutationOptions(options), queryClient);
+};
+
+export const getSetTopicOrderUrl = (enrolmentId: string) => {
+  return `/api/v1/admin/enrolments/${enrolmentId}/topic-order`;
+};
+
+/**
+ * Set the order topics are studied in. Idempotent.
+ * @summary Set Topic Order
+ */
+export const setTopicOrder = async (
+  enrolmentId: string,
+  topicOrderUpdate: TopicOrderUpdate,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<TopicMapOut> => {
+  return apiFetch<TopicMapOut>(getSetTopicOrderUrl(enrolmentId), {
+    ...options,
+    method: "PUT",
+    headers: getHeaders({ "Content-Type": "application/json" }, options?.headers),
+    body: JSON.stringify(topicOrderUpdate),
+    schema: TopicMapOut,
+  });
+};
+
+export const getSetTopicOrderMutationKey = () => ["setTopicOrder"] as const;
+
+export const getSetTopicOrderMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof setTopicOrder>>,
+    TError,
+    SetTopicOrderMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof setTopicOrder>>,
+  TError,
+  SetTopicOrderMutationVariables,
+  TContext
+> => {
+  const mutationKey = getSetTopicOrderMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof setTopicOrder>>,
+    SetTopicOrderMutationVariables
+  > = (props) => {
+    const { enrolmentId, data } = props ?? {};
+
+    return setTopicOrder(enrolmentId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SetTopicOrderMutationResult = NonNullable<Awaited<ReturnType<typeof setTopicOrder>>>;
+export type SetTopicOrderMutationBody = BodyType<TopicOrderUpdate>;
+export type SetTopicOrderMutationError = ErrorType<ErrorResponse>;
+export type SetTopicOrderMutationVariables = {
+  enrolmentId: string;
+  data: BodyType<TopicOrderUpdate>;
+};
+
+/**
+ * Set the order topics are studied in. Idempotent.
+ * @summary Set Topic Order
+ */
+export const useSetTopicOrder = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof setTopicOrder>>,
+      TError,
+      SetTopicOrderMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof setTopicOrder>>,
+  TError,
+  SetTopicOrderMutationVariables,
+  TContext
+> => {
+  return useMutation(getSetTopicOrderMutationOptions(options), queryClient);
+};
+
+export const getGetEnrolmentTopicsUrl = (enrolmentId: string) => {
+  return `/api/v1/admin/enrolments/${enrolmentId}/topics`;
+};
+
+/**
+ * A student's topic map, for setting what's been covered at school.
+ * @summary Get Enrolment Topics
+ */
+export const getEnrolmentTopics = async (
+  enrolmentId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<TopicMapOut> => {
+  return apiFetch<TopicMapOut>(getGetEnrolmentTopicsUrl(enrolmentId), {
+    ...options,
+    method: "GET",
+
+    schema: TopicMapOut,
+  });
+};
+
+export const getGetEnrolmentTopicsQueryKey = (enrolmentId: string) => {
+  return [`/api/v1/admin/enrolments/${enrolmentId}/topics`] as const;
+};
+
+export const getGetEnrolmentTopicsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getEnrolmentTopics>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  enrolmentId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEnrolmentTopics>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetEnrolmentTopicsQueryKey(enrolmentId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getEnrolmentTopics>>> = ({ signal }) =>
+    getEnrolmentTopics(enrolmentId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: enrolmentId !== null && enrolmentId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getEnrolmentTopics>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetEnrolmentTopicsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getEnrolmentTopics>>
+>;
+export type GetEnrolmentTopicsQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * A student's topic map, for setting what's been covered at school.
+ * @summary Get Enrolment Topics
+ */
+export function useGetEnrolmentTopics<
+  TData = Awaited<ReturnType<typeof getEnrolmentTopics>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  enrolmentId: string,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEnrolmentTopics>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEnrolmentTopics>>,
+          TError,
+          Awaited<ReturnType<typeof getEnrolmentTopics>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * A student's topic map, for setting what's been covered at school.
+ * @summary Get Enrolment Topics
+ */
+export function useGetEnrolmentTopics<
+  TData = Awaited<ReturnType<typeof getEnrolmentTopics>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  enrolmentId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof getEnrolmentTopics>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getEnrolmentTopics>>,
+          TError,
+          Awaited<ReturnType<typeof getEnrolmentTopics>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * A student's topic map, for setting what's been covered at school.
+ * @summary Get Enrolment Topics
+ */
+export function useGetEnrolmentTopics<
+  TData = Awaited<ReturnType<typeof getEnrolmentTopics>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  enrolmentId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEnrolmentTopics>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * A student's topic map, for setting what's been covered at school.
+ * @summary Get Enrolment Topics
+ */
+export function useGetEnrolmentTopics<
+  TData = Awaited<ReturnType<typeof getEnrolmentTopics>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  enrolmentId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getEnrolmentTopics>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetEnrolmentTopicsQueryOptions(enrolmentId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getSetTopicTaughtUrl = (enrolmentId: string, topicId: string) => {
+  return `/api/v1/admin/enrolments/${enrolmentId}/topics/${topicId}`;
+};
+
+/**
+ * Mark a topic as covered (or not) at school. Idempotent.
+ * @summary Set Topic Taught
+ */
+export const setTopicTaught = async (
+  enrolmentId: string,
+  topicId: string,
+  topicSettingUpdate: TopicSettingUpdate,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<TopicMapOut> => {
+  return apiFetch<TopicMapOut>(getSetTopicTaughtUrl(enrolmentId, topicId), {
+    ...options,
+    method: "PUT",
+    headers: getHeaders({ "Content-Type": "application/json" }, options?.headers),
+    body: JSON.stringify(topicSettingUpdate),
+    schema: TopicMapOut,
+  });
+};
+
+export const getSetTopicTaughtMutationKey = () => ["setTopicTaught"] as const;
+
+export const getSetTopicTaughtMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof setTopicTaught>>,
+    TError,
+    SetTopicTaughtMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof setTopicTaught>>,
+  TError,
+  SetTopicTaughtMutationVariables,
+  TContext
+> => {
+  const mutationKey = getSetTopicTaughtMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof setTopicTaught>>,
+    SetTopicTaughtMutationVariables
+  > = (props) => {
+    const { enrolmentId, topicId, data } = props ?? {};
+
+    return setTopicTaught(enrolmentId, topicId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SetTopicTaughtMutationResult = NonNullable<Awaited<ReturnType<typeof setTopicTaught>>>;
+export type SetTopicTaughtMutationBody = BodyType<TopicSettingUpdate>;
+export type SetTopicTaughtMutationError = ErrorType<ErrorResponse>;
+export type SetTopicTaughtMutationVariables = {
+  enrolmentId: string;
+  topicId: string;
+  data: BodyType<TopicSettingUpdate>;
+};
+
+/**
+ * Mark a topic as covered (or not) at school. Idempotent.
+ * @summary Set Topic Taught
+ */
+export const useSetTopicTaught = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof setTopicTaught>>,
+      TError,
+      SetTopicTaughtMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof setTopicTaught>>,
+  TError,
+  SetTopicTaughtMutationVariables,
+  TContext
+> => {
+  return useMutation(getSetTopicTaughtMutationOptions(options), queryClient);
+};
+
+export const getDeleteSetTextUrl = (setTextId: string) => {
+  return `/api/v1/admin/set-texts/${setTextId}`;
+};
+
+/**
+ * Remove a set text (e.g. a typo). Idempotent.
+ * @summary Delete Set Text
+ */
+export const deleteSetText = async (
+  setTextId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<void> => {
+  return apiFetch<void>(getDeleteSetTextUrl(setTextId), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteSetTextMutationKey = () => ["deleteSetText"] as const;
+
+export const getDeleteSetTextMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteSetText>>,
+    TError,
+    DeleteSetTextMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteSetText>>,
+  TError,
+  DeleteSetTextMutationVariables,
+  TContext
+> => {
+  const mutationKey = getDeleteSetTextMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteSetText>>,
+    DeleteSetTextMutationVariables
+  > = (props) => {
+    const { setTextId } = props ?? {};
+
+    return deleteSetText(setTextId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteSetTextMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSetText>>>;
+
+export type DeleteSetTextMutationError = ErrorType<ErrorResponse>;
+export type DeleteSetTextMutationVariables = { setTextId: string };
+
+/**
+ * Remove a set text (e.g. a typo). Idempotent.
+ * @summary Delete Set Text
+ */
+export const useDeleteSetText = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteSetText>>,
+      TError,
+      DeleteSetTextMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteSetText>>,
+  TError,
+  DeleteSetTextMutationVariables,
+  TContext
+> => {
+  return useMutation(getDeleteSetTextMutationOptions(options), queryClient);
+};
+
+export const getMatchSetTextUrl = (setTextId: string) => {
+  return `/api/v1/admin/set-texts/${setTextId}`;
+};
+
+/**
+ * Match a typed-in set text to the board's list.
+ * @summary Match Set Text
+ */
+export const matchSetText = async (
+  setTextId: string,
+  setTextUpdate: SetTextUpdate,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<AdminEnrolmentOut> => {
+  return apiFetch<AdminEnrolmentOut>(getMatchSetTextUrl(setTextId), {
+    ...options,
+    method: "PATCH",
+    headers: getHeaders({ "Content-Type": "application/json" }, options?.headers),
+    body: JSON.stringify(setTextUpdate),
+    schema: AdminEnrolmentOut,
+  });
+};
+
+export const getMatchSetTextMutationKey = () => ["matchSetText"] as const;
+
+export const getMatchSetTextMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof matchSetText>>,
+    TError,
+    MatchSetTextMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof matchSetText>>,
+  TError,
+  MatchSetTextMutationVariables,
+  TContext
+> => {
+  const mutationKey = getMatchSetTextMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof matchSetText>>,
+    MatchSetTextMutationVariables
+  > = (props) => {
+    const { setTextId, data } = props ?? {};
+
+    return matchSetText(setTextId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type MatchSetTextMutationResult = NonNullable<Awaited<ReturnType<typeof matchSetText>>>;
+export type MatchSetTextMutationBody = BodyType<SetTextUpdate>;
+export type MatchSetTextMutationError = ErrorType<ErrorResponse>;
+export type MatchSetTextMutationVariables = { setTextId: string; data: BodyType<SetTextUpdate> };
+
+/**
+ * Match a typed-in set text to the board's list.
+ * @summary Match Set Text
+ */
+export const useMatchSetText = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof matchSetText>>,
+      TError,
+      MatchSetTextMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof matchSetText>>,
+  TError,
+  MatchSetTextMutationVariables,
+  TContext
+> => {
+  return useMutation(getMatchSetTextMutationOptions(options), queryClient);
+};
+
+export const getListSpecificationsUrl = () => {
+  return `/api/v1/admin/specifications`;
+};
+
+/**
+ * Every imported spec version with its content counts.
+ * @summary List Specifications
+ */
+export const listSpecifications = async (
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<AdminSpecificationOut[]> => {
+  return apiFetch<AdminSpecificationOut[]>(getListSpecificationsUrl(), {
+    ...options,
+    method: "GET",
+
+    schema: zod.array(AdminSpecificationOut),
+  });
+};
+
+export const getListSpecificationsQueryKey = () => {
+  return [`/api/v1/admin/specifications`] as const;
+};
+
+export const getListSpecificationsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listSpecifications>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listSpecifications>>, TError, TData>>;
+  request?: SecondParameter<typeof apiFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListSpecificationsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listSpecifications>>> = ({ signal }) =>
+    listSpecifications({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listSpecifications>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListSpecificationsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listSpecifications>>
+>;
+export type ListSpecificationsQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * Every imported spec version with its content counts.
+ * @summary List Specifications
+ */
+export function useListSpecifications<
+  TData = Awaited<ReturnType<typeof listSpecifications>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof listSpecifications>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSpecifications>>,
+          TError,
+          Awaited<ReturnType<typeof listSpecifications>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Every imported spec version with its content counts.
+ * @summary List Specifications
+ */
+export function useListSpecifications<
+  TData = Awaited<ReturnType<typeof listSpecifications>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listSpecifications>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSpecifications>>,
+          TError,
+          Awaited<ReturnType<typeof listSpecifications>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Every imported spec version with its content counts.
+ * @summary List Specifications
+ */
+export function useListSpecifications<
+  TData = Awaited<ReturnType<typeof listSpecifications>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listSpecifications>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Every imported spec version with its content counts.
+ * @summary List Specifications
+ */
+export function useListSpecifications<
+  TData = Awaited<ReturnType<typeof listSpecifications>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listSpecifications>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListSpecificationsQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
 
 export const getResetStudentPasswordUrl = (studentId: string) => {
   return `/api/v1/admin/students/${studentId}/password`;
@@ -377,6 +1275,491 @@ export const useRefreshSession = <TError = ErrorType<ErrorResponse>, TContext = 
 ): UseMutationResult<Awaited<ReturnType<typeof refreshSession>>, TError, void, TContext> => {
   return useMutation(getRefreshSessionMutationOptions(options), queryClient);
 };
+
+export const getGetCatalogueUrl = () => {
+  return `/api/v1/catalogue`;
+};
+
+/**
+ * Boards, subjects and current specs for the setup screen.
+ * @summary Get Catalogue
+ */
+export const getCatalogue = async (
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<CatalogueOut> => {
+  return apiFetch<CatalogueOut>(getGetCatalogueUrl(), {
+    ...options,
+    method: "GET",
+
+    schema: CatalogueOut,
+  });
+};
+
+export const getGetCatalogueQueryKey = () => {
+  return [`/api/v1/catalogue`] as const;
+};
+
+export const getGetCatalogueQueryOptions = <
+  TData = Awaited<ReturnType<typeof getCatalogue>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogue>>, TError, TData>>;
+  request?: SecondParameter<typeof apiFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetCatalogueQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getCatalogue>>> = ({ signal }) =>
+    getCatalogue({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getCatalogue>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetCatalogueQueryResult = NonNullable<Awaited<ReturnType<typeof getCatalogue>>>;
+export type GetCatalogueQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * Boards, subjects and current specs for the setup screen.
+ * @summary Get Catalogue
+ */
+export function useGetCatalogue<
+  TData = Awaited<ReturnType<typeof getCatalogue>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogue>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCatalogue>>,
+          TError,
+          Awaited<ReturnType<typeof getCatalogue>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Boards, subjects and current specs for the setup screen.
+ * @summary Get Catalogue
+ */
+export function useGetCatalogue<
+  TData = Awaited<ReturnType<typeof getCatalogue>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogue>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCatalogue>>,
+          TError,
+          Awaited<ReturnType<typeof getCatalogue>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Boards, subjects and current specs for the setup screen.
+ * @summary Get Catalogue
+ */
+export function useGetCatalogue<
+  TData = Awaited<ReturnType<typeof getCatalogue>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogue>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Boards, subjects and current specs for the setup screen.
+ * @summary Get Catalogue
+ */
+export function useGetCatalogue<
+  TData = Awaited<ReturnType<typeof getCatalogue>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogue>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetCatalogueQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getGetMySubjectsUrl = () => {
+  return `/api/v1/me/subjects`;
+};
+
+/**
+ * The student's chosen subjects and their status.
+ * @summary Get My Subjects
+ */
+export const getMySubjects = async (
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<MySubjectsOut> => {
+  return apiFetch<MySubjectsOut>(getGetMySubjectsUrl(), {
+    ...options,
+    method: "GET",
+
+    schema: MySubjectsOut,
+  });
+};
+
+export const getGetMySubjectsQueryKey = () => {
+  return [`/api/v1/me/subjects`] as const;
+};
+
+export const getGetMySubjectsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMySubjects>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMySubjects>>, TError, TData>>;
+  request?: SecondParameter<typeof apiFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMySubjectsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getMySubjects>>> = ({ signal }) =>
+    getMySubjects({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof getMySubjects>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetMySubjectsQueryResult = NonNullable<Awaited<ReturnType<typeof getMySubjects>>>;
+export type GetMySubjectsQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * The student's chosen subjects and their status.
+ * @summary Get My Subjects
+ */
+export function useGetMySubjects<
+  TData = Awaited<ReturnType<typeof getMySubjects>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMySubjects>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMySubjects>>,
+          TError,
+          Awaited<ReturnType<typeof getMySubjects>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The student's chosen subjects and their status.
+ * @summary Get My Subjects
+ */
+export function useGetMySubjects<
+  TData = Awaited<ReturnType<typeof getMySubjects>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMySubjects>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMySubjects>>,
+          TError,
+          Awaited<ReturnType<typeof getMySubjects>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The student's chosen subjects and their status.
+ * @summary Get My Subjects
+ */
+export function useGetMySubjects<
+  TData = Awaited<ReturnType<typeof getMySubjects>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMySubjects>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The student's chosen subjects and their status.
+ * @summary Get My Subjects
+ */
+export function useGetMySubjects<
+  TData = Awaited<ReturnType<typeof getMySubjects>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMySubjects>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetMySubjectsQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getReplaceMySubjectsUrl = () => {
+  return `/api/v1/me/subjects`;
+};
+
+/**
+ * Save the setup screen. Replaces the whole list; safe to repeat.
+ * @summary Replace My Subjects
+ */
+export const replaceMySubjects = async (
+  subjectChoices: SubjectChoices,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<MySubjectsOut> => {
+  return apiFetch<MySubjectsOut>(getReplaceMySubjectsUrl(), {
+    ...options,
+    method: "PUT",
+    headers: getHeaders({ "Content-Type": "application/json" }, options?.headers),
+    body: JSON.stringify(subjectChoices),
+    schema: MySubjectsOut,
+  });
+};
+
+export const getReplaceMySubjectsMutationKey = () => ["replaceMySubjects"] as const;
+
+export const getReplaceMySubjectsMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof replaceMySubjects>>,
+    TError,
+    ReplaceMySubjectsMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof replaceMySubjects>>,
+  TError,
+  ReplaceMySubjectsMutationVariables,
+  TContext
+> => {
+  const mutationKey = getReplaceMySubjectsMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof replaceMySubjects>>,
+    ReplaceMySubjectsMutationVariables
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return replaceMySubjects(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReplaceMySubjectsMutationResult = NonNullable<
+  Awaited<ReturnType<typeof replaceMySubjects>>
+>;
+export type ReplaceMySubjectsMutationBody = BodyType<SubjectChoices>;
+export type ReplaceMySubjectsMutationError = ErrorType<ErrorResponse>;
+export type ReplaceMySubjectsMutationVariables = { data: BodyType<SubjectChoices> };
+
+/**
+ * Save the setup screen. Replaces the whole list; safe to repeat.
+ * @summary Replace My Subjects
+ */
+export const useReplaceMySubjects = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof replaceMySubjects>>,
+      TError,
+      ReplaceMySubjectsMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof replaceMySubjects>>,
+  TError,
+  ReplaceMySubjectsMutationVariables,
+  TContext
+> => {
+  return useMutation(getReplaceMySubjectsMutationOptions(options), queryClient);
+};
+
+export const getGetMyTopicMapUrl = (enrolmentId: string) => {
+  return `/api/v1/me/subjects/${enrolmentId}/topics`;
+};
+
+/**
+ * The topic map for one of the student's active subjects.
+ * @summary Get My Topic Map
+ */
+export const getMyTopicMap = async (
+  enrolmentId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<TopicMapOut> => {
+  return apiFetch<TopicMapOut>(getGetMyTopicMapUrl(enrolmentId), {
+    ...options,
+    method: "GET",
+
+    schema: TopicMapOut,
+  });
+};
+
+export const getGetMyTopicMapQueryKey = (enrolmentId: string) => {
+  return [`/api/v1/me/subjects/${enrolmentId}/topics`] as const;
+};
+
+export const getGetMyTopicMapQueryOptions = <
+  TData = Awaited<ReturnType<typeof getMyTopicMap>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  enrolmentId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTopicMap>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetMyTopicMapQueryKey(enrolmentId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getMyTopicMap>>> = ({ signal }) =>
+    getMyTopicMap(enrolmentId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: enrolmentId !== null && enrolmentId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getMyTopicMap>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetMyTopicMapQueryResult = NonNullable<Awaited<ReturnType<typeof getMyTopicMap>>>;
+export type GetMyTopicMapQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * The topic map for one of the student's active subjects.
+ * @summary Get My Topic Map
+ */
+export function useGetMyTopicMap<
+  TData = Awaited<ReturnType<typeof getMyTopicMap>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  enrolmentId: string,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTopicMap>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyTopicMap>>,
+          TError,
+          Awaited<ReturnType<typeof getMyTopicMap>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The topic map for one of the student's active subjects.
+ * @summary Get My Topic Map
+ */
+export function useGetMyTopicMap<
+  TData = Awaited<ReturnType<typeof getMyTopicMap>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  enrolmentId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTopicMap>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMyTopicMap>>,
+          TError,
+          Awaited<ReturnType<typeof getMyTopicMap>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The topic map for one of the student's active subjects.
+ * @summary Get My Topic Map
+ */
+export function useGetMyTopicMap<
+  TData = Awaited<ReturnType<typeof getMyTopicMap>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  enrolmentId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTopicMap>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The topic map for one of the student's active subjects.
+ * @summary Get My Topic Map
+ */
+export function useGetMyTopicMap<
+  TData = Awaited<ReturnType<typeof getMyTopicMap>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  enrolmentId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getMyTopicMap>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetMyTopicMapQueryOptions(enrolmentId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
 
 export const getGetCurrentUserUrl = () => {
   return `/api/v1/users/me`;

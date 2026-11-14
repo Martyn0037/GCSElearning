@@ -879,6 +879,19 @@
             "title": "Id",
             "type": "string"
           },
+          "optionId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set when matched to the board's list",
+            "title": "Optionid"
+          },
           "status": {
             "$ref": "#/components/schemas/EnrolmentStatus"
           },
@@ -890,6 +903,7 @@
         "required": [
           "id",
           "category",
+          "optionId",
           "title",
           "author",
           "status"

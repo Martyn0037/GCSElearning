@@ -6,6 +6,34 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added — Phase 2 (Curriculum)
+- **Curriculum format:** `curriculum/` holds YAML files: a catalogue of boards and subjects, and one file per spec version. There's a template and a README on how to copy content from a spec PDF.
+- **Worked example:** Pearson Edexcel GCSE Maths 1MA1 (Issue 2, June 2015), topic 1 Number (N1–N16). It's copied word for word, with the Foundation and Higher wording kept separately.
+- **Import command:** `app.cli.import_curriculum`.
+  - Strict validation, including keywords copied from the wording, a `TODO` block and reference checks.
+  - Idempotent; removed statements are retired, not deleted.
+  - Spec versions are pinned.
+  - Pending subjects are switched on when their spec arrives.
+  - It runs automatically in the `migrate` job.
+- **Setup screen:** the student picks subjects from the catalogue, or types one in.
+  - Each subject has a board (most common pre-selected, or "I don't know"), a tier ("Not sure" means Higher) and set texts (from the board's list, or typed).
+  - Anything without an imported spec shows as "being set up" (ADR-012).
+- **Student home and topic map:** subjects are listed with their status.
+  - Topics are shown in study order and locked until covered at school.
+  - Skill counts respect the student's tier.
+- **Admin screen:**
+  - subjects needing attention, with plain-language reasons and cursor paging
+  - confirming or correcting board, tier and spec
+  - converting typed-in subjects
+  - matching or removing typed-in set texts
+  - "covered at school" ticks and topic order
+  - a list of imported specs
+- **Testing:** Playwright end-to-end tests against the real stack, and a CI job that runs them.
+- **Docs:** ADR-013 (curriculum versioning and import).
+
+### Fixed
+- After saving the setup screen, the app now goes to the home page instead of bouncing back to setup.
+
 ### Changed
 - The seed command asks for any password not set in the environment, at a hidden prompt with confirmation, so seeding works the same in any shell (zsh, bash, PowerShell).
 

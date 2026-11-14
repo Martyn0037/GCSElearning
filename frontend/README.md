@@ -11,7 +11,10 @@ src/
   app/                routes, query client
   auth/               session hooks, route guard, role → home mapping
   components/         shared UI
-  pages/              screens
+  setup/              subject setup screen (choices model + UI)
+  subjects/           student home and topic map
+  admin/              admin screen
+  pages/              login, guardian placeholder, not found
   test/               test setup, fake API, render helpers
 ```
 
@@ -48,6 +51,7 @@ Nothing secret is ever built into the frontend.
 | `npm run lint` | ESLint (`strictTypeChecked`) |
 | `npm run typecheck` | TypeScript, no emit |
 | `npm run build` | Production build into `dist/` |
+| `npm run test:e2e` | Playwright end-to-end tests against the running stack (see `e2e/README.md`) |
 
 ## API client
 

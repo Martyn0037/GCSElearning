@@ -15,6 +15,7 @@ export const SessionOut = zod
         email: zod.union([zod.string(), zod.null()]),
         id: zod.uuid(),
         role: zod.enum(["student", "guardian", "admin"]).describe("What a user is allowed to do."),
+        setupCompleted: zod.boolean(),
         username: zod.union([zod.string(), zod.null()]),
       })
       .describe("A user as visible to themselves, their guardian, or an admin."),

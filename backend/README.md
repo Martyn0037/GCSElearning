@@ -12,6 +12,8 @@ app/
   auth/     passwords, tokens, cookies, rate limiting, audit, service, router
   users/    /users endpoints (ownership rules)
   admin/    /admin endpoints (admin role only)
+  curriculum/  YAML schema and importer
+  enrolment/   catalogue, subject choice, topic map, admin enrolment tools
   health/   /health/live, /health/ready, /metrics (internal only)
   cli/      seed_users, export_openapi
 alembic/    migrations
@@ -118,6 +120,20 @@ uv run alembic revision --autogenerate -m "describe change" --rev-id 0002
 ```
 
 Every migration needs a working `downgrade()`. An integration test checks the round trip, and checks that the models match the migrated schema.
+
+## Curriculum import
+
+The `migrate` service runs this on every `docker compose up`. To run it by hand, or to check files without writing anything:
+
+```bash
+uv run python -m app.cli.import_curriculum ../curriculum
+```
+
+```bash
+uv run python -m app.cli.import_curriculum --check ../curriculum
+```
+
+See `curriculum/README.md` for the file format.
 
 ## OpenAPI
 

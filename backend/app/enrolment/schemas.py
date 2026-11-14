@@ -142,6 +142,7 @@ class StudentSetTextOut(ApiModel):
 
     id: uuid.UUID
     category: str
+    option_id: uuid.UUID | None = Field(description="Set when matched to the board's list")
     title: str
     author: str | None
     status: EnrolmentStatus

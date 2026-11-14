@@ -232,3 +232,28 @@ curriculum content comes only from the exam board's spec, never from model knowl
 **Rejected (option B).** Letting typed-in subjects and texts be used straight away from model knowledge, labelled "unverified". It's faster, but questions could drift off-spec or be wrong, which undermines the app's core promise.
 
 **Consequences.** Each extra subject means the admin loads one spec PDF. Claude can usually fetch it from the board's site, but the admin checks the version. The student can wait a little for an unusual subject.
+
+---
+
+## ADR-013 — Curriculum as versioned YAML, imported idempotently on every start
+
+**Status:** Accepted (2026-11-14). Implemented in Phase 2.
+
+**Decision.**
+- Each spec version is one YAML file under `curriculum/specs/`, with the exact version
+  string printed in the PDF footer. Specs are unique by (board, code, version). Only one version per board and code is *current*.
+- The `migrate` job runs `python -m app.cli.import_curriculum /app/curriculum` after the Alembic migrations on every start.
+  - Every file is validated first. If any file is invalid, nothing is written.
+  - Re-running changes nothing.
+- Statements removed from a file are **retired** (`retired_at`), not deleted, because later phases' attempts and mistakes reference them.
+- A student's subject is pinned to the spec version it was matched to. A new current version applies to new and pending subjects only; the admin moves existing ones explicitly.
+- Validation enforces "nothing invented":
+  - every keyword must appear in the statement's own wording
+  - `TODO` anywhere in a file blocks the import
+  - Higher wording is stored only where it differs from Foundation
+- Tiers are derived by comparing the Foundation and Higher sections of the PDF, because text extraction loses the bold that marks Higher-only content.
+
+**Trade-offs.**
+- (+) Content changes are reviewable diffs in git, and deploys can't half-apply them.
+- (+) The app always matches the repo.
+- (−) Editing content needs a commit and a restart rather than an admin web form. That's acceptable for one admin; an upload form can be added later and would reuse the same importer.

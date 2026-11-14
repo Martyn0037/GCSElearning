@@ -90,3 +90,50 @@ jobs:
               image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --no-progress \
               --ignorefile /trivyignore "$image"
           done
+
+  e2e:
+    needs: [backend, frontend]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      E2E_STUDENT_USERNAME: e2e-student
+      E2E_ADMIN_EMAIL: e2e-admin@example.test
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Create a throwaway .env with random secrets
+        run: |
+          cp .env.example .env
+          sed -i "s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=$(openssl rand -hex 24)|" .env
+          sed -i "s|^JWT_SECRET=.*|JWT_SECRET=$(openssl rand -hex 32)|" .env
+          sed -i "s|^AUDIT_IP_SALT=.*|AUDIT_IP_SALT=$(openssl rand -hex 32)|" .env
+          {
+            echo "E2E_STUDENT_PASSWORD=$(openssl rand -hex 16)"
+            echo "E2E_ADMIN_PASSWORD=$(openssl rand -hex 16)"
+            echo "E2E_GUARDIAN_PASSWORD=$(openssl rand -hex 16)"
+          } >> "$GITHUB_ENV"
+      - name: Start the stack
+        run: docker compose up -d --build --wait
+      - name: Seed test accounts
+        env:
+          SEED_ADMIN_PASSWORD: ${{ env.E2E_ADMIN_PASSWORD }}
+          SEED_GUARDIAN_PASSWORD: ${{ env.E2E_GUARDIAN_PASSWORD }}
+          SEED_STUDENT_PASSWORD: ${{ env.E2E_STUDENT_PASSWORD }}
+        run: |
+          docker compose run --rm -T -e SEED_ADMIN_PASSWORD -e SEED_GUARDIAN_PASSWORD \
+            -e SEED_STUDENT_PASSWORD api python -m app.cli.seed_users \
+            --admin-email "$E2E_ADMIN_EMAIL" --guardian-email e2e-guardian@example.test \
+            --guardian-name Guardian --student-username "$E2E_STUDENT_USERNAME" --student-name Sam
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Run end-to-end tests
+        working-directory: frontend
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          npx playwright test
+      - name: Stack logs on failure
+        if: failure()
+        run: docker compose logs --no-color --tail 200
