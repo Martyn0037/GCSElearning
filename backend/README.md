@@ -51,7 +51,7 @@ tests/      unit/, integration/ (real Postgres), fixtures/
    uv run alembic upgrade head
    ```
 
-5. Seed the accounts. Set `SEED_ADMIN_PASSWORD`, `SEED_GUARDIAN_PASSWORD` and `SEED_STUDENT_PASSWORD` in your shell first, then run:
+5. Seed the accounts. It asks for each password at a hidden prompt, unless `SEED_ADMIN_PASSWORD`, `SEED_GUARDIAN_PASSWORD` or `SEED_STUDENT_PASSWORD` is set:
 
    ```bash
    uv run python -m app.cli.seed_users --admin-email you@example.com --guardian-email guardian@example.com --guardian-name Alex --student-username sam10 --student-name Sam

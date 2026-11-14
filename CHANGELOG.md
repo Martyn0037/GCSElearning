@@ -6,6 +6,9 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- The seed command asks for any password not set in the environment, at a hidden prompt with confirmation, so seeding works the same in any shell (zsh, bash, PowerShell).
+
 ### Added — Phase 1 (Foundations)
 - **Backend:** a FastAPI service under `/api/v1`.
   - Consistent error shape with trace IDs, structured JSON logging with redaction, and security headers.

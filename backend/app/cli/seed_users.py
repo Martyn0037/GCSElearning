@@ -1,13 +1,14 @@
 # backend/app/cli/seed_users.py
 """Create or update the three accounts: admin, guardian and student.
 
-Passwords are read from the environment (never from arguments, which end up
-in shell history and process listings). Running it again updates the
+Passwords are never taken as arguments (those end up in shell history and
+process listings). Each one is read from its environment variable
+(``SEED_ADMIN_PASSWORD``, ``SEED_GUARDIAN_PASSWORD``, ``SEED_STUDENT_PASSWORD``)
+if set, otherwise asked for at a hidden prompt. Running it again updates the
 existing accounts instead of duplicating them (idempotent).
 
 Usage::
 
-    SEED_ADMIN_PASSWORD=... SEED_GUARDIAN_PASSWORD=... SEED_STUDENT_PASSWORD=... \\
     python -m app.cli.seed_users \\
         --admin-email you@example.com --admin-name Admin \\
         --guardian-email guardian@example.com --guardian-name Alex \\
@@ -18,8 +19,10 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import getpass
 import os
 import sys
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 
 from sqlalchemy import select
@@ -43,11 +46,54 @@ class SeedAccount:
     password: str
 
 
-def _password_from_env(name: str) -> str:
-    value = os.environ.get(name, "")
-    if len(value) < MIN_PASSWORD_LENGTH:
-        sys.exit(f"{name} must be set and at least {MIN_PASSWORD_LENGTH} characters")
-    return value
+MAX_PROMPT_ATTEMPTS = 3
+
+
+class PasswordError(Exception):
+    """A usable password couldn't be obtained."""
+
+
+def resolve_password(
+    env_name: str,
+    label: str,
+    *,
+    env: Mapping[str, str],
+    prompt: Callable[[str], str] | None,
+) -> str:
+    """Return a password from the environment, or ask for it at a hidden prompt.
+
+    Args:
+        env_name: Environment variable to read first.
+        label: Who the password is for, shown in the prompt (e.g. "Admin").
+        env: The environment to read from.
+        prompt: Hidden-input function (``getpass.getpass``), or ``None`` when
+            there's no terminal to ask on.
+
+    Returns:
+        A password of at least ``MIN_PASSWORD_LENGTH`` characters.
+
+    Raises:
+        PasswordError: If the environment value is too short, there's no
+            terminal to prompt on, or no valid matching password was entered
+            within ``MAX_PROMPT_ATTEMPTS`` tries.
+    """
+    from_env = env.get(env_name, "")
+    if from_env:
+        if len(from_env) < MIN_PASSWORD_LENGTH:
+            raise PasswordError(f"{env_name} must be at least {MIN_PASSWORD_LENGTH} characters")
+        return from_env
+    if prompt is None:
+        raise PasswordError(f"Set {env_name}, or run this in a terminal to be asked for it")
+    for _ in range(MAX_PROMPT_ATTEMPTS):
+        first = prompt(f"{label} password (at least {MIN_PASSWORD_LENGTH} characters): ")
+        if len(first) < MIN_PASSWORD_LENGTH:
+            print(f"Too short: it needs at least {MIN_PASSWORD_LENGTH} characters.")
+            continue
+        if prompt(f"{label} password again: ") != first:
+            print("Those didn't match. Try again.")
+            continue
+        return first
+    raise PasswordError(f"No valid {label.lower()} password entered")
 
 
 async def upsert_account(session: AsyncSession, account: SeedAccount) -> User:
@@ -91,22 +137,28 @@ async def link_guardian(session: AsyncSession, guardian: User, student: User) ->
     )
 
 
+def _collect_passwords() -> dict[str, str]:
+    prompt = getpass.getpass if sys.stdin.isatty() else None
+    try:
+        return {
+            key: resolve_password(
+                f"SEED_{key.upper()}_PASSWORD", key.title(), env=os.environ, prompt=prompt
+            )
+            for key in ("admin", "guardian", "student")
+        }
+    except PasswordError as exc:
+        sys.exit(str(exc))
+
+
 async def _run(args: argparse.Namespace) -> None:
+    passwords = _collect_passwords()
     accounts = {
-        "admin": SeedAccount(
-            Role.ADMIN, args.admin_email, args.admin_name, _password_from_env("SEED_ADMIN_PASSWORD")
-        ),
+        "admin": SeedAccount(Role.ADMIN, args.admin_email, args.admin_name, passwords["admin"]),
         "guardian": SeedAccount(
-            Role.GUARDIAN,
-            args.guardian_email,
-            args.guardian_name,
-            _password_from_env("SEED_GUARDIAN_PASSWORD"),
+            Role.GUARDIAN, args.guardian_email, args.guardian_name, passwords["guardian"]
         ),
         "student": SeedAccount(
-            Role.STUDENT,
-            args.student_username,
-            args.student_name,
-            _password_from_env("SEED_STUDENT_PASSWORD"),
+            Role.STUDENT, args.student_username, args.student_name, passwords["student"]
         ),
     }
     engine = create_engine(get_settings())

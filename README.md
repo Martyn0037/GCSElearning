@@ -40,27 +40,13 @@ You need Docker with the Compose plugin.
    docker compose up -d --build
    ```
 
-5. Create the admin, guardian and student accounts. The seed command reads the three passwords (at least 10 characters each) from environment variables, so they never appear in shell history or in `.env`. Enter each one at a prompt:
+5. Create the admin, guardian and student accounts. Swap in your own email addresses (the admin and guardian need different ones, e.g. `you+admin@…` and `you+parent@…`) and his username and name:
 
    ```bash
-   read -rsp "Admin password: " SEED_ADMIN_PASSWORD && echo && export SEED_ADMIN_PASSWORD
+   docker compose run --rm api python -m app.cli.seed_users --admin-email you+admin@example.com --guardian-email you+parent@example.com --guardian-name Mum --student-username sam10 --student-name Sam
    ```
 
-   ```bash
-   read -rsp "Guardian password: " SEED_GUARDIAN_PASSWORD && echo && export SEED_GUARDIAN_PASSWORD
-   ```
-
-   ```bash
-   read -rsp "Student password: " SEED_STUDENT_PASSWORD && echo && export SEED_STUDENT_PASSWORD
-   ```
-
-   Then run the seed command:
-
-   ```bash
-   docker compose run --rm -e SEED_ADMIN_PASSWORD -e SEED_GUARDIAN_PASSWORD -e SEED_STUDENT_PASSWORD api python -m app.cli.seed_users --admin-email you@example.com --guardian-email guardian@example.com --guardian-name Alex --student-username sam10 --student-name Sam
-   ```
-
-   Running it again updates the same accounts; it never creates duplicates.
+   It asks for each password twice. Nothing shows as you type; each needs at least 10 characters. Running it again updates the same accounts; it never creates duplicates. (For scripts, it reads `SEED_ADMIN_PASSWORD`, `SEED_GUARDIAN_PASSWORD` and `SEED_STUDENT_PASSWORD` from the environment instead, passed with `-e`.)
 
 6. Open <https://localhost> and sign in. Your browser will warn about Caddy's local certificate the first time; that's expected for `localhost`.
 
