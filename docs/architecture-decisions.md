@@ -208,3 +208,27 @@ It stays valid for up to 15 minutes. Deactivating an account cuts access immedia
 
 **Trade-off.** It adds one dev dependency (Orval, which is actively maintained) but removes hand-written
 API types that could drift from the backend.
+
+---
+
+## ADR-012 — Student chooses subjects and set texts; no questions without an imported spec
+
+**Status:** Accepted (2026-11-14); implementation lands in Phase 2.
+
+**Context.** The student should choose his own subjects, add ones that aren't listed,
+and name the books he's studying. The brief's core accuracy rule (section 4) says
+curriculum content comes only from the exam board's spec, never from model knowledge.
+
+**Decision (option A).**
+- On first login, a setup screen asks for:
+  - his subjects, from a catalogue, plus an "Other" free-text box
+  - the board and tier for each subject, picked from lists, or "I don't know"
+  - for English Literature, his set texts, picked from the board's official set-text lists, plus "Other"
+- Anything that can't be matched to an imported spec becomes a **pending request** in the admin area. This covers "Other" subjects, texts not on a list and unknown boards.
+  - The subject or text shows as "being set up" to the student.
+  - **No questions are generated for it** until the admin imports that spec (or set-text list) and confirms the match.
+- Questions are always generated per learning objective. For set texts, objectives are scoped to his chosen texts, using text names from the spec and never invented plot or quotation content.
+
+**Rejected (option B).** Letting typed-in subjects and texts be used straight away from model knowledge, labelled "unverified". It's faster, but questions could drift off-spec or be wrong, which undermines the app's core promise.
+
+**Consequences.** Each extra subject means the admin loads one spec PDF. Claude can usually fetch it from the board's site, but the admin checks the version. The student can wait a little for an unusual subject.

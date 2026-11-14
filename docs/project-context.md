@@ -20,6 +20,10 @@ within 2 taps of logging in.
 | Primary device | _TBD_ (default: mobile-first, works on laptop) |
 | Budget | £25/month for the Claude API, about £10–15 for hosting |
 
+The student picks his own subjects, boards, tiers and set texts on first login
+(ADR-012). Anything not matched to an imported spec waits for the admin; no
+questions are generated for it until then.
+
 Curriculum content comes **only** from the board's spec PDFs, copied word for word with
 references. Anything unclear is marked `TODO`; nothing is invented.
 
