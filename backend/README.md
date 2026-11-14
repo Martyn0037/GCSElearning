@@ -16,7 +16,8 @@ app/
   enrolment/   catalogue, subject choice, topic map, admin enrolment tools
   ai/          Claude client, gateway (budget, circuit breaker, retries), pricing
   questions/   prompts, generation + verification, SymPy check, marking, bank
-  practice/    next question, hints, answers, difficulty ladder, flags
+  practice/    next question, hints, answers, difficulty ladder, flags, mastery (BKT),
+               mistakes + explanations, spaced review, progress read models
   jobs/        Postgres job queue and job handlers (worker: app/worker.py)
   health/   /health/live, /health/ready, /metrics (internal only)
   cli/      seed_users, export_openapi

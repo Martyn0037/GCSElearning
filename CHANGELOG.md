@@ -6,6 +6,24 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added — Phase 4 (Memory and mistakes)
+- **Mistakes:** every wrong or full-solution answer creates (or re-opens) a mistake, with his answer, the correct answer and a review schedule.
+- **"Where it went wrong":**
+  - A Sonnet explanation that refers to his actual answer, with a misconception label.
+  - Written in the background and shown within seconds.
+  - His answer is sent only as delimited data, with no personal data.
+- **"Try a similar one":** straight after a wrong answer, another question on the same skill.
+- **Spaced review:** mistakes return after 1, 3, 7 and 14 days (London calendar days) until right twice in a row. The home page shows "Review N mistakes" and there's a review mode.
+- **BKT mastery** per skill, updated on every answer.
+- **"My mistakes" page:** counts by topic and misconception; each mistake with its explanation and next review date; paging; a Fixed tab.
+- **Progress page:** mastery by topic, a 30-day activity chart with a table view, and the strongest skills and skills to work on.
+- **Docs:** ADR-015; migration 0004; the end-to-end test now covers "My mistakes" and the progress page.
+
+### Fixed
+- Token times are now judged by the app's clock throughout. PyJWT's own issued-at check used the system clock.
+- Mastery can no longer get stuck at 100%, where wrong answers would have stopped counting.
+- Topic accuracy now comes from the answer records, so it can't disagree with the activity chart.
+
 ### Added — Phase 3 (Question engine)
 - **Claude gateway:**
   - Structured output checked with Pydantic plus rules, retried up to twice.

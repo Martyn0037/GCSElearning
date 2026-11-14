@@ -7,6 +7,7 @@ import { GuardianHomePage } from "../pages/HomePages";
 import { LoginPage } from "../pages/LoginPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 import { LazyPracticePage } from "../practice/LazyPracticePage";
+import { LazyMistakesPage, LazyProgressPage, LazyReviewPage } from "../progress/LazyPages";
 import { SetupPage } from "../setup/SetupPage";
 import { StudentHomePage } from "../subjects/StudentHomePage";
 import { TopicMapPage } from "../subjects/TopicMapPage";
@@ -34,6 +35,24 @@ export const routes: RouteObject[] = [
     path: "/practice/:enrolmentId/:topicId",
     element: (
       <RequireRole roles={["student"]}>{(user) => <LazyPracticePage user={user} />}</RequireRole>
+    ),
+  },
+  {
+    path: "/review",
+    element: (
+      <RequireRole roles={["student"]}>{(user) => <LazyReviewPage user={user} />}</RequireRole>
+    ),
+  },
+  {
+    path: "/mistakes",
+    element: (
+      <RequireRole roles={["student"]}>{(user) => <LazyMistakesPage user={user} />}</RequireRole>
+    ),
+  },
+  {
+    path: "/progress/:enrolmentId",
+    element: (
+      <RequireRole roles={["student"]}>{(user) => <LazyProgressPage user={user} />}</RequireRole>
     ),
   },
   {

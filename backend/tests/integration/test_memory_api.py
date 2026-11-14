@@ -17,7 +17,8 @@ Covers:
 - My mistakes: list (open/fixed, cursor paging), summary by topic and
   misconception, detail; reviews summary; other students get 404
 - progress: per-topic mastery/accuracy, daily activity on London dates,
-  strongest/weakest skills; unknown subject -> 404
+  strongest/weakest skills; accuracy from answer records (regression);
+  unknown subject -> 404
 """
 
 from __future__ import annotations
@@ -370,7 +371,9 @@ async def test_progress_should_report_topics_activity_and_skills(
     )  # T3 is Higher-only
     assert len(body["daily"]) == 30
     assert body["daily"][-1] == {"date": "2026-11-14", "attempts": 2, "correct": 1}
-    assert [s["ref"] for s in body["weakest"]] == ["A1"]
+    # One practised skill: it's "strongest" only, never in both lists.
+    assert [s["ref"] for s in body["strongest"]] == ["A1"]
+    assert body["weakest"] == []
 
 
 async def test_progress_for_unknown_subject_should_404(
@@ -379,3 +382,23 @@ async def test_progress_for_unknown_subject_should_404(
     response = await client.get(f"/api/v1/me/subjects/{uuid.uuid4()}/progress")
 
     assert response.status_code == 404
+
+
+async def test_progress_accuracy_should_come_from_answers_not_counters(
+    client: httpx.AsyncClient, session: AsyncSession, setup: Setup
+) -> None:
+    # Regression: answers given before the `correct` counter existed showed 0%.
+    for _ in range(2):
+        await create_question(session, setup.a1, tier="foundation")
+    item = (await _next(client, setup)).json()
+    await _answer(client, item["id"], "C")
+    await _wrong(client, setup)
+    progress = await session.get(ObjectiveProgress, (setup.student_id, setup.a1))
+    assert progress is not None
+    progress.correct = 0  # as if the counter had missed the right answer
+    await session.commit()
+
+    body = (await client.get(f"/api/v1/me/subjects/{setup.enrolment_id}/progress")).json()
+
+    algebra = next(t for t in body["topics"] if t["title"] == "Algebra")
+    assert (algebra["attempts"], algebra["accuracy"]) == (2, 0.5)

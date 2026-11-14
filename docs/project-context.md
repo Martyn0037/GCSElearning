@@ -62,7 +62,7 @@ references. Anything unclear is marked `TODO`; nothing is invented.
 1. Foundations ✅
 2. Curriculum ✅
 3. Question engine ✅
-4. Memory and mistakes
+4. Memory and mistakes ✅
 5. Gamification
 6. Extended answers and tutor chat
 7. Guardian and admin tools

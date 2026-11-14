@@ -2,7 +2,8 @@
 /**
  * End-to-end: the brief's core flow against the real stack.
  * login -> open a topic -> answer -> "I'm stuck" -> hint -> wrong answer ->
- * see the correct answer and worked solution -> next question.
+ * see the correct answer and worked solution -> next question -> the mistake
+ * is on "My mistakes" -> the progress page renders.
  *
  * Needs the E2E fixture questions (app.cli.seed_test_questions for 1MA1 N4),
  * Maths on the student's subjects, and topic 1 covered (01-subjects.spec does that).
@@ -12,6 +13,11 @@ import { expect, test } from "@playwright/test";
 import { accounts, signIn } from "./accounts";
 
 test("student answers, asks for a hint, gets one wrong and moves on", async ({ page }) => {
+  const problems: string[] = [];
+  page.on("console", (m) => {
+    // A 401 for /users/me before signing in is expected.
+    if (m.type() === "error" && !m.text().includes("401")) problems.push(m.text());
+  });
   await signIn(page, accounts.student());
 
   // Make sure Maths is chosen (re-runnable), then open its topic map.
@@ -45,4 +51,18 @@ test("student answers, asks for a hint, gets one wrong and moves on", async ({ p
   // Next question.
   await page.getByRole("button", { name: "Next question" }).click();
   await expect(page.getByText(/^E2E: Write down/)).toBeVisible();
+
+  // The mistake is waiting on "My mistakes", with a review date.
+  await page.goto("/mistakes");
+  await expect(page.getByRole("region", { name: "Mistakes by topic" })).toContainText("Number");
+  await expect(page.getByText(/Back for review on/).first()).toBeVisible();
+
+  // Progress page renders its chart without errors.
+  await page.goto("/");
+  await page.getByRole("link", { name: /Mathematics/ }).click();
+  await page.getByRole("link", { name: "Progress" }).click();
+  await expect(page.getByRole("progressbar", { name: "Number mastery" })).toBeVisible();
+  await expect(page.getByText(/answers in the last 30 days/)).toBeVisible();
+
+  expect(problems).toEqual([]); // includes CSP violations
 });

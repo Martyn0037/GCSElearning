@@ -38,6 +38,19 @@ HISTORY_DAYS = 30
 STAT_LIMIT = 3
 
 
+def split_skills(stats: list[ObjectiveStat]) -> tuple[list[ObjectiveStat], list[ObjectiveStat]]:
+    """Pick the strongest and weakest practised skills (up to 3 each, never overlapping).
+
+    With few skills, at most half go to "to work on"; the rest are "strongest".
+
+    Returns:
+        (strongest, best first), (weakest, weakest first).
+    """
+    ranked = sorted(stats, key=lambda s: s.mastery)
+    weak_count = min(STAT_LIMIT, len(ranked) // 2)
+    return list(reversed(ranked[weak_count:]))[:STAT_LIMIT], ranked[:weak_count]
+
+
 def _mistake_select() -> Select[Mistake, Question, str, Topic, str]:
     return (
         select(Mistake, Question, LearningObjective.ref, Topic, Subject.name)
@@ -241,7 +254,6 @@ async def progress(
     ).all()
     topics: dict[uuid.UUID, TopicProgress] = {}
     mastery_sums: dict[uuid.UUID, float] = defaultdict(float)
-    correct_counts: dict[uuid.UUID, int] = defaultdict(int)
     stats: list[ObjectiveStat] = []
     for topic, objective, prog in rows:
         wording = objective.text_for(enrolment.tier)
@@ -264,17 +276,38 @@ async def progress(
         mastery_sums[topic.id] += prog.mastery if prog else P_INIT
         if prog and prog.attempts:
             entry.objectives_practised += 1
-            entry.attempts += prog.attempts
-            correct_counts[topic.id] += prog.correct
             stats.append(
                 ObjectiveStat(
                     ref=objective.ref, text=wording, mastery=prog.mastery, attempts=prog.attempts
                 )
             )
+    # Attempts and accuracy come from the answer records themselves (the
+    # source of truth), so they always agree with the activity chart.
+    answered = (
+        await session.execute(
+            select(
+                Subtopic.topic_id,
+                func.count(),
+                func.sum(case((PracticeItem.correct.is_(True), 1), else_=0)),
+            )
+            .select_from(PracticeItem)
+            .join(Question, Question.id == PracticeItem.question_id)
+            .join(LearningObjective, LearningObjective.id == Question.objective_id)
+            .join(Subtopic, Subtopic.id == LearningObjective.subtopic_id)
+            .where(
+                PracticeItem.user_id == student_id,
+                PracticeItem.enrolment_id == enrolment_id,
+                PracticeItem.answered_at.is_not(None),
+            )
+            .group_by(Subtopic.topic_id)
+        )
+    ).all()
+    for topic_id, attempts, correct in answered:
+        if topic_id in topics:
+            topics[topic_id].attempts = attempts
+            topics[topic_id].accuracy = round(int(correct or 0) / attempts, 3)
     for topic_id, entry in topics.items():
         entry.mastery = round(mastery_sums[topic_id] / entry.objectives_total, 3)
-        if entry.attempts:
-            entry.accuracy = round(correct_counts[topic_id] / entry.attempts, 3)
 
     since = london_today(now) - timedelta(days=HISTORY_DAYS - 1)
     local_day = cast(func.timezone(LONDON.key, PracticeItem.answered_at), Date)
@@ -301,12 +334,12 @@ async def progress(
         )
         for day in (since + timedelta(days=i) for i in range(HISTORY_DAYS))
     ]
-    ranked = sorted(stats, key=lambda s: s.mastery)
+    strongest, weakest = split_skills(stats)
     return ProgressOut(
         enrolment_id=enrolment.id,
         subject_name=subject_name or "",
         topics=list(topics.values()),
         daily=daily,
-        strongest=list(reversed(ranked[-STAT_LIMIT:])) if ranked else [],
-        weakest=ranked[:STAT_LIMIT],
+        strongest=strongest,
+        weakest=weakest,
     )

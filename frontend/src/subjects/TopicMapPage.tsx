@@ -29,7 +29,15 @@ export function TopicMapPage({ user }: { user: UserOut }) {
       )}
       {map.isSuccess && (
         <>
-          <h1 className="mt-2 text-2xl font-bold text-slate-900">{map.data.subjectName}</h1>
+          <div className="mt-2 flex items-baseline justify-between gap-3">
+            <h1 className="text-2xl font-bold text-slate-900">{map.data.subjectName}</h1>
+            <Link
+              to={`/progress/${map.data.enrolmentId}`}
+              className="inline-flex min-h-11 items-center text-brand-700 underline"
+            >
+              Progress
+            </Link>
+          </div>
           <p className="mb-4 text-sm text-slate-600">
             {map.data.specification.code} · {map.data.specification.version}
             {map.data.tier ? ` · ${map.data.tier === "higher" ? "Higher" : "Foundation"} tier` : ""}

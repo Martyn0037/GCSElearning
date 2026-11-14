@@ -1,19 +1,31 @@
 // frontend/src/subjects/StudentHomePage.tsx
 import { Link, Navigate } from "react-router";
 
-import { useGetMySubjects } from "../api/generated/endpoints";
+import { useGetMySubjects, useMyReviewSummary } from "../api/generated/endpoints";
 import type { EnrolmentOut, UserOut } from "../api/generated/model";
 import { AppShell } from "../components/AppShell";
 
 /** Student home: their subjects. Sends first-time students to setup. */
 export function StudentHomePage({ user }: { user: UserOut }) {
   const mine = useGetMySubjects({ query: { enabled: user.setupCompleted } });
+  const reviews = useMyReviewSummary({ query: { enabled: user.setupCompleted } });
 
   if (!user.setupCompleted) return <Navigate to="/setup" replace />;
 
   return (
     <AppShell user={user}>
       <h1 className="text-2xl font-bold text-slate-900">Hi {user.displayName}!</h1>
+      {reviews.isSuccess && reviews.data.dueToday > 0 && (
+        <Link
+          to="/review"
+          className="mt-4 flex min-h-16 items-center justify-between rounded-xl bg-brand-700 p-4 text-lg font-semibold text-white hover:bg-brand-800"
+        >
+          <span>
+            Review {reviews.data.dueToday} {reviews.data.dueToday === 1 ? "mistake" : "mistakes"}
+          </span>
+          <span aria-hidden="true">›</span>
+        </Link>
+      )}
       <h2 className="mt-6 mb-2 text-lg font-semibold text-slate-800">Your subjects</h2>
       {mine.isPending && <p role="status">Loading…</p>}
       {mine.isError && <p role="alert">Couldn&apos;t load your subjects. Please refresh.</p>}
@@ -26,12 +38,20 @@ export function StudentHomePage({ user }: { user: UserOut }) {
           ))}
         </ul>
       )}
-      <Link
-        to="/setup"
-        className="mt-6 inline-flex min-h-11 items-center text-brand-700 underline underline-offset-4"
-      >
-        Change my subjects
-      </Link>
+      <div className="mt-6 flex flex-wrap gap-x-6">
+        <Link
+          to="/mistakes"
+          className="inline-flex min-h-11 items-center text-brand-700 underline underline-offset-4"
+        >
+          My mistakes
+        </Link>
+        <Link
+          to="/setup"
+          className="inline-flex min-h-11 items-center text-brand-700 underline underline-offset-4"
+        >
+          Change my subjects
+        </Link>
+      </div>
     </AppShell>
   );
 }

@@ -8,6 +8,7 @@ Covers:
 - reviews: first review tomorrow; right -> next interval; right twice in a
   row -> resolved; wrong -> back to 1 day; the last interval repeats;
   London calendar days across midnight UTC and the clocks changing; bad config
+- strongest/weakest skill lists never overlap, whatever the count
 - explanations: student text sanitised (angle brackets, control chars,
   length, blank) and delimited; prompt carries no personal data; output
   rules; misconception labels normalised
@@ -27,6 +28,8 @@ from app.practice.explain import (
     normalise_tag,
     sanitise_student_answer,
 )
+from app.practice.insight_schemas import ObjectiveStat
+from app.practice.insights import split_skills
 from app.practice.ladder import Outcome
 from app.practice.mastery import P_CEIL, P_FLOOR, P_INIT, P_LEARN, update
 from app.practice.review import FixedIntervalScheduler, ReviewState, london_today
@@ -171,3 +174,16 @@ def test_check_explanation(explanation: str, tag: str, problem: str | None) -> N
 
 def test_normalise_tag() -> None:
     assert normalise_tag("  Sign Error   Expanding Brackets. ") == "sign error expanding brackets"
+
+
+@pytest.mark.parametrize(
+    ("count", "strong", "weak"),
+    [(0, [], []), (1, [0], []), (2, [1], [0]), (5, [4, 3, 2], [0, 1]), (9, [8, 7, 6], [0, 1, 2])],
+)
+def test_split_skills_should_never_overlap(count: int, strong: list[int], weak: list[int]) -> None:
+    stats = [ObjectiveStat(ref=str(i), text="t", mastery=i / 10, attempts=1) for i in range(count)]
+
+    strongest, weakest = split_skills(stats)
+
+    assert [int(s.ref) for s in strongest] == strong
+    assert [int(s.ref) for s in weakest] == weak

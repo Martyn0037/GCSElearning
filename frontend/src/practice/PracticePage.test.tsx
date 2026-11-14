@@ -43,6 +43,7 @@ const MCQ: PracticeItemOut = {
   objectiveRef: "N4",
   hints: [],
   hintsRemaining: 4,
+  review: false,
 };
 
 const NUMERIC: PracticeItemOut = {
@@ -63,6 +64,9 @@ function result(overrides: Partial<AnswerResultOut> = {}): AnswerResultOut {
     workedSolution: "Common factors are 1, 2, 3, 6.",
     levelBefore: 1,
     levelAfter: 1,
+    mistakeId: null,
+    review: false,
+    mistakeResolved: false,
     ...overrides,
   };
 }

@@ -292,3 +292,30 @@ curriculum content comes only from the exam board's spec, never from model knowl
 - Two model calls per question roughly doubles generation cost, but on Haiku 5.5 it's around a tenth of a penny per question.
 - A strict verifier rejects some good questions, so the bank fills more slowly, which pre-generation hides.
 - MathML rendering is slightly less polished than KaTeX's HTML mode.
+
+---
+
+## ADR-015 — Mistakes, explanations and review
+
+**Status:** Accepted (2026-11-14). Implemented in Phase 4.
+
+**Decision.**
+- **One `mistakes` row per open student-and-question pair** (a partial unique index).
+  - A wrong or full-solution answer opens one.
+  - Missing the same question again re-opens it with a fresh schedule rather than duplicating it.
+  - The review schedule is stored on the mistake, because each mistake has exactly one schedule. That replaces the separate `review_schedule` table in the brief's data model.
+- **Reviews** use the `ReviewScheduler` interface (ADR-006): 1, 3, 7 and 14 London calendar days, fixed after two right in a row, back to tomorrow when wrong.
+  - A review re-asks the same question.
+  - Review answers update mastery but not the difficulty ladder.
+- **"Where it went wrong"** explanations are written by Sonnet in a background job, so marking stays instant. The screen checks for the explanation every 2 seconds and stops after 20 checks.
+  - Prompt-injection hygiene: the student's answer (at most 200 characters, angle brackets and control characters stripped) is the only student text sent. It's placed inside `<student_answer>` tags, which the system prompt says are data, never instructions.
+  - No name, username or other personal data is included.
+  - The output is checked for length and markup before it's shown.
+  - Misconception labels are lower-cased and the student's earlier labels are offered for reuse, so grouping stays consistent.
+  - Without Claude, the status is `unavailable` and the worked solution still shows.
+- **BKT mastery** is stored on `objective_progress` (one row per student and objective, so no separate `mastery` table). It's kept between 0.01 and 0.99; at exactly 0 or 1 the formula can never move again.
+- **Progress** figures (attempts, accuracy, daily activity) come from the answer records themselves, so the charts always agree with each other.
+- **Charts:**
+  - Topic mastery is shown as accessible HTML progress bars.
+  - Daily activity is stacked columns (right / not right) in palette slots 1 and 2. The pair is validated for colour-blind separation, normal-vision separation and contrast. There's one y-axis, a legend, a hover tooltip, a table view, and no animation.
+  - Recharts loads only on the progress page.
