@@ -3,6 +3,8 @@ import type { SyntheticEvent } from "react";
 import { useId, useState } from "react";
 
 import type { PracticeItemOut } from "../api/generated/model";
+import { answerAsLatex } from "./answerPreview";
+import { MathKeypad } from "./MathKeypad";
 import { MathText } from "./MathText";
 
 interface QuestionCardProps {
@@ -17,7 +19,14 @@ const inputClass =
 /** One question with the right answer control for its type. */
 export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) {
   const [answer, setAnswer] = useState("");
-  const ids = { answer: useId(), stem: useId() };
+  // Phones: the on-screen keys replace the system keyboard unless asked for.
+  const [useKeyboard, setUseKeyboard] = useState(false);
+  const ids = { answer: useId(), stem: useId(), hint: useId() };
+  // Number answers always get the keys; short answers only on maths questions.
+  const showKeys =
+    item.questionType === "numeric" ||
+    (item.questionType === "short_text" && item.stem.includes("$"));
+  const preview = showKeys ? answerAsLatex(answer) : null;
 
   function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -79,13 +88,52 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
               autoComplete="off"
               autoCapitalize="none"
               spellCheck={false}
-              inputMode={item.questionType === "numeric" ? "decimal" : "text"}
+              inputMode={
+                showKeys && !useKeyboard
+                  ? "none"
+                  : item.questionType === "numeric"
+                    ? "decimal"
+                    : "text"
+              }
+              aria-describedby={showKeys ? ids.hint : undefined}
               className={inputClass}
             />
             {item.unit && <span className="text-lg text-slate-700">{item.unit}</span>}
           </div>
-          {item.questionType === "numeric" && (
-            <p className="mt-1 text-sm text-slate-600">You can type a fraction like 7/2.</p>
+          {preview && (
+            <p className="mt-2 text-lg text-slate-800" aria-live="polite">
+              Looks like: <MathText text={`$${preview}$`} />
+            </p>
+          )}
+          {showKeys && (
+            <>
+              <p id={ids.hint} className="mt-1 text-sm text-slate-600">
+                Tap the keys or type. For a fraction, use a/b: 3 a/b 5 gives 3/5.
+              </p>
+              <div className="mt-3">
+                <MathKeypad
+                  extraKeys={item.questionType === "short_text"}
+                  onInsert={(text) => {
+                    setAnswer((current) => (current + text).slice(0, 200));
+                  }}
+                  onBackspace={() => {
+                    setAnswer((current) => current.slice(0, -1));
+                  }}
+                  onClear={() => {
+                    setAnswer("");
+                  }}
+                />
+              </div>
+              <button
+                type="button"
+                className="mt-2 text-sm font-medium text-brand-700 underline"
+                onClick={() => {
+                  setUseKeyboard((current) => !current);
+                }}
+              >
+                {useKeyboard ? "Use the on-screen keys only" : "Use keyboard instead"}
+              </button>
+            </>
           )}
         </div>
       )}
