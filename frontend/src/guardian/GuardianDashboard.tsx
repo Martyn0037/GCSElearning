@@ -188,7 +188,10 @@ function WeekDetails({ week }: { week: WeeklySummaryOut }) {
         <Tile label="Right" value={accuracy} />
         <Tile label="Time practising" value={`${String(week.minutes)} min`} />
         <Tile label="XP earned" value={String(week.xp)} />
-        <Tile label="Streak" value={`${String(week.streakDays)} days`} />
+        <Tile
+          label="Streak"
+          value={`${String(week.streakDays)} ${week.streakDays === 1 ? "day" : "days"}`}
+        />
         <Tile label="Mistakes fixed" value={String(week.mistakesFixed)} />
       </div>
       <ol
