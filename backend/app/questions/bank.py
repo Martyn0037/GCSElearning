@@ -8,17 +8,19 @@ can currently practise (at their level and the next), so they rarely wait.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.jobs.queue import enqueue
+from app.jobs.queue import enqueue, expedite
 from app.models.curriculum import LearningObjective, Subtopic, Tier, Topic
 from app.models.enrolment import StudentSubject
 from app.models.question import ObjectiveProgress, PracticeItem, Question, QuestionStatus
 
 GENERATE_JOB = "generate_question"
+# How far ahead of routine jobs an urgent one is placed in the queue.
+URGENT_HEAD_START = timedelta(hours=1)
 
 
 def _tier_filter(tier: Tier | None):  # type: ignore[no-untyped-def]
@@ -93,9 +95,28 @@ async def request_generation(
     tier: Tier | None,
     difficulty: int,
     now: datetime,
+    *,
+    urgent: bool = False,
 ) -> bool:
-    """Queue a background generation job (no-op if one is already pending). Caller commits."""
-    return await enqueue(
+    """Queue a background generation job (no-op if one is already pending). Caller commits.
+
+    Args:
+        session: Database session.
+        objective_id: The skill to write a question for.
+        tier: The student's tier (``None`` for untiered subjects).
+        difficulty: Level 1-5.
+        now: Current time.
+        urgent: The student is likely to need this next, so it jumps the queue
+            (an already-pending routine job for the same thing is moved forward).
+
+    Returns:
+        Whether a new job was added.
+    """
+    key = generation_dedupe_key(objective_id, tier, difficulty)
+    # The queue runs jobs in ``run_after`` order, so an earlier time jumps ahead
+    # of routine work (top-ups, extra levels) without a priority column.
+    run_after = now - URGENT_HEAD_START if urgent else now
+    added = await enqueue(
         session,
         GENERATE_JOB,
         {
@@ -104,8 +125,12 @@ async def request_generation(
             "difficulty": difficulty,
         },
         now,
-        dedupe_key=generation_dedupe_key(objective_id, tier, difficulty),
+        dedupe_key=key,
+        run_after=run_after,
     )
+    if not added and urgent:
+        await expedite(session, key, run_after)
+    return added
 
 
 async def plan_top_up(session: AsyncSession, now: datetime, target: int) -> int:

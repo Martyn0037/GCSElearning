@@ -27,7 +27,7 @@ from app.gamification.rewards import Rewards
 from app.gamification.schemas import RewardsOut
 from app.gamification.xp import level_for, xp_for_answer, xp_for_marks
 from app.jobs.queue import enqueue
-from app.models.curriculum import LearningObjective, Subtopic
+from app.models.curriculum import LearningObjective, Subtopic, Tier
 from app.models.enrolment import StudentSubject
 from app.models.gamification import Challenge, ChallengeKind, XpSource
 from app.models.question import (
@@ -67,6 +67,13 @@ logger = logging.getLogger(__name__)
 # How long a student waits for an on-the-spot question before we give up and
 # let the worker finish it in the background.
 SYNC_GENERATION_TIMEOUT_SECONDS = 25.0
+# When the best skill has no question ready, look this far down the list for a
+# skill at the same level that does, rather than make the student wait while
+# one is written.
+READY_LOOKAHEAD = 5
+# Skills to start writing questions for as soon as one is served, so the next
+# "Next question" finds one waiting.
+PREFETCH_SKILLS = 2
 EXPLAIN_JOB = "explain_mistake"
 
 
@@ -171,22 +178,65 @@ class PracticeService:
         candidates = await self._objectives_by_priority(enrolment, topic_id)
         if not candidates:
             raise ConflictError("This topic has no skills on your tier.", code="TOPIC_EMPTY")
-        for objective_id, level in candidates:
-            question = await pick_question(
-                self._session, student_id, objective_id, enrolment.tier, level
+        served = await self._ready_or_generated(student_id, enrolment, candidates)
+        if served is not None:
+            question, level = served
+            # The next few in line are what the next request will want.
+            upcoming = [c for c in candidates if c[0] != question.objective_id][:PREFETCH_SKILLS]
+            return await self._serve(
+                student_id, enrolment.id, question, level, upcoming=upcoming, tier=enrolment.tier
             )
-            if question is None and objective_id == candidates[0][0]:
-                question = await self._generate_now(objective_id, enrolment, level)
-            if question is not None:
-                return await self._serve(student_id, enrolment.id, question, level)
 
-        for objective_id, level in candidates:
-            await request_generation(self._session, objective_id, enrolment.tier, level, self._now)
+        # Nothing ready anywhere: get the first few written first. Not every
+        # skill in the topic, which could be a hundred jobs for a big topic.
+        for objective_id, level in candidates[: 1 + PREFETCH_SKILLS]:
+            await request_generation(
+                self._session, objective_id, enrolment.tier, level, self._now, urgent=True
+            )
         await self._session.commit()
         raise ConflictError(
             "We're preparing questions for this topic. Try again in a minute.",
             code="QUESTIONS_PREPARING",
         )
+
+    async def _ready_or_generated(
+        self,
+        student_id: uuid.UUID,
+        enrolment: StudentSubject,
+        candidates: list[tuple[uuid.UUID, int]],
+    ) -> tuple[Question, int] | None:
+        """A question for the best skill that can be served now.
+
+        In order: a banked question for the top skill; a banked question for one
+        of the next few skills at the same level (the top skill is then queued
+        urgently, so it's ready soon); a question written now for the top skill;
+        finally a banked question for any skill.
+        """
+        top_id, top_level = candidates[0]
+        question = await pick_question(self._session, student_id, top_id, enrolment.tier, top_level)
+        if question is not None:
+            return question, top_level
+        for objective_id, level in candidates[1 : 1 + READY_LOOKAHEAD]:
+            if level != top_level:
+                break
+            question = await pick_question(
+                self._session, student_id, objective_id, enrolment.tier, level
+            )
+            if question is not None:
+                await request_generation(
+                    self._session, top_id, enrolment.tier, top_level, self._now, urgent=True
+                )
+                return question, level
+        question = await self._generate_now(top_id, enrolment, top_level)
+        if question is not None:
+            return question, top_level
+        for objective_id, level in candidates[1 + READY_LOOKAHEAD :]:
+            question = await pick_question(
+                self._session, student_id, objective_id, enrolment.tier, level
+            )
+            if question is not None:
+                return question, level
+        return None
 
     async def _objectives_by_priority(
         self, enrolment: StudentSubject, topic_id: uuid.UUID
@@ -236,7 +286,14 @@ class PracticeService:
             return None
 
     async def _serve(
-        self, student_id: uuid.UUID, enrolment_id: uuid.UUID, question: Question, level: int
+        self,
+        student_id: uuid.UUID,
+        enrolment_id: uuid.UUID,
+        question: Question,
+        level: int,
+        *,
+        upcoming: list[tuple[uuid.UUID, int]] | None = None,
+        tier: Tier | None = None,
     ) -> PracticeItemOut:
         item = PracticeItem(
             id=uuid.uuid4(),
@@ -248,7 +305,12 @@ class PracticeService:
             hints_revealed=0,
         )
         self._session.add(item)
-        # Keep the bank ahead of the student for this objective.
+        # Get the skills likely to come next written first (they jump the queue).
+        for objective_id, upcoming_level in upcoming or []:
+            await request_generation(
+                self._session, objective_id, tier, upcoming_level, self._now, urgent=True
+            )
+        # Keep the bank ahead of the student for this objective ("Try a similar one").
         await request_generation(
             self._session, question.objective_id, question.tier, level, self._now
         )

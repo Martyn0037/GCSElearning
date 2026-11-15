@@ -109,6 +109,8 @@ class Settings(BaseSettings):
     question_strict_mode: bool = False  # True: new questions wait for admin approval
     question_bank_target: int = Field(default=3, ge=1, le=20)  # unseen per objective+level
     worker_poll_seconds: float = Field(default=3.0, gt=0)
+    # Jobs the worker runs at once (mostly waiting on Claude, so cheap).
+    worker_concurrency: int = Field(default=3, ge=1, le=8)
 
     @field_validator("anthropic_api_key", mode="before")
     @classmethod

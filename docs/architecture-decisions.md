@@ -537,3 +537,21 @@ curriculum content comes only from the exam board's spec, never from model knowl
 **Trade-offs.**
 - Remapping the colour scale is global: a new component that puts white text on a light tint would break in dark mode. The rule is to use the shared Button variants for anything with white text.
 - Topic sections are folded away by default to keep the topic map short, at the cost of one extra tap to see them.
+
+## ADR-023 — Questions ready before they're needed
+
+**Status:** Accepted (2026-11-15).
+
+**Context.** Practice moves to the least-practised skill after every answer. In a new subject (Spanish was the first noticed) that skill usually had no question ready, so "Next question" waited for one to be written and checked: two Claude calls in a row, up to the 25-second limit. Meanwhile the worker spent its time on more questions for the skill just finished, one job at a time.
+
+**Decision.**
+- **Serve what's ready.** If the top skill has nothing banked, a banked question for one of the next five skills *at the same level* is served instead. The top skill is then written in the background with priority. A question is written on the spot only when none of those are ready.
+- **Write ahead.** Serving a question queues the next two skills in line with priority. Priority is an earlier `run_after` (one hour back), so no schema change is needed. A routine job that becomes urgent is moved forward (`queue.expedite`).
+- **Bounded fallback.** With nothing ready anywhere, only the first three skills are queued, not every skill in the topic.
+- **Worker lanes.** The worker runs `WORKER_CONCURRENCY` jobs at once (default 3, at most 8). Claiming uses `SKIP LOCKED`, so lanes never share a job.
+- **Background fetch in the app.** Once an answer is marked, the app asks for the next question while the student reads the result, so "Next question" usually shows it at once. The server keeps it as the open item, so nothing is lost if the student leaves. A failed background fetch just means fetching on click.
+
+**Trade-offs.**
+- The order of skills bends slightly: a ready skill at the same level can come before a slightly better one. The bend is never to a different level.
+- A prepared question's "served" time starts while the result is still on screen, so time-on-question figures read a little high. They're already capped at 10 minutes per question.
+- More questions are written ahead, so a few may go unused if he stops. Each is small, and the AI budget caps still apply.

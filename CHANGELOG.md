@@ -6,6 +6,13 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed — Faster "Next question" (ADR-023)
+- A ready question for a nearby skill at the same level is served instead of waiting for one to be written.
+- Serving a question starts writing the next two skills straight away, ahead of routine work.
+- The background worker writes up to 3 questions at once (`WORKER_CONCURRENCY`).
+- The app fetches the next question while the result is being read.
+- With nothing ready, only the first few skills in a topic are queued, not all of them.
+
 ### Added — Student details
 - **Admin → Students → Edit details:** change a student's name and/or username. Progress and sessions are kept. A taken username is refused (409 `USERNAME_TAKEN`, also when two saves race). Changes are audited.
 - **`PATCH /api/v1/admin/students/{id}`** (admin only), with the same rules enforced on both sides: name 1–40 characters with no control characters; username 3–32 lower-case letters, digits, dots, hyphens or underscores, never email-like.

@@ -25,6 +25,7 @@ import asyncio
 import os
 import signal
 import uuid
+from datetime import timedelta
 from decimal import Decimal
 from pathlib import Path
 
@@ -46,6 +47,7 @@ from app.models.enrolment import StudentSubject
 from app.models.ops import AiUsage, Job, JobStatus, UsageStatus
 from app.models.question import Hint, ObjectiveProgress, Question, QuestionStatus, QuestionType
 from app.models.user import Role
+from app.questions.bank import request_generation
 from app.questions.generator import TYPES_BY_LEVEL, ObjectiveNotAvailableError, QuestionGenerator
 from app.questions.llm_schemas import GeneratedQuestion, Verification
 from app.worker import Scheduler, run_once
@@ -632,3 +634,48 @@ async def test_top_up_should_do_nothing_without_api_key(
         )
         == 0
     )
+
+
+async def test_urgent_generation_should_jump_ahead_of_routine_jobs(
+    session: AsyncSession, clock: FakeClock
+) -> None:
+    # Arrange: two routine jobs queued, then one of them becomes urgent.
+    await import_fixture_curriculum(session)
+    a1, t1 = await _objective(session, "A1"), await _objective(session, "T1")
+    now = clock.now()
+    assert await request_generation(session, a1, Tier.FOUNDATION, 1, now)
+    assert await request_generation(session, t1, Tier.FOUNDATION, 1, now)
+    await session.commit()
+
+    # Act: asking again urgently moves the existing job; no duplicate is added.
+    added = await request_generation(session, t1, Tier.FOUNDATION, 1, now, urgent=True)
+    await session.commit()
+
+    # Assert
+    assert added is False
+    claimed = await queue.claim(session, now)
+    assert claimed is not None
+    assert claimed.dedupe_key == f"gen:{t1}:foundation:1"
+    assert await session.scalar(select(func.count()).select_from(Job)) == 2
+
+
+async def test_expedite_should_leave_running_and_sooner_jobs_alone(
+    session: AsyncSession, clock: FakeClock
+) -> None:
+    # Arrange: "soon" is claimed and running; "later" is waiting.
+    now = clock.now()
+    await queue.enqueue(session, "x", {}, now, dedupe_key="soon", run_after=now - timedelta(days=1))
+    await session.commit()
+    assert (await queue.claim(session, now)) is not None
+    await queue.enqueue(session, "x", {}, now, dedupe_key="later")
+    await session.commit()
+
+    # Act
+    await queue.expedite(session, "soon", now - timedelta(minutes=5))
+    await queue.expedite(session, "later", now - timedelta(minutes=5))
+    await session.commit()
+
+    # Assert
+    rows = {j.dedupe_key: j for j in (await session.scalars(select(Job))).all()}
+    assert rows["soon"].run_after == now - timedelta(days=1)  # running: untouched
+    assert rows["later"].run_after == now - timedelta(minutes=5)

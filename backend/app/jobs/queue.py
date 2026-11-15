@@ -67,6 +67,23 @@ async def enqueue(
     return (await session.execute(stmt)).scalar_one_or_none() is not None
 
 
+async def expedite(session: AsyncSession, dedupe_key: str, run_after: datetime) -> None:
+    """Move a waiting job forward to ``run_after`` if that's sooner (caller commits).
+
+    Used when a job that was queued as routine becomes urgent (the student is
+    about to need its result). Running jobs are left alone.
+    """
+    await session.execute(
+        update(Job)
+        .where(
+            Job.dedupe_key == dedupe_key,
+            Job.status == JobStatus.QUEUED,
+            Job.run_after > run_after,
+        )
+        .values(run_after=run_after)
+    )
+
+
 async def claim(session: AsyncSession, now: datetime) -> Job | None:
     """Take the next due job and mark it running (commits).
 

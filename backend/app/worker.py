@@ -66,6 +66,25 @@ class Scheduler:
         return kinds
 
 
+async def _lane(
+    ctx: JobContext, scheduler: Scheduler, stop: asyncio.Event, poll_seconds: float
+) -> None:
+    """One job at a time until stopped. Several lanes run side by side: jobs are
+    claimed with ``SKIP LOCKED``, so two lanes never take the same job, and
+    writing a question (two Claude calls) doesn't hold up the next one."""
+    while not stop.is_set():
+        # Tiny tmpfs write; not worth a thread hop. Any live lane keeps it fresh.
+        HEARTBEAT_FILE.touch()  # noqa: ASYNC240
+        try:
+            worked = await run_once(ctx, scheduler)
+        except Exception:
+            logger.exception("worker_loop_error")
+            worked = False
+        if not worked:
+            with contextlib.suppress(TimeoutError):
+                await asyncio.wait_for(stop.wait(), timeout=poll_seconds)
+
+
 async def run_once(ctx: JobContext, scheduler: Scheduler) -> bool:
     """Schedule due periodic jobs, then run at most one queued job.
 
@@ -136,20 +155,21 @@ async def main(settings: Settings | None = None, clock: Clock | None = None) -> 
     for sig in (signal.SIGTERM, signal.SIGINT):
         loop.add_signal_handler(sig, stop.set)
 
-    logger.info("worker_started", extra={"claude": settings.anthropic_api_key is not None})
+    logger.info(
+        "worker_started",
+        extra={
+            "claude": settings.anthropic_api_key is not None,
+            "concurrency": settings.worker_concurrency,
+        },
+    )
     scheduler = Scheduler()
     try:
-        while not stop.is_set():
-            # Tiny tmpfs write; not worth a thread hop.
-            HEARTBEAT_FILE.touch()  # noqa: ASYNC240
-            try:
-                worked = await run_once(ctx, scheduler)
-            except Exception:
-                logger.exception("worker_loop_error")
-                worked = False
-            if not worked:
-                with contextlib.suppress(TimeoutError):
-                    await asyncio.wait_for(stop.wait(), timeout=settings.worker_poll_seconds)
+        await asyncio.gather(
+            *(
+                _lane(ctx, scheduler, stop, settings.worker_poll_seconds)
+                for _ in range(settings.worker_concurrency)
+            )
+        )
     finally:
         for sig in (signal.SIGTERM, signal.SIGINT):
             loop.remove_signal_handler(sig)

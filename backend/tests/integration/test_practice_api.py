@@ -6,6 +6,10 @@ Covers:
   without the answer; repeating "next" returns the same open item (also when
   two requests race); generation on the spot when the bank is empty; bank
   empty + no Claude -> 409 QUESTIONS_PREPARING and generation queued
+- speed: a ready question for a same-level skill further down is served
+  instead of waiting for one to be written (the top skill is queued to jump
+  the queue); serving queues the next skills ahead of routine top-ups; with
+  nothing ready only the first few skills are queued, not the whole topic
 - hints: revealed one at a time up to the full solution, then 409; not after
   answering
 - answering: correct/incorrect marking per type; same Idempotency-Key replays
@@ -194,6 +198,74 @@ async def test_empty_bank_without_claude_should_ask_to_wait_and_queue_generation
     assert error_code(response) == "QUESTIONS_PREPARING"
     keys = (await session.scalars(select(Job.dedupe_key))).all()
     assert f"gen:{setup.a1}:foundation:1" in keys
+
+
+async def _objective_id(session: AsyncSession, ref: str) -> uuid.UUID:
+    objective_id = await session.scalar(
+        select(LearningObjective.id).where(LearningObjective.ref == ref)
+    )
+    assert objective_id is not None
+    return objective_id
+
+
+async def _jobs(session: AsyncSession) -> dict[str, bool]:
+    """Generation jobs by dedupe key, with whether each jumps the queue."""
+    rows = (await session.scalars(select(Job))).all()
+    return {job.dedupe_key or "": job.run_after < job.created_at for job in rows}
+
+
+async def test_should_serve_a_ready_skill_rather_than_wait_for_one_to_be_written(
+    client: httpx.AsyncClient, session: AsyncSession, setup: Setup
+) -> None:
+    # Arrange: in Number, T1 comes first but only T2 has a question ready.
+    t1, t2 = await _objective_id(session, "T1"), await _objective_id(session, "T2")
+    await create_question(session, t2, tier="foundation", stem="Work out sqrt 49.")
+
+    # Act
+    response = await _next(client, setup, setup.number)
+
+    # Assert: served at once, and T1 is being written ahead of routine work.
+    assert response.status_code == 200
+    assert response.json()["objectiveRef"] == "T2"
+    jobs = await _jobs(session)
+    assert jobs[f"gen:{t1}:foundation:1"] is True
+
+
+async def test_serving_should_queue_the_next_skills_ahead_of_routine_top_ups(
+    client: httpx.AsyncClient, session: AsyncSession, setup: Setup
+) -> None:
+    # Arrange: T1 is first in line and has a question ready.
+    t1, t2 = await _objective_id(session, "T1"), await _objective_id(session, "T2")
+    await create_question(session, t1, tier="foundation")
+
+    # Act
+    response = await _next(client, setup, setup.number)
+
+    # Assert
+    assert response.json()["objectiveRef"] == "T1"
+    assert await _jobs(session) == {
+        f"gen:{t2}:foundation:1": True,  # next in line: jumps the queue
+        f"gen:{t1}:foundation:1": False,  # "Try a similar one": routine
+        f"gen:{t1}:foundation:2": False,  # the level above: routine
+    }
+
+
+async def test_nothing_ready_should_queue_only_the_first_few_skills(
+    client: httpx.AsyncClient,
+    session: AsyncSession,
+    setup: Setup,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Arrange: pretend the topic is bigger than the look-ahead.
+    monkeypatch.setattr("app.practice.service.PREFETCH_SKILLS", 0)
+    t1 = await _objective_id(session, "T1")
+
+    # Act
+    response = await _next(client, setup, setup.number)
+
+    # Assert
+    assert error_code(response) == "QUESTIONS_PREPARING"
+    assert await _jobs(session) == {f"gen:{t1}:foundation:1": True}
 
 
 async def test_hints_should_reveal_one_at_a_time_up_to_four(

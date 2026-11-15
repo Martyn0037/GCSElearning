@@ -10,6 +10,9 @@
  * - "This looks wrong" sends the report and loads the next question
  * - friendly message for QUESTIONS_PREPARING (with Try again)
  * - every topic on the topic map links to practice (nothing is locked)
+ * - the next question is fetched in the background once an answer is marked,
+ *   so "Next question" shows it without another request; a failed background
+ *   fetch falls back to fetching on click
  */
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -207,6 +210,52 @@ describe("PracticePage", () => {
     await user.click(screen.getByRole("button", { name: "Try again" }));
 
     expect(await screen.findByText(/Write down the HCF/)).toBeInTheDocument();
+  });
+});
+
+describe("background fetch of the next question", () => {
+  it("should fetch it while the result is read, and show it without another request", async () => {
+    // Arrange
+    const fetchMock = api({
+      [NEXT]: [() => json(MCQ), () => json(NUMERIC)],
+      [`POST /api/v1/practice/items/${ITEM}/answer`]: () => json(result()),
+    });
+    renderApp(practisePath);
+    const user = userEvent.setup();
+    const nextCalls = () =>
+      fetchMock.mock.calls.filter(([url]) => url === NEXT.replace("POST ", "")).length;
+
+    // Act
+    await user.click(await screen.findByRole("radio", { name: /C\s*6/ }));
+    await user.click(screen.getByRole("button", { name: "Check answer" }));
+    await screen.findByText("Correct!");
+
+    // Assert: already requested before "Next question" is pressed...
+    await expect.poll(nextCalls).toBe(2);
+    await user.click(screen.getByRole("button", { name: "Next question" }));
+    expect(await screen.findByText("Work out the length.")).toBeInTheDocument();
+    // ...and pressing it made no further request.
+    expect(nextCalls()).toBe(2);
+  });
+
+  it("should fetch on click when the background fetch failed", async () => {
+    // Arrange: the background request fails; the one on click works.
+    api({
+      [NEXT]: [() => json(MCQ), () => apiError(503, "SERVICE_UNAVAILABLE"), () => json(NUMERIC)],
+      [`POST /api/v1/practice/items/${ITEM}/answer`]: () => json(result()),
+    });
+    renderApp(practisePath);
+    const user = userEvent.setup();
+
+    // Act
+    await user.click(await screen.findByRole("radio", { name: /C\s*6/ }));
+    await user.click(screen.getByRole("button", { name: "Check answer" }));
+    await screen.findByText("Correct!");
+    await user.click(screen.getByRole("button", { name: "Next question" }));
+
+    // Assert
+    expect(await screen.findByText("Work out the length.")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 });
 

@@ -49,7 +49,18 @@ interface PracticeSessionProps {
  */
 export function PracticeSession({ user, fetchNext, back, done }: PracticeSessionProps) {
   const [served, setServed] = useState<PracticeItemOut | null>(null);
-  const next = useMutation({ mutationFn: fetchNext });
+  // The next question, requested in the background while the student reads
+  // the result, so "Next question" usually needs no wait. The server keeps it
+  // as the open item, so nothing is lost if they leave instead.
+  const prefetched = useRef<Promise<PracticeItemOut | null> | null>(null);
+  const next = useMutation({
+    mutationFn: async () => {
+      const pending = prefetched.current;
+      prefetched.current = null;
+      const ready = pending ? await pending : null;
+      return ready ?? fetchNext(); // a failed prefetch just means fetching now
+    },
+  });
   const similar = useMutation({ mutationFn: (itemId: string) => similarPracticeItem(itemId) });
   const hint = useRevealHint();
   const flag = useFlagPracticeItem();
@@ -90,6 +101,7 @@ export function PracticeSession({ user, fetchNext, back, done }: PracticeSession
       {
         onSuccess: (marked) => {
           if (marked.marked === false) return; // still being marked
+          prefetched.current = fetchNext().catch(() => null);
           setTally((t) => ({
             answered: t.answered + 1,
             right: t.right + (marked.correct && !marked.assisted ? 1 : 0),
