@@ -141,8 +141,7 @@ class PracticeService:
 
         Raises:
             NotFoundError: Unknown or someone else's enrolment/topic.
-            ConflictError: ``TOPIC_LOCKED`` (not covered at school yet) or
-                ``QUESTIONS_PREPARING`` (no question available yet).
+            ConflictError: ``QUESTIONS_PREPARING`` (no question available yet).
         """
         # Lock the subject row so simultaneous "next" requests serialise and
         # the second one finds the item the first created.

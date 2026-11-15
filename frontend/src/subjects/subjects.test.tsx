@@ -3,8 +3,8 @@
  * Covers:
  * - home lists subjects: active ones link to their topic map, pending ones
  *   show "Being set up"; board and tier shown; link to change subjects
- * - topic map: spec code/version/tier header, locked vs ready topics,
- *   skill counts, the "ask your parent" hint when everything is locked
+ * - topic map: spec code/version/tier header, every topic open (no lock
+ *   labels), skill counts
  * - topic map errors: still being set up (409), not found (404)
  */
 import { screen } from "@testing-library/react";
@@ -120,30 +120,16 @@ describe("StudentHomePage", () => {
 });
 
 describe("TopicMapPage", () => {
-  it("should show the spec, ready and locked topics, and skill counts", async () => {
+  it("should show the spec, every topic open, and skill counts", async () => {
     api();
     renderApp("/subjects/00000000-0000-4000-8000-000000000008");
 
     expect(await screen.findByText("1MA1 · Issue 2 – June 2015 · Higher tier")).toBeInTheDocument();
     const number = screen.getByRole("heading", { name: "1. Number" }).closest("li");
     const algebra = screen.getByRole("heading", { name: "2. Algebra" }).closest("li");
-    expect(number).toHaveTextContent("Ready");
     expect(number).toHaveTextContent("9 skills");
-    expect(algebra).toHaveTextContent("Not covered yet");
     expect(algebra).toHaveTextContent("1 skill");
-    expect(screen.queryByText(/Ask your parent/)).not.toBeInTheDocument();
-  });
-
-  it("should explain unlocking when every topic is locked", async () => {
-    api(() =>
-      json({
-        ...MAP,
-        topics: MAP.topics.map((t) => ({ ...t, unlocked: false, taughtAtSchool: false })),
-      }),
-    );
-    renderApp("/subjects/00000000-0000-4000-8000-000000000008");
-
-    expect(await screen.findByText(/Ask your parent or carer/)).toBeInTheDocument();
+    expect(algebra).not.toHaveTextContent("Not covered yet");
   });
 
   it("should say when a subject is still being set up", async () => {

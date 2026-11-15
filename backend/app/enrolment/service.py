@@ -232,8 +232,14 @@ class EnrolmentService:
             enrolment.tier = tier
             enrolment.tier_confirmed = tier_confirmed
             enrolment.position = position
-            if enrolment.specification_id is None and subject is not None and board_id:
-                enrolment.specification_id = await self._current_spec_id(subject.id, board_id)
+            if enrolment.specification_id is None and subject is not None:
+                # Everything should be usable straight away (ADR-021): if the
+                # chosen board's spec isn't imported, use the subject's spec
+                # that is, and show its board.
+                spec = await self._spec_for(subject.id, board_id)
+                if spec is not None:
+                    enrolment.specification_id = spec.id
+                    enrolment.board_id = spec.board_id
             await self._session.flush()
             await self._replace_set_texts(enrolment, subject, choice)
             kept.add(enrolment.id)
@@ -375,7 +381,7 @@ class EnrolmentService:
                     ref=topic.ref,
                     title=topic.title,
                     taught_at_school=taught,
-                    unlocked=taught,
+                    unlocked=True,
                     subtopics=subtopics_by_topic[topic.id],
                     standing=_standing_out(standings.get(topic.id)),
                 )
@@ -633,6 +639,19 @@ class EnrolmentService:
         ]
 
     # ------------------------------------------------------------ helpers
+
+    async def _spec_for(
+        self, subject_id: uuid.UUID, board_id: uuid.UUID | None
+    ) -> Specification | None:
+        """The current spec for the subject on this board, else on any board."""
+        specs = (
+            await self._session.scalars(
+                select(Specification)
+                .where(Specification.subject_id == subject_id, Specification.is_current.is_(True))
+                .order_by(Specification.code)
+            )
+        ).all()
+        return next((s for s in specs if s.board_id == board_id), specs[0] if specs else None)
 
     async def _current_spec_id(
         self, subject_id: uuid.UUID, board_id: uuid.UUID

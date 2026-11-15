@@ -1,8 +1,8 @@
 // frontend/e2e/04-guardian-admin.spec.ts
 /**
- * End-to-end: the guardian dashboard (consent, weekly summary, export button)
+ * End-to-end: the guardian dashboard (weekly summary, export button)
  * and the admin tools (review queue, AI spend, grade boundaries), with no
- * console or security-policy errors. Re-runnable: consent may already be given.
+ * console or security-policy errors. Re-runnable.
  */
 import { expect, test } from "@playwright/test";
 
@@ -16,18 +16,13 @@ function watchConsole(page: import("@playwright/test").Page): string[] {
   return problems;
 }
 
-test("guardian sees consent, the week and their data controls", async ({ page }) => {
+test("guardian sees the week and their data controls, with no consent step", async ({ page }) => {
   const problems = watchConsole(page);
   await signIn(page, accounts.guardian());
 
   await expect(page.getByRole("heading", { name: "Progress dashboard" })).toBeVisible();
-  const agree = page.getByRole("button", { name: "I've read it and agree" });
-  const withdraw = page.getByRole("button", { name: "Withdraw consent" });
-  await expect(agree.or(withdraw)).toBeVisible(); // wait for the page to load
-  if (await agree.isVisible()) await agree.click();
-  await expect(withdraw).toBeVisible();
-
   await expect(page.getByText("Questions answered")).toBeVisible();
+  await expect(page.getByRole("button", { name: /agree/ })).toHaveCount(0);
   await expect(page.getByRole("list", { name: "Days practised" })).toBeVisible();
   await expect(page.getByRole("button", { name: "Download all data (JSON)" })).toBeVisible();
 

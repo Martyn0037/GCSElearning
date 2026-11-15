@@ -10,7 +10,7 @@ import { AppShell } from "../components/AppShell";
 import { PracticeSession } from "../practice/PracticeSession";
 
 const START_ERRORS: Record<string, string> = {
-  NOTHING_TO_PRACTISE: "There's nothing to practise yet: a topic needs to be unlocked first.",
+  NOTHING_TO_PRACTISE: "There's nothing to practise yet: choose your subjects first.",
   QUESTIONS_PREPARING: "We're preparing today's challenge. Try again in a minute.",
 };
 

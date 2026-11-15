@@ -42,9 +42,9 @@ from app.core.config import Settings
 from app.jobs import queue
 from app.jobs.handlers import JobContext
 from app.models.curriculum import LearningObjective, Tier
-from app.models.enrolment import StudentSubject, StudentTopicSetting
+from app.models.enrolment import StudentSubject
 from app.models.ops import AiUsage, Job, JobStatus, UsageStatus
-from app.models.question import Hint, Question, QuestionStatus, QuestionType
+from app.models.question import Hint, ObjectiveProgress, Question, QuestionStatus, QuestionType
 from app.models.user import Role
 from app.questions.generator import TYPES_BY_LEVEL, ObjectiveNotAvailableError, QuestionGenerator
 from app.questions.llm_schemas import GeneratedQuestion, Verification
@@ -554,13 +554,14 @@ async def test_worker_should_retry_outages_and_skip_without_key(
     assert (await _job(session, "generate_question")).status is expected
 
 
-async def test_top_up_should_queue_only_for_topics_covered_at_school(
+async def test_top_up_should_queue_only_for_objectives_the_student_has_started(
     factory: async_sessionmaker[AsyncSession],
     session: AsyncSession,
     ai_settings: Settings,
     clock: FakeClock,
 ) -> None:
-    # Arrange: a Foundation student on M1, with only topic 2 (Algebra: A1) covered.
+    # Arrange: a Foundation student on M1 who has only started A1. Every topic is
+    # open, but untouched skills are generated on demand, not in advance.
     ids = await import_fixture_curriculum(session)
     student = await create_user(session, Role.STUDENT)
     session.add(
@@ -575,11 +576,7 @@ async def test_top_up_should_queue_only_for_topics_covered_at_school(
             position=0,
         )
     )
-    session.add(
-        StudentTopicSetting(
-            student_id=student.id, topic_id=ids.topics["M1:2"], taught_at_school=True
-        )
-    )
+    session.add(ObjectiveProgress(user_id=student.id, objective_id=await _objective(session, "A1")))
     await session.commit()
     ctx = await _ctx(factory, ai_settings, None, clock)
 

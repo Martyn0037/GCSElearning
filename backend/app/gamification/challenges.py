@@ -35,7 +35,7 @@ from app.gamification.schemas import (
 from app.gamification.standings import boss_bests, on_tier, topic_standings
 from app.gamification.xp import DAILY_CHALLENGE_BONUS, boss_bonus
 from app.models.curriculum import LearningObjective, Subtopic, Tier, Topic
-from app.models.enrolment import StudentSubject, StudentTopicSetting
+from app.models.enrolment import StudentSubject
 from app.models.gamification import (
     Challenge,
     ChallengeKind,
@@ -162,8 +162,8 @@ class ChallengeService:
 
         Raises:
             NotFoundError: Unknown or someone else's subject or topic.
-            ConflictError: ``TOPIC_LOCKED``; ``BOSS_LOCKED`` until half the
-                topic's skills are practised; ``QUESTIONS_PREPARING``.
+            ConflictError: ``BOSS_LOCKED`` until half the topic's skills are
+                practised; ``QUESTIONS_PREPARING``.
         """
         enrolment = await load_enrolment(self._session, student_id, enrolment_id, lock=True)
         await require_unlocked_topic(self._session, enrolment, topic_id)
@@ -400,19 +400,11 @@ class ChallengeService:
     async def _candidates(
         self, student_id: uuid.UUID
     ) -> tuple[list[selection.Candidate], dict[uuid.UUID, Tier | None]]:
-        """Every skill on the student's tier in topics covered at school, across subjects."""
+        """Every skill on the student's tier, in every topic, across subjects."""
         rows = (
             await self._session.execute(
                 select(StudentSubject, Subtopic.topic_id, LearningObjective, ObjectiveProgress)
                 .join(Topic, Topic.specification_id == StudentSubject.specification_id)
-                .join(
-                    StudentTopicSetting,
-                    and_(
-                        StudentTopicSetting.topic_id == Topic.id,
-                        StudentTopicSetting.student_id == student_id,
-                        StudentTopicSetting.taught_at_school.is_(True),
-                    ),
-                )
                 .join(Subtopic, Subtopic.topic_id == Topic.id)
                 .join(LearningObjective, LearningObjective.subtopic_id == Subtopic.id)
                 .outerjoin(

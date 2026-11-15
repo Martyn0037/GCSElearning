@@ -2,7 +2,7 @@
 """Integration tests for the practice API.
 
 Covers:
-- next question: topic not covered -> 409 TOPIC_LOCKED; serves from the bank
+- next question: a topic not covered at school is still served; serves from the bank
   without the answer; repeating "next" returns the same open item (also when
   two requests race); generation on the spot when the bank is empty; bank
   empty + no Claude -> 409 QUESTIONS_PREPARING and generation queued
@@ -119,11 +119,20 @@ async def _hint(client: httpx.AsyncClient, item_id: str) -> httpx.Response:
     )
 
 
-async def test_locked_topic_should_be_refused(client: httpx.AsyncClient, setup: Setup) -> None:
+async def test_topic_not_covered_at_school_should_still_be_open(
+    client: httpx.AsyncClient, session: AsyncSession, setup: Setup
+) -> None:
+    # Arrange: Number isn't ticked as covered at school (ADR-021: everything is open)
+    t1 = await session.scalar(select(LearningObjective.id).where(LearningObjective.ref == "T1"))
+    assert t1 is not None
+    await create_question(session, t1, tier="foundation", stem="What is $2 + 2$?")
+
+    # Act
     response = await _next(client, setup, setup.number)
 
-    assert response.status_code == 409
-    assert error_code(response) == "TOPIC_LOCKED"
+    # Assert
+    assert response.status_code == 200
+    assert response.json()["objectiveRef"] == "T1"
 
 
 async def test_should_serve_bank_question_without_answer(

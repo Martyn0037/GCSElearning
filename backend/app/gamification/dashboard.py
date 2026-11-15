@@ -22,7 +22,7 @@ from app.gamification.schemas import (
 from app.gamification.streaks import StreakState, current_streak, freeze_available, week_start
 from app.gamification.xp import level_for
 from app.models.curriculum import LearningObjective, Subtopic, Topic
-from app.models.enrolment import StudentSubject, StudentTopicSetting
+from app.models.enrolment import StudentSubject
 from app.models.gamification import (
     Badge,
     Challenge,
@@ -126,7 +126,7 @@ async def _continue(
     session: AsyncSession, student_id: uuid.UUID, daily: DailyStatusOut, reviews_due: int
 ) -> ContinueOut:
     """The next best thing: an unfinished daily challenge, then reviews, then the
-    last topic practised (or the first unlocked one)."""
+    last topic practised (or the first topic)."""
     if daily.status == "active":
         return ContinueOut(
             kind="daily", challenge_id=daily.challenge_id, label="Carry on with today's challenge"
@@ -135,11 +135,6 @@ async def _continue(
         return ContinueOut(
             kind="review", label=f"Review {reviews_due} mistake{'s' if reviews_due != 1 else ''}"
         )
-    unlocked = and_(
-        StudentTopicSetting.student_id == student_id,
-        StudentTopicSetting.topic_id == Topic.id,
-        StudentTopicSetting.taught_at_school.is_(True),
-    )
     last = (
         await session.execute(
             select(PracticeItem.enrolment_id, Topic.id, Topic.title)
@@ -147,7 +142,6 @@ async def _continue(
             .join(LearningObjective, LearningObjective.id == Question.objective_id)
             .join(Subtopic, Subtopic.id == LearningObjective.subtopic_id)
             .join(Topic, Topic.id == Subtopic.topic_id)
-            .join(StudentTopicSetting, unlocked)
             .where(
                 PracticeItem.user_id == student_id,
                 PracticeItem.challenge_id.is_(None),
@@ -163,7 +157,6 @@ async def _continue(
             await session.execute(
                 select(StudentSubject.id, Topic.id, Topic.title)
                 .join(Topic, Topic.specification_id == StudentSubject.specification_id)
-                .join(StudentTopicSetting, unlocked)
                 .where(StudentSubject.student_id == student_id, Topic.retired_at.is_(None))
                 .order_by(StudentSubject.position, Topic.position)
                 .limit(1)

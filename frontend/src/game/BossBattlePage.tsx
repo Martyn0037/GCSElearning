@@ -20,7 +20,6 @@ import { describeEstimate } from "./estimate";
 const START_ERRORS: Record<string, string> = {
   BOSS_LOCKED: "Practise more skills in this topic to unlock its boss battle.",
   QUESTIONS_PREPARING: "We're preparing this boss battle. Try again in a few minutes.",
-  TOPIC_LOCKED: "This topic hasn't been marked as covered at school yet.",
 };
 
 /**

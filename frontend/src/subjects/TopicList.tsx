@@ -5,8 +5,8 @@ import type { TopicOut } from "../api/generated/model";
 import { MasteryRing } from "../game/Ring";
 
 /**
- * A subject's topics in study order, showing which are unlocked.
- * With ``enrolmentId``, unlocked topics get a "Practise" button.
+ * A subject's topics in study order, each with its mastery ring.
+ * Every topic is open (ADR-021); with ``enrolmentId`` each gets a "Practise" button.
  */
 export function TopicList({
   topics,
@@ -21,29 +21,13 @@ export function TopicList({
   return (
     <ol className="space-y-3">
       {topics.map((topic) => (
-        <li
-          key={topic.id}
-          className={`rounded-xl p-4 shadow-sm ${topic.unlocked ? "bg-white" : "bg-slate-100"}`}
-        >
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="text-lg font-semibold text-slate-900">
-              <span className="text-slate-500">{topic.ref}.</span> {topic.title}
-            </h2>
-            {topic.unlocked ? (
-              <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-900">
-                Ready
-              </span>
-            ) : (
-              <span className="rounded-full bg-slate-200 px-3 py-1 text-sm text-slate-700">
-                <span aria-hidden="true">🔒 </span>Not covered yet
-              </span>
-            )}
+        <li key={topic.id} className="rounded-xl bg-white p-4 shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-900">
+            <span className="text-slate-500">{topic.ref}.</span> {topic.title}
+          </h2>
+          <div className="mt-2">
+            <MasteryRing ring={topic.standing.ring} progress={topic.standing.ringProgress} />
           </div>
-          {topic.unlocked && (
-            <div className="mt-2">
-              <MasteryRing ring={topic.standing.ring} progress={topic.standing.ringProgress} />
-            </div>
-          )}
           <ul className="mt-2 space-y-1 text-slate-700">
             {topic.subtopics.map((subtopic) => (
               <li key={subtopic.id} className="flex justify-between gap-3">
@@ -54,7 +38,7 @@ export function TopicList({
               </li>
             ))}
           </ul>
-          {enrolmentId && topic.unlocked && (
+          {enrolmentId && (
             <Link
               to={`/practice/${enrolmentId}/${topic.id}`}
               className="mt-3 flex min-h-12 items-center justify-center rounded-lg bg-brand-700 font-semibold text-white hover:bg-brand-800"
@@ -62,7 +46,7 @@ export function TopicList({
               Practise {topic.title}
             </Link>
           )}
-          {enrolmentId && topic.unlocked && <BossButton topic={topic} enrolmentId={enrolmentId} />}
+          {enrolmentId && <BossButton topic={topic} enrolmentId={enrolmentId} />}
         </li>
       ))}
     </ol>

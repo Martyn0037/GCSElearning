@@ -42,12 +42,6 @@ export function TopicMapPage({ user }: { user: UserOut }) {
             {map.data.specification.code} · {map.data.specification.version}
             {map.data.tier ? ` · ${map.data.tier === "higher" ? "Higher" : "Foundation"} tier` : ""}
           </p>
-          {map.data.topics.every((t) => !t.unlocked) && map.data.topics.length > 0 && (
-            <p className="mb-4 rounded-lg bg-brand-50 p-3 text-slate-800">
-              Topics unlock once they&apos;re marked as covered at school. Ask your parent or carer
-              to tick off what you&apos;ve done so far.
-            </p>
-          )}
           <TopicList topics={map.data.topics} enrolmentId={map.data.enrolmentId} />
         </>
       )}

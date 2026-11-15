@@ -7,7 +7,8 @@ Covers:
   re-adding un-retires
 - a new current version takes over is_current from the old one
 - unknown board/subject -> error
-- importing a spec activates matching pending enrolments and matches
+- importing a spec activates matching pending enrolments (and ones on a board
+  with no spec for the subject, unless their board has its own) and matches
   typed-in set texts by exact title (case/apostrophe-insensitive)
 - the real repo curriculum imports cleanly
 """
@@ -62,7 +63,7 @@ async def test_should_create_everything_then_change_nothing_on_reimport(
 
     # Assert
     objectives = await session.scalar(select(func.count()).select_from(LearningObjective))
-    assert objectives == 5
+    assert objectives == 6  # M1: 4, L1: 1, L2: 1
     assert (again.created, again.updated, again.retired) == (0, 0, 0)
 
 
@@ -191,6 +192,72 @@ async def test_import_should_activate_pending_enrolments_and_match_typed_set_tex
     assert enrolment.specification_id is not None
     assert report.set_texts_matched == 1
     assert texts == {"macbeth": True, "Hamlet": False}
+
+
+async def _pending(session: AsyncSession, subject_slug: str, board_code: str) -> StudentSubject:
+    student = await create_user(session, Role.STUDENT)
+    board = await session.scalar(select(ExamBoard).where(ExamBoard.code == board_code))
+    subject = await session.scalar(select(Subject).where(Subject.slug == subject_slug))
+    assert board is not None
+    assert subject is not None
+    enrolment = StudentSubject(
+        student_id=student.id,
+        subject_id=subject.id,
+        board_id=board.id,
+        board_confirmed=True,
+        tier=None,
+        tier_confirmed=True,
+        position=0,
+    )
+    session.add(enrolment)
+    await session.commit()
+    return enrolment
+
+
+async def test_import_should_move_a_pending_enrolment_on_a_board_without_a_spec(
+    session: AsyncSession,
+) -> None:
+    # Arrange: maths chosen on board B, which has no maths spec
+    catalogue, specs = load_folder(FIXTURE_CURRICULUM)
+    importer = CurriculumImporter(session, FIXED_NOW)
+    await importer.import_catalogue(catalogue, "catalogue.yaml")
+    await session.commit()
+    enrolment = await _pending(session, "maths", "board-b")
+
+    # Act
+    maths = next(spec for source, spec in specs if "m1" in source)
+    report = await importer.import_specification(maths, "specs/board-a-m1.yaml")
+    await session.commit()
+
+    # Assert
+    await session.refresh(enrolment)
+    board_a = await session.scalar(select(ExamBoard.id).where(ExamBoard.code == "board-a"))
+    assert report.enrolments_activated == 1
+    assert enrolment.specification_id is not None
+    assert enrolment.board_id == board_a
+
+
+async def test_import_should_not_take_an_enrolment_whose_board_has_its_own_spec(
+    session: AsyncSession,
+) -> None:
+    # Arrange: board A's English spec is imported, then a pending board-A enrolment exists
+    catalogue, specs = load_folder(FIXTURE_CURRICULUM)
+    importer = CurriculumImporter(session, FIXED_NOW)
+    await importer.import_catalogue(catalogue, "catalogue.yaml")
+    board_a_spec = next(spec for source, spec in specs if "l2" in source)
+    await importer.import_specification(board_a_spec, "specs/board-a-l2.yaml")
+    await session.commit()
+    enrolment = await _pending(session, "english-literature", "board-a")
+
+    # Act: board B's English spec is imported
+    board_b_spec = next(spec for source, spec in specs if "l1" in source)
+    report = await importer.import_specification(board_b_spec, "specs/board-b-l1.yaml")
+    await session.commit()
+
+    # Assert: left for its own board's spec
+    await session.refresh(enrolment)
+    assert report.enrolments_activated == 0
+    assert enrolment.specification_id is None
 
 
 async def test_repo_curriculum_should_import(session: AsyncSession) -> None:

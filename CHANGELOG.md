@@ -6,6 +6,16 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed — Simplified for one student (ADR-021)
+- **Every topic is open:** no "covered at school" lock in practice, the daily challenge, the dashboard or the topic map.
+- **Every listed subject works straight away:** a board with no imported spec falls back to the subject's imported spec, for new choices and (on import) for subjects already saved.
+- **The bank top-up** pre-generates only for skills the student has started; new skills are generated on demand.
+- **The guardian page** links to the privacy notice instead of asking for consent.
+
+### Removed
+- The admin "Topics covered at school" section.
+- The `TOPIC_LOCKED` error.
+
 ### Added — Phase 8 (Production)
 - **Backups:**
   - A `backup` service with a nightly database dump, 7 days kept on the server, and optional encrypted upload to S3 (30-day lifecycle).

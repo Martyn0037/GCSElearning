@@ -23,7 +23,6 @@ const LOAD_ERRORS: Record<string, string> = {
   MARKING_IN_PROGRESS: "Your answer is still being marked. Try again in a moment.",
   ANSWER_TOO_LONG: "That answer is too long for this question.",
   QUESTIONS_PREPARING: "We're preparing questions for this topic. Try again in a minute.",
-  TOPIC_LOCKED: "This topic hasn't been marked as covered at school yet.",
   SUBJECT_NOT_READY: "This subject is still being set up.",
 };
 

@@ -212,7 +212,7 @@ async def test_five_day_streak_should_grant_its_badge_once(
 # --------------------------------------------------------------------- dashboard
 
 
-async def test_new_student_dashboard_should_continue_to_the_first_unlocked_topic(
+async def test_new_student_dashboard_should_continue_to_the_first_topic(
     client: httpx.AsyncClient, setup: Setup
 ) -> None:
     # Act
@@ -224,7 +224,7 @@ async def test_new_student_dashboard_should_continue_to_the_first_unlocked_topic
     assert body["streak"]["freezeAvailable"] is True
     assert body["daily"]["status"] == "not_started"
     assert body["continueTo"]["kind"] == "topic"
-    assert body["continueTo"]["topicId"] == str(setup.algebra)
+    assert body["continueTo"]["topicId"] == str(setup.number)
     assert (body["badgesEarned"], body["badgesTotal"]) == (0, 10)
 
 

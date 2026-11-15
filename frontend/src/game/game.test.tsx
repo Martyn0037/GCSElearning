@@ -260,7 +260,7 @@ describe("home dashboard", () => {
     renderApp("/");
 
     expect(await screen.findByText(/Today's challenge done/)).toBeInTheDocument();
-    expect(screen.getByText(/Nothing to practise yet\. Ask for a topic/)).toBeInTheDocument();
+    expect(screen.getByText(/Nothing to practise yet\. Choose your subjects/)).toBeInTheDocument();
   });
 
   it("should keep the subjects list when the dashboard fails", async () => {
@@ -399,7 +399,7 @@ describe("daily challenge", () => {
   });
 
   it.each([
-    ["NOTHING_TO_PRACTISE", /a topic needs to be unlocked first/],
+    ["NOTHING_TO_PRACTISE", /choose your subjects first/],
     ["QUESTIONS_PREPARING", /preparing today's challenge/],
   ])("should explain %s", async (code, message) => {
     api({ "POST /api/v1/practice/challenges/daily": () => apiError(409, code) });

@@ -4,7 +4,7 @@
  * - attention list explains each reason in plain words; empty state
  * - confirming sends board + tier; choosing a spec sends specificationId
  * - typed-in set texts can be matched to the board's list or removed
- * - topics covered: choose a subject, tick a topic, move a topic
+ * - no topics-covered section: every topic is open to the student
  * - imported specifications table
  * - choosing a spec for a typed-in subject sends specificationId
  * - paging with "Next page"; update errors are shown
@@ -13,12 +13,11 @@ import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
-import type { AdminEnrolmentOut, AdminSpecificationOut, TopicMapOut } from "../api/generated/model";
+import type { AdminEnrolmentOut, AdminSpecificationOut } from "../api/generated/model";
 import { CATALOGUE } from "../test/catalogue";
 import type { Handler } from "../test/fakeApi";
 import { installFakeApi, json, jsonBody } from "../test/fakeApi";
 import { renderApp } from "../test/renderApp";
-import { NO_STANDING } from "../test/fixtures";
 
 const ADMIN = {
   id: "00000000-0000-4000-8000-000000000017",
@@ -98,33 +97,6 @@ const ENGLISH: AdminEnrolmentOut = {
       title: "Macbth",
       author: null,
       status: "pending",
-    },
-  ],
-};
-
-const TOPICS: TopicMapOut = {
-  enrolmentId: "00000000-0000-4000-8000-000000000008",
-  subjectName: "Mathematics",
-  tier: "higher",
-  specification: SPECS[0]!,
-  topics: [
-    {
-      id: "00000000-0000-4000-8000-000000000012",
-      ref: "1",
-      title: "Number",
-      taughtAtSchool: false,
-      unlocked: false,
-      standing: NO_STANDING,
-      subtopics: [],
-    },
-    {
-      id: "00000000-0000-4000-8000-000000000013",
-      ref: "2",
-      title: "Algebra",
-      taughtAtSchool: false,
-      unlocked: false,
-      standing: NO_STANDING,
-      subtopics: [],
     },
   ],
 };
@@ -227,46 +199,12 @@ describe("AdminPage", () => {
       .toBe(true);
   });
 
-  it("should tick a topic as covered and move a topic", async () => {
-    // Arrange
-    const sent: unknown[] = [];
-    api({
-      "GET /api/v1/admin/enrolments/00000000-0000-4000-8000-000000000008/topics": () =>
-        json(TOPICS),
-      "PUT /api/v1/admin/enrolments/00000000-0000-4000-8000-000000000008/topics/00000000-0000-4000-8000-000000000012":
-        (init) => {
-          sent.push(bodyOf(init));
-          return json({
-            ...TOPICS,
-            topics: [{ ...TOPICS.topics[0]!, taughtAtSchool: true }, TOPICS.topics[1]!],
-          });
-        },
-      "PUT /api/v1/admin/enrolments/00000000-0000-4000-8000-000000000008/topic-order": (init) => {
-        sent.push(bodyOf(init));
-        return json({ ...TOPICS, topics: [...TOPICS.topics].reverse() });
-      },
-    });
+  it("should not offer a topics-covered-at-school section", async () => {
+    api();
     renderApp("/admin");
-    const user = userEvent.setup();
 
-    // Act
-    await user.selectOptions(await screen.findByLabelText("Subject"), "Sam: Mathematics");
-    await user.click(await screen.findByRole("checkbox", { name: /Number: covered at school/ }));
-    await expect.poll(() => sent.length).toBe(1);
-    await user.click(screen.getByRole("button", { name: "Move Algebra up" }));
-
-    // Assert
-    await expect
-      .poll(() => sent)
-      .toEqual([
-        { taughtAtSchool: true },
-        {
-          topicIds: [
-            "00000000-0000-4000-8000-000000000013",
-            "00000000-0000-4000-8000-000000000012",
-          ],
-        },
-      ]);
+    expect(await screen.findByRole("table")).toBeInTheDocument();
+    expect(screen.queryByText("Topics covered at school")).not.toBeInTheDocument();
   });
 
   it("should list imported specifications", async () => {

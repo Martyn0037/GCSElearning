@@ -7,10 +7,8 @@ import {
   deleteStudent,
   exportStudentData,
   getMyStudentsQueryKey,
-  giveConsent,
   useMyStudents,
   useStudentWeeklySummary,
-  withdrawConsent,
 } from "../api/generated/endpoints";
 import type { LinkedStudentOut, UserOut, WeeklySummaryOut } from "../api/generated/model";
 import { ApiError } from "../api/http";
@@ -20,7 +18,7 @@ import { MasteryRing } from "../game/Ring";
 const dayName = new Intl.DateTimeFormat("en-GB", { weekday: "short" });
 const shortDate = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short" });
 
-/** The guardian's read-only view: consent, the weekly summary, export and deletion. */
+/** The guardian's read-only view: the weekly summary, export and deletion. */
 export function GuardianDashboard({ user }: { user: UserOut }) {
   const students = useMyStudents();
   const [selected, setSelected] = useState<string | null>(null);
@@ -54,7 +52,7 @@ export function GuardianDashboard({ user }: { user: UserOut }) {
       )}
       {student && (
         <div key={student.id} className="mt-4 space-y-6">
-          <ConsentCard student={student} />
+          <PrivacyLink />
           <Week studentId={student.id} />
           <YourData student={student} />
         </div>
@@ -63,63 +61,15 @@ export function GuardianDashboard({ user }: { user: UserOut }) {
   );
 }
 
-function ConsentCard({ student }: { student: LinkedStudentOut }) {
-  const queryClient = useQueryClient();
-  const refresh = () => queryClient.invalidateQueries({ queryKey: getMyStudentsQueryKey() });
-  const give = useMutation({
-    mutationFn: () => giveConsent(student.id, { policyVersion: student.currentPolicyVersion }),
-    onSuccess: refresh,
-  });
-  const withdraw = useMutation({
-    mutationFn: () => withdrawConsent(student.id),
-    onSuccess: refresh,
-  });
-  const { consent } = student;
-  if (consent.granted && consent.policyVersion === student.currentPolicyVersion) {
-    return (
-      <p className="rounded-xl bg-white p-4 text-slate-700 shadow-sm">
-        You agreed to the{" "}
-        <Link to="/privacy" className="text-brand-700 underline">
-          privacy notice
-        </Link>{" "}
-        for {student.displayName}
-        {consent.grantedAt ? ` on ${shortDate.format(new Date(consent.grantedAt))}` : ""}.{" "}
-        <button
-          type="button"
-          onClick={() => {
-            withdraw.mutate();
-          }}
-          disabled={withdraw.isPending}
-          className="min-h-11 text-brand-700 underline"
-        >
-          Withdraw consent
-        </button>
-      </p>
-    );
-  }
+function PrivacyLink() {
   return (
-    <section aria-label="Consent" className="space-y-2 rounded-xl bg-amber-50 p-4 text-amber-950">
-      <p className="font-semibold">Please read and agree to the privacy notice</p>
-      <p>
-        It explains, in plain language, what GCSE Coach keeps about {student.displayName}, how AI is
-        used, and how to download or delete it.
-      </p>
-      <div className="flex flex-wrap items-center gap-4">
-        <Link to="/privacy" className="inline-flex min-h-11 items-center underline">
-          Read the privacy notice
-        </Link>
-        <button
-          type="button"
-          onClick={() => {
-            give.mutate();
-          }}
-          disabled={give.isPending}
-          className="min-h-11 rounded-lg bg-brand-700 px-4 font-semibold text-white disabled:opacity-60"
-        >
-          I&apos;ve read it and agree
-        </button>
-      </div>
-    </section>
+    <p className="text-slate-700">
+      What GCSE Coach keeps, and how AI is used, is in the{" "}
+      <Link to="/privacy" className="text-brand-700 underline">
+        privacy notice
+      </Link>
+      .
+    </p>
   );
 }
 

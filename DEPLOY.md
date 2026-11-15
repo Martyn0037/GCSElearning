@@ -82,7 +82,7 @@ Edit `.env` (for example with `nano .env`) and set:
 | `POSTGRES_PASSWORD`, `JWT_SECRET`, `AUDIT_IP_SALT` | the generated values, all different |
 | `ANTHROPIC_API_KEY` | your key |
 | `AI_MONTHLY_BUDGET_GBP` / `AI_DAILY_BUDGET_GBP` | the caps; Claude isn't called past either |
-| `QUESTION_STRICT_MODE` | `true` for the first couple of weeks, so you approve new questions and learn cards in Admin; `false` after that |
+| `QUESTION_STRICT_MODE` | leave as `false`: questions and learn cards go live once they pass the automatic checks |
 
 The app refuses to start in production if a secret is short, if `JWT_SECRET` and `AUDIT_IP_SALT` are the same, or if secure cookies are off.
 
@@ -112,11 +112,9 @@ This asks for each password at a hidden prompt (at least 10 characters each):
 docker compose run --rm api python -m app.cli.seed_users --admin-email you@example.com --guardian-email you+parent@example.com --guardian-name Alex --student-username sam10 --student-name Sam
 ```
 
-Then:
+Then sign in as the **student** on their phone and choose their subjects. Every topic is open straight away. Add the app to the home screen: Share → "Add to Home Screen" on iPhone, or the install prompt on Android.
 
-1. Sign in as the **student** on their phone and choose their subjects. Add the app to the home screen: Share → "Add to Home Screen" on iPhone, or the install prompt on Android.
-2. Sign in as the **guardian** and agree to the privacy notice.
-3. Sign in as the **admin**. Confirm the student's boards and tiers, and tick the topics already covered at school. Practice opens topic by topic.
+The **guardian** account shows the weekly summary. The **admin** account only needs a look now and then (see section 10).
 
 ## 7. Off-site backups (recommended)
 

@@ -1,0 +1,23 @@
+# backend/tests/fixtures/curriculum/specs/board-a-l2.yaml
+# Test-only second English spec on another board, so a set-text option from
+# one spec can be offered against the other.
+specification:
+  board: board-a
+  subject: english-literature
+  code: L2
+  title: Test English Literature (Board A)
+  version: Version 1.0
+  tiered: false
+topics:
+  - ref: "1"
+    title: Shakespeare
+    subtopics:
+      - title: Shakespeare
+        objectives:
+          - ref: L2.1
+            foundation: read and understand a Shakespeare play
+set_texts:
+  - category: Shakespeare play
+    options:
+      - title: The Tempest
+        author: William Shakespeare

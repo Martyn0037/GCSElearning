@@ -395,7 +395,7 @@ curriculum content comes only from the exam board's spec, never from model knowl
   - Language vocabulary lists.
   - Texts whose last exam is before 2028.
 - **OCR's "Not required" guidance** becomes `out_of_scope`, which the question generator already uses to keep questions inside the spec.
-- **Options are all included.** Which ones the student studies is managed through "covered at school" on the topic map, not by leaving content out.
+- **Options are all included.** Every topic is open (ADR-021), so the student simply practises the options he studies.
 - **The wording limit is raised to 8,000 characters,** because two AQA physics units are over 4,000. The database columns are unlimited `text`.
 
 **Trade-offs.**
@@ -493,3 +493,20 @@ curriculum content comes only from the exam board's spec, never from model knowl
 **Trade-offs.**
 - Logical dumps are simple and portable, but restoring loses anything written after the last nightly dump (at most a day of practice). Point-in-time recovery would need WAL archiving, which isn't worth it at this scale.
 - A hand-written service worker is ~60 lines with no build step. A plugin (Workbox) would add precaching of every asset, at the cost of a dependency.
+
+## ADR-021 — Keep it simple: everything open, no approvals
+
+**Status:** Accepted (2026-11-15). Supersedes the topic-unlocking parts of ADR-016 and ADR-017, and the consent step in ADR-019.
+
+**Context.** The app is for one student, set up by his family. Gating topics on "covered at school", asking an admin to confirm things, and asking a guardian to agree to the privacy notice all added steps without protecting anyone.
+
+**Decision.**
+- **Every topic is open.** Practice, reviews, the daily challenge and the dashboard's Continue button use every topic in the student's specs. `taught_at_school` stays in the database and the API as a label only; the admin "Topics covered at school" section is removed.
+- **Every listed subject works straight away.** If the chosen board's spec isn't imported, the subject uses the imported spec for that subject and shows its board. The curriculum import applies the same rule to subjects already saved, unless their own board has a spec. Typed-in subjects with no spec still wait for an admin.
+- **No approvals.** `QUESTION_STRICT_MODE` stays off: generated questions and learn cards go live once they pass the automatic checks. The admin review queue stays for questions the student flags.
+- **No consent step.** The guardian page links to the privacy notice instead of asking for agreement. The consent API and table stay (unused by the UI) so nothing is lost if this changes.
+- **Boss battles** still unlock after half a topic's skills are practised: that's a game mechanic, not an approval.
+
+**Trade-offs.**
+- The bank top-up now pre-generates only for skills the student has started. Pre-generating for every open skill (~1,250 across 13 subjects) would spend the AI budget on skills he may never open. The first question on a new skill is generated on demand, so it can take a few seconds longer.
+- With every topic open, he can practise things not yet taught. That's his choice; the topic map's rings show where he stands.

@@ -1,8 +1,7 @@
 // frontend/src/guardian/guardian.test.tsx
 /**
  * Covers:
- * - guardian home: consent prompt with privacy link, agreeing sends the
- *   current version; consent shown with withdraw once given
+ * - guardian home: privacy-notice link, no consent prompt (ADR-021)
  * - weekly summary tiles, days practised, subjects with weak topics,
  *   achievements; earlier/later week navigation
  * - export downloads a JSON file
@@ -64,33 +63,23 @@ afterEach(() => {
 });
 
 describe("guardian dashboard", () => {
-  it("should ask for consent, then show the week", async () => {
+  it("should show the week with a link to the privacy notice and no consent prompt", async () => {
     // Arrange
-    const fetchMock = api({
-      "GET /api/v1/guardian/students": [() => json([student(false)]), () => json([student(true)])],
+    api({
+      "GET /api/v1/guardian/students": () => json([student(false)]),
       [`GET ${BASE}/summary?weeks_ago=0`]: () => json(WEEK),
-      [`POST ${BASE}/consent`]: () => json(student(true).consent),
-      [`DELETE ${BASE}/consent`]: () => json(student(false).consent),
     });
-    renderApp("/guardian");
-    const user = userEvent.setup();
 
     // Act
-    expect(
-      await screen.findByText(/Please read and agree to the privacy notice/),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Read the privacy notice" })).toHaveAttribute(
+    renderApp("/guardian");
+
+    // Assert
+    expect(await screen.findByRole("link", { name: "privacy notice" })).toHaveAttribute(
       "href",
       "/privacy",
     );
-    await user.click(screen.getByRole("button", { name: "I've read it and agree" }));
-
-    // Assert
-    expect(await screen.findByRole("button", { name: "Withdraw consent" })).toBeInTheDocument();
-    const consentCall = fetchMock.mock.calls.find(
-      ([url, init]) => url === `${BASE}/consent` && init?.method === "POST",
-    );
-    expect(jsonBody(consentCall?.[1] ?? {})).toEqual({ policyVersion: "2026-11" });
+    expect(screen.queryByRole("button", { name: /agree/ })).not.toBeInTheDocument();
+    expect(await screen.findByText("Questions answered")).toBeInTheDocument();
     expect(screen.getByText("Questions answered").nextSibling).toHaveTextContent("20");
     expect(screen.getByText("75%")).toBeInTheDocument();
     expect(screen.getByText("42 min")).toBeInTheDocument();

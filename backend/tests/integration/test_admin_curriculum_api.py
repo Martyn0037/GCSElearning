@@ -289,7 +289,7 @@ async def test_matching_option_from_another_spec_should_be_rejected(
     assert response.status_code == 422
 
 
-async def test_taught_toggle_should_unlock_topic_for_student(
+async def test_taught_toggle_should_label_the_topic_and_leave_every_topic_open(
     admin: httpx.AsyncClient, student: httpx.AsyncClient, ids: CurriculumIds
 ) -> None:
     [maths] = await _choose(student, [{"subjectId": str(ids.subjects["maths"])}])
@@ -303,10 +303,11 @@ async def test_taught_toggle_should_unlock_topic_for_student(
 
     assert response.status_code == 200
     student_view = (await student.get(f"/api/v1/me/subjects/{maths['id']}/topics")).json()
-    assert {t["title"]: t["unlocked"] for t in student_view["topics"]} == {
+    assert {t["title"]: t["taughtAtSchool"] for t in student_view["topics"]} == {
         "Number": False,
         "Algebra": True,
     }
+    assert all(t["unlocked"] for t in student_view["topics"])
 
 
 async def test_topic_from_another_spec_should_404(

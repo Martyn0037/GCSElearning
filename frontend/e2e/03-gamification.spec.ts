@@ -5,7 +5,7 @@
  * topic map's rings and boss battle status. Re-runnable: if today's
  * challenge is already done it checks the "done" state instead.
  *
- * Needs the same setup as 02-practice (Maths, topic 1 covered, E2E questions).
+ * Needs the same setup as 02-practice (Maths and the E2E questions).
  */
 import { expect, test } from "@playwright/test";
 

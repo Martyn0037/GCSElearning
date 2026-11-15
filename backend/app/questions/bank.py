@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.jobs.queue import enqueue
 from app.models.curriculum import LearningObjective, Subtopic, Tier, Topic
-from app.models.enrolment import StudentSubject, StudentTopicSetting
+from app.models.enrolment import StudentSubject
 from app.models.question import ObjectiveProgress, PracticeItem, Question, QuestionStatus
 
 GENERATE_JOB = "generate_question"
@@ -111,8 +111,10 @@ async def request_generation(
 async def plan_top_up(session: AsyncSession, now: datetime, target: int) -> int:
     """Queue generation wherever a student is short of unseen questions (commits).
 
-    Covers every active subject's topics that are covered at school, at the
-    student's current level for each objective and the level above.
+    Covers the objectives the student has started (every topic is open, so
+    pre-generating for all ~1,250 would spend the AI budget on skills he may
+    never open; a first visit generates on demand). Tops up at the current
+    level and the level above.
 
     Returns:
         Number of jobs queued.
@@ -126,17 +128,9 @@ async def plan_top_up(session: AsyncSession, now: datetime, target: int) -> int:
                 ObjectiveProgress.level,
             )
             .join(Topic, Topic.specification_id == StudentSubject.specification_id)
-            .join(
-                StudentTopicSetting,
-                and_(
-                    StudentTopicSetting.topic_id == Topic.id,
-                    StudentTopicSetting.student_id == StudentSubject.student_id,
-                    StudentTopicSetting.taught_at_school.is_(True),
-                ),
-            )
             .join(Subtopic, Subtopic.topic_id == Topic.id)
             .join(LearningObjective, LearningObjective.subtopic_id == Subtopic.id)
-            .outerjoin(
+            .join(
                 ObjectiveProgress,
                 and_(
                     ObjectiveProgress.objective_id == LearningObjective.id,
@@ -151,8 +145,8 @@ async def plan_top_up(session: AsyncSession, now: datetime, target: int) -> int:
         )
     ).all()
     queued = 0
-    # One count per objective/level: bounded by the objectives in topics covered
-    # at school (tens to low hundreds), and it runs in the worker, not a request.
+    # One count per objective/level: bounded by the objectives started (tens to
+    # low hundreds), and it runs in the worker, not a request.
     for student_id, tier, objective, level in rows:
         if objective.text_for(tier) is None:
             continue  # not on this student's tier

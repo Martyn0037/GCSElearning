@@ -18,7 +18,7 @@ from typing import Any
 
 import yaml
 from pydantic import ValidationError
-from sqlalchemy import select, update
+from sqlalchemy import or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.curriculum.schema import CatalogueFile, SpecificationFile
@@ -371,15 +371,30 @@ class CurriculumImporter:
         return count
 
     async def _activate_pending(self, spec: Specification) -> int:
-        """Link pending enrolments for this subject + board to the spec."""
+        """Link pending enrolments for this subject to the spec.
+
+        Enrolments on this spec's board are linked. So are ones on a board
+        with no current spec for the subject, which move to this spec's board
+        (everything is usable straight away, ADR-021).
+        """
+        board_has_own_spec = (
+            select(Specification.id)
+            .where(
+                Specification.subject_id == spec.subject_id,
+                Specification.board_id == StudentSubject.board_id,
+                Specification.is_current.is_(True),
+            )
+            .exists()
+        )
         result = await self._session.execute(
             update(StudentSubject)
             .where(
                 StudentSubject.specification_id.is_(None),
                 StudentSubject.subject_id == spec.subject_id,
-                StudentSubject.board_id == spec.board_id,
+                or_(StudentSubject.board_id == spec.board_id, ~board_has_own_spec),
             )
-            .values(specification_id=spec.id)
+            .values(specification_id=spec.id, board_id=spec.board_id)
+            .execution_options(synchronize_session=False)
         )
         count = int(result.rowcount)  # type: ignore[attr-defined]
         if count:

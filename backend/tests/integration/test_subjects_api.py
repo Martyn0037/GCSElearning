@@ -98,7 +98,7 @@ async def test_dont_know_board_and_tier_should_use_defaults_flagged_unconfirmed(
     assert maths["specification"]["code"] == "M1"
 
 
-async def test_board_without_imported_spec_should_be_pending(
+async def test_board_without_imported_spec_should_fall_back_to_the_subjects_spec(
     student: httpx.AsyncClient, ids: CurriculumIds
 ) -> None:
     response = await _save(
@@ -106,9 +106,20 @@ async def test_board_without_imported_spec_should_be_pending(
     )
 
     [maths] = response.json()["subjects"]
-    assert maths["status"] == "pending"
-    assert maths["specification"] is None
+    assert maths["status"] == "active"
+    assert maths["specification"]["code"] == "M1"
+    assert maths["boardId"] == str(ids.boards["board-a"])
     assert (maths["boardConfirmed"], maths["tierConfirmed"]) == (True, True)
+
+
+async def test_subject_with_no_imported_spec_should_be_pending(
+    student: httpx.AsyncClient, ids: CurriculumIds
+) -> None:
+    response = await _save(student, [{"subjectId": str(ids.subjects["geography"])}])
+
+    [geography] = response.json()["subjects"]
+    assert geography["status"] == "pending"
+    assert geography["specification"] is None
 
 
 async def test_set_texts_from_list_are_active_and_typed_ones_pending(
@@ -214,12 +225,13 @@ async def test_resave_should_be_idempotent_and_remove_dropped_subjects(
 async def test_changing_board_should_rematch_specification(
     student: httpx.AsyncClient, ids: CurriculumIds
 ) -> None:
-    await _save(student, [_maths(ids, boardId=str(ids.boards["board-a"]))])
+    english = {"subjectId": str(ids.subjects["english-literature"])}
+    await _save(student, [{**english, "boardId": str(ids.boards["board-b"])}])
 
-    response = await _save(student, [_maths(ids, boardId=str(ids.boards["board-b"]))])
+    response = await _save(student, [{**english, "boardId": str(ids.boards["board-a"])}])
 
-    [maths] = response.json()["subjects"]
-    assert maths["status"] == "pending"
+    [chosen] = response.json()["subjects"]
+    assert chosen["specification"]["code"] == "L2"
 
 
 async def test_concurrent_saves_should_leave_one_consistent_list(
@@ -258,7 +270,7 @@ async def test_topic_map_should_count_only_statements_on_students_tier(
     topics = response.json()["topics"]
     assert [t["title"] for t in topics] == ["Number", "Algebra"]
     assert [t["subtopics"][0]["objectiveCount"] for t in topics] == counts
-    assert all(t["unlocked"] is False for t in topics)
+    assert all(t["unlocked"] is True for t in topics)
 
 
 async def test_topic_map_should_409_for_pending_subject(

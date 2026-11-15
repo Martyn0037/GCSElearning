@@ -5,22 +5,18 @@ import { useListSpecifications } from "../api/generated/endpoints";
 import type { UserOut } from "../api/generated/model";
 import { AppShell } from "../components/AppShell";
 import { AttentionList } from "./AttentionList";
-import { TopicsCovered } from "./TopicsCovered";
 import { Costs } from "./Costs";
 import { GradeBoundaries } from "./GradeBoundaries";
 import { LearnCardQueue } from "./LearnCardQueue";
 import { ReviewQueue } from "./ReviewQueue";
 
-/** Admin home: things to confirm, topics covered at school, imported specs. */
+/** Admin home: things to confirm, review queues, AI spend and imported specs. */
 export function AdminPage({ user }: { user: UserOut }) {
   return (
     <AppShell user={user}>
       <h1 className="text-2xl font-bold text-slate-900">Admin</h1>
       <Section title="Needs your attention">
         <AttentionList />
-      </Section>
-      <Section title="Topics covered at school">
-        <TopicsCovered />
       </Section>
       <Section title="Review queue">
         <ReviewQueue />

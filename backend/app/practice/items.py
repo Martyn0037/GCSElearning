@@ -14,7 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ConflictError, NotFoundError
 from app.models.curriculum import LearningObjective, Topic
-from app.models.enrolment import StudentSubject, StudentTopicSetting
+from app.models.enrolment import StudentSubject
 from app.models.question import Hint, PracticeItem, Question, QuestionType
 from app.practice.schemas import OptionOut, PracticeItemOut
 from app.questions.answer_forms import is_maths_answer, keypad_symbols
@@ -46,23 +46,16 @@ async def load_enrolment(
 async def require_unlocked_topic(
     session: AsyncSession, enrolment: StudentSubject, topic_id: uuid.UUID
 ) -> Topic:
-    """The topic, if it's in the subject's spec and covered at school.
+    """The topic, if it's a current topic in the subject's spec.
+
+    Every topic is open (ADR-021); "covered at school" is only a label.
 
     Raises:
         NotFoundError: Not a current topic of this subject.
-        ConflictError: ``TOPIC_LOCKED`` until covered at school.
     """
     topic = await session.get(Topic, topic_id)
     if topic is None or topic.specification_id != enrolment.specification_id or topic.retired_at:
         raise NotFoundError("Topic not found")
-    taught = await session.scalar(
-        select(StudentTopicSetting.taught_at_school).where(
-            StudentTopicSetting.student_id == enrolment.student_id,
-            StudentTopicSetting.topic_id == topic_id,
-        )
-    )
-    if not taught:
-        raise ConflictError("This topic hasn't been covered at school yet.", code="TOPIC_LOCKED")
     return topic
 
 

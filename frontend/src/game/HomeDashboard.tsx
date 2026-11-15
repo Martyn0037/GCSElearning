@@ -38,7 +38,7 @@ function Dashboard({ data }: { data: DashboardOut }) {
         </Link>
       ) : (
         <p className="rounded-xl bg-white p-4 text-slate-700 shadow-sm">
-          {data.continueTo.label}. Ask for a topic to be marked as covered at school.
+          {data.continueTo.label}. Choose your subjects to get started.
         </p>
       )}
 

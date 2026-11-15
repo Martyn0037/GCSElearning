@@ -60,7 +60,6 @@ export function PrivacyPage() {
         <h2 className="text-lg font-semibold text-slate-900">Your choices</h2>
         <ul className="list-disc space-y-1 pl-5">
           <li>Download everything we hold, from the guardian page.</li>
-          <li>Withdraw consent at any time, from the guardian page.</li>
           <li>Delete the account and all its data permanently, from the guardian page.</li>
         </ul>
       </section>

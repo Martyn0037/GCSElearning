@@ -8,8 +8,8 @@
  * - "I'm stuck" reveals hints one by one; warning before the full solution
  * - wrong answer shows the correct answer and opens the worked solution
  * - "This looks wrong" sends the report and loads the next question
- * - friendly messages for QUESTIONS_PREPARING (with Try again) and TOPIC_LOCKED
- * - unlocked topics on the topic map link to practice
+ * - friendly message for QUESTIONS_PREPARING (with Try again)
+ * - every topic on the topic map links to practice (nothing is locked)
  */
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -205,17 +205,10 @@ describe("PracticePage", () => {
 
     expect(await screen.findByText(/Write down the HCF/)).toBeInTheDocument();
   });
-
-  it("should explain a locked topic", async () => {
-    api({ [NEXT]: () => apiError(409, "TOPIC_LOCKED", "x") });
-    renderApp(practisePath);
-
-    expect(await screen.findByRole("alert")).toHaveTextContent("hasn't been marked as covered");
-  });
 });
 
 describe("topic map practise links", () => {
-  it("should link unlocked topics to practice", async () => {
+  it("should link every topic to practice, covered at school or not", async () => {
     const map: TopicMapOut = {
       enrolmentId: ENROLMENT,
       subjectName: "Mathematics",
@@ -256,6 +249,6 @@ describe("topic map practise links", () => {
       "href",
       practisePath,
     );
-    expect(screen.queryByRole("link", { name: "Practise Algebra" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Practise Algebra" })).toBeInTheDocument();
   });
 });

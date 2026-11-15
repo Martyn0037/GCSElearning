@@ -6,7 +6,7 @@
  * is on "My mistakes" -> the progress page renders.
  *
  * Needs the E2E fixture questions (app.cli.seed_test_questions for 1MA1 N4),
- * Maths on the student's subjects, and topic 1 covered (01-subjects.spec does that).
+ * Maths on the student's subjects (01-subjects.spec does that).
  */
 import { expect, test } from "@playwright/test";
 
