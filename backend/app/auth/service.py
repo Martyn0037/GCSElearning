@@ -234,6 +234,19 @@ class AuthService:
                 )
         await self._session.commit()
 
+    async def list_students(self, limit: int) -> list[User]:
+        """Active student accounts, by name (bounded by ``limit``)."""
+        return list(
+            (
+                await self._session.scalars(
+                    select(User)
+                    .where(User.role == Role.STUDENT, User.is_active.is_(True))
+                    .order_by(User.display_name, User.id)
+                    .limit(limit)
+                )
+            ).all()
+        )
+
     async def admin_reset_password(
         self, admin: User, target_user_id: uuid.UUID, new_password: str
     ) -> None:

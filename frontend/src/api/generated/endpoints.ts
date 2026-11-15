@@ -24,6 +24,7 @@ import {
   AdminEnrolmentOut,
   AdminEnrolmentPage,
   AdminSpecificationOut,
+  AdminStudentOut,
   AnswerResultOut,
   BadgeOut,
   CatalogueOut,
@@ -59,6 +60,7 @@ import type {
   GradeBoundariesIn,
   ListEnrolmentsParams,
   ListMyMistakesParams,
+  ListStudentsParams,
   LoginRequest,
   ResetPasswordRequest,
   ReviewDecision,
@@ -1825,6 +1827,154 @@ export const useReplaceGradeBoundaries = <TError = ErrorType<ErrorResponse>, TCo
 > => {
   return useMutation(getReplaceGradeBoundariesMutationOptions(options), queryClient);
 };
+
+export const getListStudentsUrl = (params?: ListStudentsParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/admin/students?${stringifiedParams}`
+    : `/api/v1/admin/students`;
+};
+
+/**
+ * Student accounts, by name, with whether sign-in is locked.
+ * @summary List Students
+ */
+export const listStudents = async (
+  params?: ListStudentsParams,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<AdminStudentOut[]> => {
+  return apiFetch<AdminStudentOut[]>(getListStudentsUrl(params), {
+    ...options,
+    method: "GET",
+
+    schema: zod.array(AdminStudentOut),
+  });
+};
+
+export const getListStudentsQueryKey = (params?: ListStudentsParams) => {
+  return [`/api/v1/admin/students`, ...(params ? [params] : [])] as const;
+};
+
+export const getListStudentsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listStudents>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params?: ListStudentsParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listStudents>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListStudentsQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listStudents>>> = ({ signal }) =>
+    listStudents(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listStudents>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ListStudentsQueryResult = NonNullable<Awaited<ReturnType<typeof listStudents>>>;
+export type ListStudentsQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * Student accounts, by name, with whether sign-in is locked.
+ * @summary List Students
+ */
+export function useListStudents<
+  TData = Awaited<ReturnType<typeof listStudents>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: undefined | ListStudentsParams,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof listStudents>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listStudents>>,
+          TError,
+          Awaited<ReturnType<typeof listStudents>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Student accounts, by name, with whether sign-in is locked.
+ * @summary List Students
+ */
+export function useListStudents<
+  TData = Awaited<ReturnType<typeof listStudents>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params?: ListStudentsParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listStudents>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listStudents>>,
+          TError,
+          Awaited<ReturnType<typeof listStudents>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Student accounts, by name, with whether sign-in is locked.
+ * @summary List Students
+ */
+export function useListStudents<
+  TData = Awaited<ReturnType<typeof listStudents>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params?: ListStudentsParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listStudents>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Student accounts, by name, with whether sign-in is locked.
+ * @summary List Students
+ */
+export function useListStudents<
+  TData = Awaited<ReturnType<typeof listStudents>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params?: ListStudentsParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof listStudents>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListStudentsQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
 
 export const getResetStudentPasswordUrl = (studentId: string) => {
   return `/api/v1/admin/students/${studentId}/password`;

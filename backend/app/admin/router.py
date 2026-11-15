@@ -9,7 +9,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.auth.dependencies import NowDep, SessionDep, SettingsDep, require_csrf, require_roles
-from app.auth.schemas import ResetPasswordRequest
+from app.auth.schemas import AdminStudentOut, ResetPasswordRequest
 from app.auth.service import AuthService
 from app.core.pagination import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, Cursor
 from app.core.schemas import API_V1_PREFIX, ERROR_RESPONSES
@@ -34,6 +34,27 @@ router = APIRouter(
 )
 
 AdminDep = Annotated[User, Depends(require_roles(Role.ADMIN))]
+
+
+@router.get("/students", response_model=list[AdminStudentOut], operation_id="listStudents")
+async def list_students(
+    _: AdminDep,
+    session: SessionDep,
+    settings: SettingsDep,
+    now: NowDep,
+    limit: Annotated[int, Query(ge=1, le=MAX_PAGE_SIZE)] = MAX_PAGE_SIZE,
+) -> list[AdminStudentOut]:
+    """Student accounts, by name, with whether sign-in is locked."""
+    students = await AuthService(session, settings, now).list_students(limit)
+    return [
+        AdminStudentOut(
+            id=s.id,
+            display_name=s.display_name,
+            username=s.username,
+            locked_until=s.locked_until if s.locked_until and s.locked_until > now else None,
+        )
+        for s in students
+    ]
 
 
 @router.post(

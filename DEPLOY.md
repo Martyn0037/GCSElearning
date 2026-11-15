@@ -116,6 +116,8 @@ Then sign in as the **student** on their phone and choose their subjects. Every 
 
 The **guardian** account shows the weekly summary. The **admin** account only needs a look now and then (see section 10).
 
+**Forgotten password:** sign in as the admin and go to **Student passwords**. Choose **Reset password**, type a new one or tap **Suggest one** (three words and two digits, easy to type on a phone), then **Set new password**. The student is signed out on every device, and a lockout from too many wrong attempts is cleared. Give them the new password. Admin and guardian passwords are changed by running the command above again.
+
 ## 7. Off-site backups (recommended)
 
 The `backup` service dumps the database every night at 02:30 (UK time) and keeps 7 days on the server. It tests a restore every Sunday. To also keep 30 days of copies off the server:

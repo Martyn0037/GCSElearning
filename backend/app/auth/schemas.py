@@ -42,3 +42,14 @@ class ResetPasswordRequest(ApiModel):
     """An admin setting a student's new password."""
 
     new_password: str = Field(min_length=MIN_PASSWORD_LENGTH, max_length=MAX_PASSWORD_LENGTH)
+
+
+class AdminStudentOut(ApiModel):
+    """A student account as the admin sees it, for picking whose password to reset."""
+
+    id: uuid.UUID
+    display_name: str
+    username: str | None = Field(description="What the student signs in with.")
+    locked_until: datetime | None = Field(
+        description="Set while sign-in is locked after too many wrong passwords."
+    )

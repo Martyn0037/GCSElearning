@@ -10,9 +10,13 @@ Covers:
   existing sessions are revoked, lockout cleared
 - admin reset forbidden for student/guardian; non-student target -> 404;
   CSRF required; weak password rejected
+- admin student list: active students only, by name, with username and a
+  current lock (an expired lock reads as null); admin only; limit bounded
 """
 
 from __future__ import annotations
+
+from datetime import timedelta
 
 import httpx
 import pytest
@@ -245,3 +249,60 @@ async def test_admin_reset_should_reject_short_password(
     assert response.status_code == 422
     unchanged = await session.get(User, student.id)
     assert unchanged is not None
+
+
+async def test_admin_should_list_active_students_by_name_with_locks(
+    client: httpx.AsyncClient, session: AsyncSession, clock: FakeClock
+) -> None:
+    # Arrange
+    await create_user(session, Role.ADMIN, identifier="admin@example.test")
+    zed = await create_user(session, Role.STUDENT, identifier="zed10", display_name="Zed")
+    amy = await create_user(session, Role.STUDENT, identifier="amy10", display_name="Amy")
+    gone = await create_user(session, Role.STUDENT, identifier="old10", display_name="Old")
+    await create_user(session, Role.GUARDIAN, identifier="parent@example.test")
+    zed.locked_until = clock.now() + timedelta(minutes=10)
+    amy.locked_until = clock.now() - timedelta(minutes=1)  # expired
+    gone.is_active = False
+    await session.commit()
+    await login(client, "admin@example.test")
+
+    # Act
+    response = await client.get("/api/v1/admin/students")
+
+    # Assert
+    assert response.status_code == 200
+    body = response.json()
+    assert [(s["displayName"], s["username"]) for s in body] == [("Amy", "amy10"), ("Zed", "zed10")]
+    assert body[0]["lockedUntil"] is None
+    assert body[1]["lockedUntil"] is not None
+    assert body[0]["id"] == str(amy.id)
+
+
+@pytest.mark.parametrize("role", [Role.STUDENT, Role.GUARDIAN])
+async def test_non_admin_should_be_forbidden_from_listing_students(
+    client: httpx.AsyncClient, session: AsyncSession, role: Role
+) -> None:
+    # Arrange
+    identifier = "sam10" if role is Role.STUDENT else "parent@example.test"
+    await create_user(session, role, identifier=identifier)
+    await login(client, identifier)
+
+    # Act
+    response = await client.get("/api/v1/admin/students")
+
+    # Assert
+    assert response.status_code == 403
+
+
+async def test_student_list_should_reject_an_out_of_range_limit(
+    client: httpx.AsyncClient, session: AsyncSession
+) -> None:
+    # Arrange
+    await create_user(session, Role.ADMIN, identifier="admin@example.test")
+    await login(client, "admin@example.test")
+
+    # Act
+    response = await client.get("/api/v1/admin/students", params={"limit": 0})
+
+    # Assert
+    assert response.status_code == 422

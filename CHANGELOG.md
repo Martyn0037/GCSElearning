@@ -6,6 +6,10 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added — Student password reset
+- **Admin → Student passwords:** lists students (with their username, and whether sign-in is locked) and resets a password, with an easy-to-type suggestion. The student is signed out everywhere and any lockout is cleared.
+- **`GET /api/v1/admin/students`** (admin only, bounded): the students to choose from.
+
 ### Changed — Design refresh (ADR-022)
 - **New look:** a design system with tokens, a sticky header with an account menu, a bottom tab bar for the student (Home, Daily, Mistakes, Badges), and consistent buttons, cards, chips and icons across every screen.
 - **Dark mode** follows the phone's setting, including charts, mastery rings and the browser's theme colour.

@@ -8,6 +8,7 @@
 export * from "./adminEnrolmentOut.zod";
 export * from "./adminEnrolmentPage.zod";
 export * from "./adminSpecificationOut.zod";
+export * from "./adminStudentOut.zod";
 export * from "./answerPracticeItemBody.zod";
 export * from "./answerPracticeItemHeaders.zod";
 export * from "./answerRequest.zod";
@@ -60,6 +61,7 @@ export * from "./learnCardStatus.zod";
 export * from "./linkedStudentOut.zod";
 export * from "./listEnrolmentsParams.zod";
 export * from "./listMyMistakesParams.zod";
+export * from "./listStudentsParams.zod";
 export * from "./loginBody.zod";
 export * from "./loginRequest.zod";
 export * from "./markPointOut.zod";

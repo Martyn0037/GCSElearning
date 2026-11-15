@@ -9,6 +9,7 @@ import { Costs } from "./Costs";
 import { GradeBoundaries } from "./GradeBoundaries";
 import { LearnCardQueue } from "./LearnCardQueue";
 import { ReviewQueue } from "./ReviewQueue";
+import { StudentPasswords } from "./StudentPasswords";
 
 /** Admin home: things to confirm, review queues, AI spend and imported specs. */
 export function AdminPage({ user }: { user: UserOut }) {
@@ -17,6 +18,9 @@ export function AdminPage({ user }: { user: UserOut }) {
       <h1 className="text-2xl font-bold text-slate-900">Admin</h1>
       <Section title="Needs your attention">
         <AttentionList />
+      </Section>
+      <Section title="Student passwords">
+        <StudentPasswords />
       </Section>
       <Section title="Review queue">
         <ReviewQueue />
