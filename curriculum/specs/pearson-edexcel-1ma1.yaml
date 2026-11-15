@@ -1,7 +1,7 @@
 # curriculum/specs/pearson-edexcel-1ma1.yaml
-# Worked example: the "1. Number" topic, copied word for word from
+# The full subject content (topics 1–6), copied word for word from
 # Pearson Edexcel GCSE (9–1) Mathematics 1MA1, Specification Issue 2 – June 2015
-# (Foundation content pp. 4–5, Higher content pp. 11–12).
+# (Foundation content pp. 4–9, Higher content pp. 11–18).
 #
 # How the wording was transcribed (see curriculum/README.md):
 # - "foundation" is the Foundation-tier statement. "higher" is given only when
@@ -11,9 +11,8 @@
 #   between $…$ (e.g. $\frac{7}{2}$, $10^{n}$). Everything else is verbatim.
 # - Keywords are phrases copied from the statement; the importer rejects any
 #   keyword that isn't in the wording.
-#
-# The remaining topics (Algebra; Ratio, proportion and rates of change;
-# Geometry and measures; Probability; Statistics) are added in the same format.
+# - Sub-bullets in a statement are kept inline, each starting with "•".
+# - Topics 2–6 have no keywords yet (they're optional); topic 1 has them.
 
 specification:
   board: pearson-edexcel
@@ -144,3 +143,490 @@ topics:
             higher: >-
               apply and interpret limits of accuracy, including upper and lower bounds
             keywords: [limits of accuracy, upper and lower bounds]
+  - ref: "2"
+    title: Algebra
+    subtopics:
+      - title: Notation, vocabulary and manipulation
+        objectives:
+          - ref: A1
+            foundation: >-
+              use and interpret algebraic manipulation, including: • ab in place of a × b • 3y in
+              place of y + y + y and 3 × y • $a^2$ in place of a × a, $a^3$ in place of a × a × a,
+              $a^2b$ in place of a × a × b • $\frac{a}{b}$ in place of a ÷ b • coefficients
+              written as fractions rather than as decimals • brackets
+          - ref: A2
+            foundation: >-
+              substitute numerical values into formulae and expressions, including scientific
+              formulae
+          - ref: A3
+            foundation: >-
+              understand and use the concepts and vocabulary of expressions, equations, formulae,
+              identities, inequalities, terms and factors
+          - ref: A4
+            foundation: >-
+              simplify and manipulate algebraic expressions (including those involving surds) by:
+              • collecting like terms • multiplying a single term over a bracket • taking out
+              common factors • expanding products of two binomials • factorising quadratic
+              expressions of the form $x^2 + bx + c$, including the difference of two squares; •
+              simplifying expressions involving sums, products and powers, including the laws of
+              indices
+            higher: >-
+              simplify and manipulate algebraic expressions (including those involving surds and
+              algebraic fractions) by: • collecting like terms • multiplying a single term over a
+              bracket • taking out common factors • expanding products of two or more binomials •
+              factorising quadratic expressions of the form $x^2 + bx + c$, including the
+              difference of two squares; factorising quadratic expressions of the form $ax^2 + bx
+              + c$ • simplifying expressions involving sums, products and powers, including the
+              laws of indices
+          - ref: A5
+            foundation: >-
+              understand and use standard mathematical formulae; rearrange formulae to change the
+              subject
+          - ref: A6
+            foundation: >-
+              know the difference between an equation and an identity; argue mathematically to
+              show algebraic expressions are equivalent, and use algebra to support and construct
+              arguments
+            higher: >-
+              know the difference between an equation and an identity; argue mathematically to
+              show algebraic expressions are equivalent, and use algebra to support and construct
+              arguments and proofs
+          - ref: A7
+            foundation: >-
+              where appropriate, interpret simple expressions as functions with inputs and
+              outputs.
+            higher: >-
+              where appropriate, interpret simple expressions as functions with inputs and
+              outputs; interpret the reverse process as the ‘inverse function’; interpret the
+              succession of two functions as a ‘composite function’ (the use of formal function
+              notation is expected)
+      - title: Graphs
+        objectives:
+          - ref: A8
+            foundation: >-
+              work with coordinates in all four quadrants
+          - ref: A9
+            foundation: >-
+              plot graphs of equations that correspond to straight-line graphs in the coordinate
+              plane; use the form y = mx + c to identify parallel lines; find the equation of the
+              line through two given points or through one point with a given gradient
+            higher: >-
+              plot graphs of equations that correspond to straight-line graphs in the coordinate
+              plane; use the form y = mx + c to identify parallel and perpendicular lines; find
+              the equation of the line through two given points or through one point with a given
+              gradient
+          - ref: A10
+            foundation: >-
+              identify and interpret gradients and intercepts of linear functions graphically and
+              algebraically
+          - ref: A11
+            foundation: >-
+              identify and interpret roots, intercepts, turning points of quadratic functions
+              graphically; deduce roots algebraically
+            higher: >-
+              identify and interpret roots, intercepts, turning points of quadratic functions
+              graphically; deduce roots algebraically and turning points by completing the square
+          - ref: A12
+            foundation: >-
+              recognise, sketch and interpret graphs of linear functions, quadratic functions,
+              simple cubic functions, the reciprocal function $y = \frac{1}{x}$ with x ≠ 0
+            higher: >-
+              recognise, sketch and interpret graphs of linear functions, quadratic functions,
+              simple cubic functions, the reciprocal function $y = \frac{1}{x}$ with x ≠ 0,
+              exponential functions $y = k^x$ for positive values of k, and the trigonometric
+              functions (with arguments in degrees) y = sin x, y = cos x and y = tan x for angles
+              of any size
+          - ref: A13
+            higher: >-
+              sketch translations and reflections of a given function
+          - ref: A14
+            foundation: >-
+              plot and interpret graphs (including reciprocal graphs) and graphs of non-standard
+              functions in real contexts to find approximate solutions to problems such as simple
+              kinematic problems involving distance, speed and acceleration
+            higher: >-
+              plot and interpret graphs (including reciprocal graphs and exponential graphs) and
+              graphs of non-standard functions in real contexts to find approximate solutions to
+              problems such as simple kinematic problems involving distance, speed and
+              acceleration
+          - ref: A15
+            higher: >-
+              calculate or estimate gradients of graphs and areas under graphs (including
+              quadratic and other non-linear graphs), and interpret results in cases such as
+              distance-time graphs, velocity-time graphs and graphs in financial contexts (this
+              does not include calculus)
+          - ref: A16
+            higher: >-
+              recognise and use the equation of a circle with centre at the origin; find the
+              equation of a tangent to a circle at a given point
+      - title: Solving equations and inequalities
+        objectives:
+          - ref: A17
+            foundation: >-
+              solve linear equations in one unknown algebraically (including those with the
+              unknown on both sides of the equation); find approximate solutions using a graph
+          - ref: A18
+            foundation: >-
+              solve quadratic equations algebraically by factorising; find approximate solutions
+              using a graph
+            higher: >-
+              solve quadratic equations (including those that require rearrangement) algebraically
+              by factorising, by completing the square and by using the quadratic formula; find
+              approximate solutions using a graph
+          - ref: A19
+            foundation: >-
+              solve two simultaneous equations in two variables (linear/linear algebraically; find
+              approximate solutions using a graph
+            higher: >-
+              solve two simultaneous equations in two variables (linear/linear or
+              linear/quadratic) algebraically; find approximate solutions using a graph
+          - ref: A20
+            higher: >-
+              find approximate solutions to equations numerically using iteration
+          - ref: A21
+            foundation: >-
+              translate simple situations or procedures into algebraic expressions or formulae;
+              derive an equation (or two simultaneous equations), solve the equation(s) and
+              interpret the solution
+          - ref: A22
+            foundation: >-
+              solve linear inequalities in one variable; represent the solution set on a number
+              line
+            higher: >-
+              solve linear inequalities in one or two variable(s), and quadratic inequalities in
+              one variable; represent the solution set on a number line, using set notation and on
+              a graph
+      - title: Sequences
+        objectives:
+          - ref: A23
+            foundation: >-
+              generate terms of a sequence from either a term-to-term or a position-to-term rule
+          - ref: A24
+            foundation: >-
+              recognise and use sequences of triangular, square and cube numbers, simple
+              arithmetic progressions, Fibonacci type sequences, quadratic sequences, and simple
+              geometric progressions ($r^n$ where n is an integer, and r is a rational number > 0)
+            higher: >-
+              recognise and use sequences of triangular, square and cube numbers, simple
+              arithmetic progressions, Fibonacci type sequences, quadratic sequences, and simple
+              geometric progressions ($r^n$ where n is an integer, and r is a rational number > 0
+              or a surd) and other sequences
+          - ref: A25
+            foundation: >-
+              deduce expressions to calculate the nth term of linear sequences
+            higher: >-
+              deduce expressions to calculate the nth term of linear and quadratic sequences
+  - ref: "3"
+    title: Ratio, proportion and rates of change
+    subtopics:
+      - title: Ratio, proportion and rates of change
+        objectives:
+          - ref: R1
+            foundation: >-
+              change freely between related standard units (e.g. time, length, area,
+              volume/capacity, mass) and compound units (e.g. speed, rates of pay, prices,
+              density, pressure) in numerical and algebraic contexts
+          - ref: R2
+            foundation: >-
+              use scale factors, scale diagrams and maps
+          - ref: R3
+            foundation: >-
+              express one quantity as a fraction of another, where the fraction is less than 1 or
+              greater than 1
+          - ref: R4
+            foundation: >-
+              use ratio notation, including reduction to simplest form
+          - ref: R5
+            foundation: >-
+              divide a given quantity into two parts in a given part:part or part:whole ratio;
+              express the division of a quantity into two parts as a ratio; apply ratio to real
+              contexts and problems (such as those involving conversion, comparison, scaling,
+              mixing, concentrations)
+          - ref: R6
+            foundation: >-
+              express a multiplicative relationship between two quantities as a ratio or a
+              fraction
+          - ref: R7
+            foundation: >-
+              understand and use proportion as equality of ratios
+          - ref: R8
+            foundation: >-
+              relate ratios to fractions and to linear functions
+          - ref: R9
+            foundation: >-
+              define percentage as ‘number of parts per hundred’; interpret percentages and
+              percentage changes as a fraction or a decimal, and interpret these multiplicatively;
+              express one quantity as a percentage of another; compare two quantities using
+              percentages; work with percentages greater than 100%; solve problems involving
+              percentage change, including percentage increase/decrease and original value
+              problems, and simple interest including in financial mathematics
+          - ref: R10
+            foundation: >-
+              solve problems involving direct and inverse proportion, including graphical and
+              algebraic representations
+          - ref: R11
+            foundation: >-
+              use compound units such as speed, rates of pay, unit pricing, density and pressure
+          - ref: R12
+            foundation: >-
+              compare lengths, areas and volumes using ratio notation; make links to similarity
+              (including trigonometric ratios) and scale factors
+          - ref: R13
+            foundation: >-
+              understand that X is inversely proportional to Y is equivalent to X is proportional
+              to $\frac{1}{Y}$; interpret equations that describe direct and inverse proportion
+            higher: >-
+              understand that X is inversely proportional to Y is equivalent to X is proportional
+              to $\frac{1}{Y}$; construct and interpret equations that describe direct and inverse
+              proportion
+          - ref: R14
+            foundation: >-
+              interpret the gradient of a straight line graph as a rate of change; recognise and
+              interpret graphs that illustrate direct and inverse proportion
+          - ref: R15
+            higher: >-
+              interpret the gradient at a point on a curve as the instantaneous rate of change;
+              apply the concepts of average and instantaneous rate of change (gradients of chords
+              and tangents) in numerical, algebraic and graphical contexts (this does not include
+              calculus)
+          - ref: R16
+            foundation: >-
+              set up, solve and interpret the answers in growth and decay problems, including
+              compound interest
+            higher: >-
+              set up, solve and interpret the answers in growth and decay problems, including
+              compound interest and work with general iterative processes
+  - ref: "4"
+    title: Geometry and measures
+    subtopics:
+      - title: Properties and constructions
+        objectives:
+          - ref: G1
+            foundation: >-
+              use conventional terms and notation: points, lines, vertices, edges, planes,
+              parallel lines, perpendicular lines, right angles, polygons, regular polygons and
+              polygons with reflection and/or rotation symmetries; use the standard conventions
+              for labelling and referring to the sides and angles of triangles; draw diagrams from
+              written description
+            higher: >-
+              use conventional terms and notations: points, lines, vertices, edges, planes,
+              parallel lines, perpendicular lines, right angles, polygons, regular polygons and
+              polygons with reflection and/or rotation symmetries; use the standard conventions
+              for labelling and referring to the sides and angles of triangles; draw diagrams from
+              written description
+          - ref: G2
+            foundation: >-
+              use the standard ruler and compass constructions (perpendicular bisector of a line
+              segment, constructing a perpendicular to a given line from/at a given point,
+              bisecting a given angle); use these to construct given figures and solve loci
+              problems; know that the perpendicular distance from a point to a line is the
+              shortest distance to the line
+          - ref: G3
+            foundation: >-
+              apply the properties of angles at a point, angles at a point on a straight line,
+              vertically opposite angles; understand and use alternate and corresponding angles on
+              parallel lines; derive and use the sum of angles in a triangle (e.g. to deduce and
+              use the angle sum in any polygon, and to derive properties of regular polygons)
+          - ref: G4
+            foundation: >-
+              derive and apply the properties and definitions of special types of quadrilaterals,
+              including square, rectangle, parallelogram, trapezium, kite and rhombus; and
+              triangles and other plane figures using appropriate language
+            higher: >-
+              derive and apply the properties and definitions of: special types of quadrilaterals,
+              including square, rectangle, parallelogram, trapezium, kite and rhombus; and
+              triangles and other plane figures using appropriate language
+          - ref: G5
+            foundation: >-
+              use the basic congruence criteria for triangles (SSS, SAS, ASA, RHS)
+          - ref: G6
+            foundation: >-
+              apply angle facts, triangle congruence, similarity and properties of quadrilaterals
+              to conjecture and derive results about angles and sides, including Pythagoras’
+              theorem and the fact that the base angles of an isosceles triangle are equal, and
+              use known results to obtain simple proofs
+          - ref: G7
+            foundation: >-
+              identify, describe and construct congruent and similar shapes, including on
+              coordinate axes, by considering rotation, reflection, translation and enlargement
+              (including fractional scale factors)
+            higher: >-
+              identify, describe and construct congruent and similar shapes, including on
+              coordinate axes, by considering rotation, reflection, translation and enlargement
+              (including fractional and negative scale factors)
+          - ref: G8
+            higher: >-
+              describe the changes and invariance achieved by combinations of rotations,
+              reflections and translations
+          - ref: G9
+            foundation: >-
+              identify and apply circle definitions and properties, including: centre, radius,
+              chord, diameter, circumference, tangent, arc, sector and segment
+          - ref: G10
+            higher: >-
+              apply and prove the standard circle theorems concerning angles, radii, tangents and
+              chords, and use them to prove related results
+          - ref: G11
+            foundation: >-
+              solve geometrical problems on coordinate axes
+          - ref: G12
+            foundation: >-
+              identify properties of the faces, surfaces, edges and vertices of: cubes, cuboids,
+              prisms, cylinders, pyramids, cones and spheres
+          - ref: G13
+            foundation: >-
+              construct and interpret plans and elevations of 3D shapes
+      - title: Mensuration and calculation
+        objectives:
+          - ref: G14
+            foundation: >-
+              use standard units of measure and related concepts (length, area, volume/capacity,
+              mass, time, money, etc.)
+          - ref: G15
+            foundation: >-
+              measure line segments and angles in geometric figures, including interpreting maps
+              and scale drawings and use of bearings
+          - ref: G16
+            foundation: >-
+              know and apply formulae to calculate: area of triangles, parallelograms, trapezia;
+              volume of cuboids and other right prisms (including cylinders)
+          - ref: G17
+            foundation: >-
+              know the formulae: circumference of a circle = 2πr = πd , area of a circle = $\pi
+              r^2$; calculate: perimeters of 2D shapes, including circles; areas of circles and
+              composite shapes; surface area and volume of spheres, pyramids, cones and composite
+              solids
+          - ref: G18
+            foundation: >-
+              calculate arc lengths, angles and areas of sectors of circles
+          - ref: G19
+            foundation: >-
+              apply the concepts of congruence and similarity, including the relationships between
+              lengths, in similar figures
+            higher: >-
+              apply the concepts of congruence and similarity, including the relationships between
+              lengths, areas and volumes in similar figures
+          - ref: G20
+            foundation: >-
+              know the formulae for: Pythagoras’ theorem $a^2 + b^2 = c^2$, and the trigonometric
+              ratios, $\sin \theta = \frac{\text{opposite}}{\text{hypotenuse}}$, $\cos \theta =
+              \frac{\text{adjacent}}{\text{hypotenuse}}$ and $\tan \theta =
+              \frac{\text{opposite}}{\text{adjacent}}$; apply them to find angles and lengths in
+              right-angled triangles in two-dimensional figures
+            higher: >-
+              know the formulae for: Pythagoras’ theorem $a^2 + b^2 = c^2$, and the trigonometric
+              ratios, $\sin \theta = \frac{\text{opposite}}{\text{hypotenuse}}$, $\cos \theta =
+              \frac{\text{adjacent}}{\text{hypotenuse}}$ and $\tan \theta =
+              \frac{\text{opposite}}{\text{adjacent}}$; apply them to find angles and lengths in
+              right-angled triangles and, where possible, general triangles in two and three
+              dimensional figures
+          - ref: G21
+            foundation: >-
+              know the exact values of sin θ and cos θ for θ = 0°, 30°, 45°, 60° and 90°; know the
+              exact value of tan θ for θ = 0°, 30°, 45° and 60°
+          - ref: G22
+            higher: >-
+              know and apply the sine rule $\frac{a}{\sin A} = \frac{b}{\sin B} = \frac{c}{\sin
+              C}$, and cosine rule $a^2 = b^2 + c^2 – 2bc \cos A$, to find unknown lengths and
+              angles
+          - ref: G23
+            higher: >-
+              know and apply Area = $\frac{1}{2}ab \sin C$ to calculate the area, sides or angles
+              of any triangle
+      - title: Vectors
+        objectives:
+          - ref: G24
+            foundation: >-
+              describe translations as 2D vectors
+          - ref: G25
+            foundation: >-
+              apply addition and subtraction of vectors, multiplication of vectors by a scalar,
+              and diagrammatic and column representations of vectors
+            higher: >-
+              apply addition and subtraction of vectors, multiplication of vectors by a scalar,
+              and diagrammatic and column representations of vectors; use vectors to construct
+              geometric arguments and proofs
+  - ref: "5"
+    title: Probability
+    subtopics:
+      - title: Probability
+        objectives:
+          - ref: P1
+            foundation: >-
+              record, describe and analyse the frequency of outcomes of probability experiments
+              using tables and frequency trees
+          - ref: P2
+            foundation: >-
+              apply ideas of randomness, fairness and equally likely events to calculate expected
+              outcomes of multiple future experiments
+          - ref: P3
+            foundation: >-
+              relate relative expected frequencies to theoretical probability, using appropriate
+              language and the 0-1 probability scale
+          - ref: P4
+            foundation: >-
+              apply the property that the probabilities of an exhaustive set of outcomes sum to
+              one; apply the property that the probabilities of an exhaustive set of mutually
+              exclusive events sum to one
+          - ref: P5
+            foundation: >-
+              understand that empirical unbiased samples tend towards theoretical probability
+              distributions, with increasing sample size
+          - ref: P6
+            foundation: >-
+              enumerate sets and combinations of sets systematically, using tables, grids, Venn
+              diagrams and tree diagrams
+          - ref: P7
+            foundation: >-
+              construct theoretical possibility spaces for single and combined experiments with
+              equally likely outcomes and use these to calculate theoretical probabilities
+          - ref: P8
+            foundation: >-
+              calculate the probability of independent and dependent combined events, including
+              using tree diagrams and other representations, and know the underlying assumptions
+          - ref: P9
+            higher: >-
+              calculate and interpret conditional probabilities through representation using
+              expected frequencies with two-way tables, tree diagrams and Venn diagrams
+  - ref: "6"
+    title: Statistics
+    subtopics:
+      - title: Statistics
+        objectives:
+          - ref: S1
+            foundation: >-
+              infer properties of populations or distributions from a sample, while knowing the
+              limitations of sampling
+          - ref: S2
+            foundation: >-
+              interpret and construct tables, charts and diagrams, including frequency tables, bar
+              charts, pie charts and pictograms for categorical data, vertical line charts for
+              ungrouped discrete numerical data, tables and line graphs for time series data and
+              know their appropriate use
+          - ref: S3
+            higher: >-
+              construct and interpret diagrams for grouped discrete data and continuous data, i.e.
+              histograms with equal and unequal class intervals and cumulative frequency graphs,
+              and know their appropriate use
+          - ref: S4
+            foundation: >-
+              interpret, analyse and compare the distributions of data sets from univariate
+              empirical distributions through: • appropriate graphical representation involving
+              discrete, continuous and grouped data • appropriate measures of central tendency
+              (median, mean, mode and modal class) and spread (range, including consideration of
+              outliers)
+            higher: >-
+              interpret, analyse and compare the distributions of data sets from univariate
+              empirical distributions through: • appropriate graphical representation involving
+              discrete, continuous and grouped data, including box plots • appropriate measures of
+              central tendency (median, mean, mode and modal class) and spread (range, including
+              consideration of outliers, quartiles and inter-quartile range)
+          - ref: S5
+            foundation: >-
+              apply statistics to describe a population
+          - ref: S6
+            foundation: >-
+              use and interpret scatter graphs of bivariate data; recognise correlation and know
+              that it does not indicate causation; draw estimated lines of best fit; make
+              predictions; interpolate and extrapolate apparent trends while knowing the dangers
+              of so doing
