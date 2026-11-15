@@ -1,0 +1,1119 @@
+# curriculum/specs/aqa-8062.yaml
+# AQA GCSE Religious Studies A 8062, section 3 "Subject content", copied word
+# for word from the specification PDF (Version 1.2, 10 November 2017).
+#
+# - Topics are the religions (Component 1) and themes (Component 2); subtopics
+#   are the sub-headings printed in each (e.g. "Key beliefs").
+# - Each top-level bullet is one statement, with its sub-bullets after "•".
+#   Where a sentence ending in a colon introduces bullets, it starts the
+#   statement. The spec has no statement codes: refs are the section number
+#   plus a counter (3.1.2.1.1, ...).
+# - Students study two religions and four themes; every option is included.
+
+specification:
+  board: aqa
+  subject: religious-studies
+  code: "8062"
+  title: AQA GCSE Religious Studies A
+  version: Version 1.2 10 November 2017
+  source_url: "https://filestore.aqa.org.uk/resources/rs/specifications/AQA-8062-SP-2016.PDF"
+  tiered: false
+
+topics:
+  - ref: "3.1.1"
+    title: Buddhism
+    subtopics:
+      - title: The Dhamma (Dharma)
+        objectives:
+          - ref: "3.1.1.1.1"
+            foundation: >-
+              The concept of Dhamma (Dharma).
+          - ref: "3.1.1.1.2"
+            foundation: >-
+              The concept of dependent arising (paticcasamupada).
+          - ref: "3.1.1.1.3"
+            foundation: >-
+              The Three Marks of Existence: • anicca (impermanence) • anatta (no fixed self) •
+              dukkha (unsatisfactoriness of life, suffering).
+          - ref: "3.1.1.1.4"
+            foundation: >-
+              The human personality, in the Theravada and Mahayana traditions: • Theravada: the
+              Five Aggregates (skandhas) of form, sensation, perception, mental formations,
+              consciousness • Mahayana: sunyata, the possibility of attaining Buddhahood and
+              Buddha-nature.
+          - ref: "3.1.1.1.5"
+            foundation: >-
+              Human destiny: • different ideals in Theravada and Mahayana traditions: Arhat (a
+              ‘perfected person’) and Bodhisattva ideals • Buddhahood and the Pure Land.
+      - title: The Buddha and the Four Noble Truths
+        objectives:
+          - ref: "3.1.1.1.6"
+            foundation: >-
+              The Buddha’s life and its significance: • the birth of the Buddha and his life of
+              luxury • the Four Sights: illness, old age, death, holy man (Jataka 075) • the
+              Buddha’s ascetic life • the Buddha’s Enlightenment.
+          - ref: "3.1.1.1.7"
+            foundation: >-
+              The Four Noble Truths: • suffering (dukkha) including different types of suffering •
+              the causes of suffering (samudaya); the Three Poisons, ignorance, greed and hate •
+              the end of craving (tanha), interpretations of nibbana (nirvana) and Enlightenment •
+              the Eightfold Path (magga) to nibbana/nirvana; the pathas the Threefold Way: ethics
+              (sila), meditation (samadhi) and wisdom (panna). Dhammapada 190–191.
+      - title: Worship and festivals
+        objectives:
+          - ref: "3.1.1.2.1"
+            foundation: >-
+              The nature, use and importance of Buddhist places of worship including temples,
+              shrines, monasteries (viharas), halls for meditation or learning (gompas) and their
+              key features including Buddha rupa, artefacts and offerings.
+          - ref: "3.1.1.2.2"
+            foundation: >-
+              Puja, the significance and role of puja/devotional ritual in the home and in the
+              temple, including chanting, both as a devotional practice and as an aid to mental
+              concentration, mantra recitation, use of malas.
+          - ref: "3.1.1.2.3"
+            foundation: >-
+              Meditation, the different aims, significance and methods of meditation: • Samatha
+              (concentration and tranquillity) including mindfulness of breathing • Vipassana
+              (insight) including zazen • the visualisation of Buddhas and Bodhisattvas.
+          - ref: "3.1.1.2.4"
+            foundation: >-
+              The practice and significance of different ceremonies and rituals associated with
+              death and mourning in Theravada communities and in Japan and Tibet.
+          - ref: "3.1.1.2.5"
+            foundation: >-
+              Festivals and retreats and their importance to Buddhists in Great Britain today,
+              including the celebrations, origins and significance of: GCSE Religious Studies A
+              8062. GCSE exams June 2018 onwards. Version 1.2 10 November 2017 • Wesak •
+              Parinirvana Day.
+      - title: Buddhist ethics
+        objectives:
+          - ref: "3.1.1.2.6"
+            foundation: >-
+              Ethical teaching: • kamma (karma) and rebirth • compassion (karuna) • loving
+              kindness (metta).
+          - ref: "3.1.1.2.7"
+            foundation: >-
+              The five moral precepts: • do not take life • do not take what is not given • do not
+              misuse the senses • do not speak falsehoods • do not take intoxicants that cloud the
+              mind.
+          - ref: "3.1.1.2.8"
+            foundation: >-
+              The six perfections in the Mahayanan tradition: • generosity • morality • patience •
+              energy • meditation • wisdom, including how the individual develops these
+              perfections within themselves.
+  - ref: "3.1.2"
+    title: Christianity
+    subtopics:
+      - title: Key beliefs
+        objectives:
+          - ref: "3.1.2.1.1"
+            foundation: >-
+              The nature of God: • God as omnipotent, loving and just, and the problem of evil and
+              suffering • the oneness of God and the Trinity: Father, Son and Holy Spirit.
+          - ref: "3.1.2.1.2"
+            foundation: >-
+              Different Christian beliefs about creation including the role of Word and Spirit
+              (John 1:1-3 and Genesis 1:1-3).
+          - ref: "3.1.2.1.3"
+            foundation: >-
+              Different Christian beliefs about the afterlife and their importance, including:
+              resurrection and life after death; judgement, heaven and hell.
+      - title: Jesus Christ and salvation
+        objectives:
+          - ref: "3.1.2.1.4"
+            foundation: >-
+              Beliefs and teachings about: • the incarnation and Jesus as the Son of God • the
+              crucifixion, resurrection and ascension • sin, including original sin • the means of
+              salvation, including law, grace and Spirit • the role of Christ in salvation
+              including the idea of atonement.
+      - title: Worship and festivals
+        objectives:
+          - ref: "3.1.2.2.1"
+            foundation: >-
+              Different forms of worship and their significance: • liturgical, non-liturgical and
+              informal, including the use of the Bible • private worship.
+          - ref: "3.1.2.2.2"
+            foundation: >-
+              Prayer and its significance, including the Lord’s Prayer, set prayers and informal
+              prayer.
+          - ref: "3.1.2.2.3"
+            foundation: >-
+              The role and meaning of the sacraments: • the meaning of sacrament • the sacrament
+              of baptism and its significance for Christians; infant and believers' baptism;
+              different beliefs about infant baptism • the sacrament of Holy Communion/Eucharist
+              and its significance for Christians, including different ways in which it is
+              celebrated and different interpretations of its meaning.
+          - ref: "3.1.2.2.4"
+            foundation: >-
+              The role and importance of pilgrimage and celebrations including: • two contrasting
+              examples of Christian pilgrimage: Lourdes and Iona • the celebrations of Christmas
+              and Easter, including their importance for Christians in Great Britain today.
+      - title: The role of the church in the local and worldwide community
+        objectives:
+          - ref: "3.1.2.2.5"
+            foundation: >-
+              The role of the Church in the local community, including food banks and street
+              pastors.
+          - ref: "3.1.2.2.6"
+            foundation: >-
+              The place of mission, evangelism and Church growth.
+          - ref: "3.1.2.2.7"
+            foundation: >-
+              The importance of the worldwide Church including: • working for reconciliation • how
+              Christian churches respond to persecution • the work of one of the following:
+              Catholic Agency For Overseas Development (CAFOD), Christian Aid, Tearfund.
+  - ref: "3.1.3"
+    title: Catholic Christianity
+    subtopics:
+      - title: Key beliefs
+        objectives:
+          - ref: "3.1.3.1.1"
+            foundation: >-
+              One God as a Trinity of persons: Father, Son and Holy Spirit, as expressed in the
+              Nicene Creed; the scriptural origins of this belief and its development in the
+              Council of Nicaea.
+          - ref: "3.1.3.1.2"
+            foundation: >-
+              Creation: Biblical accounts of creation (Genesis 1 and 2) and their significance for
+              an understanding of the nature of God, the dignity of human beings and of humanity’s
+              relationship with creation. Different Christian beliefs about creation.
+          - ref: "3.1.3.1.3"
+            foundation: >-
+              Incarnation: the belief in Jesus as incarnate Son, divine Word, both fully God and
+              fully human and the scriptural origins of this belief.
+          - ref: "3.1.3.1.4"
+            foundation: >-
+              Redemption: the significance of the life, death, resurrection and ascension of Jesus
+              for Catholic beliefs about salvation and grace.
+          - ref: "3.1.3.1.5"
+            foundation: >-
+              Beliefs about life after death: resurrection, judgement, heaven, hell and purgatory.
+      - title: The seven sacraments
+        objectives:
+          - ref: "3.1.3.1.6"
+            foundation: >-
+              The meaning and significance of ‘sacrament’ and the importance of the sacramental
+              nature of reality.
+          - ref: "3.1.3.1.7"
+            foundation: >-
+              The names, meanings and effects of the seven sacraments: • baptism • confirmation •
+              reconciliation • anointing of the sick • matrimony • holy orders • the eucharist:
+              its status as 'the source and summit of Christian life'; different Christian views
+              about its meaning and importance.
+      - title: Worship
+        objectives:
+          - ref: "3.1.3.2.1"
+            foundation: >-
+              Prayer: • prayer as 'the raising of the mind and heart to God' • formal prayers and
+              informal prayer, including different views about their relative importance • the
+              meaning and importance of the Lord’s Prayer.
+          - ref: "3.1.3.2.2"
+            foundation: >-
+              The role and importance of forms of popular piety including the Rosary and the
+              Stations of the Cross.
+          - ref: "3.1.3.2.3"
+            foundation: >-
+              The role and importance of pilgrimage, including a study of one place of Roman
+              Catholic pilgrimage, and different Christian views about the importance of
+              pilgrimage.
+          - ref: "3.1.3.2.4"
+            foundation: >-
+              The funeral rite and its significance.
+      - title: The work of the Church
+        objectives:
+          - ref: "3.1.3.2.5"
+            foundation: >-
+              Catholic beliefs about the essential duty to ‘love our neighbour’ in concrete ways
+              locally, nationally and globally and how these beliefs are reflected in: • Catholic
+              social teaching including Gaudium et Spes paragraph 26 • Catholic teaching on
+              justice, peace and reconciliation • The work of Catholic agencies including CAFOD,
+              Trocaire, Missio.
+          - ref: "3.1.3.2.6"
+            foundation: >-
+              The meaning and significance of mission and evangelism for Catholics today, globally
+              and in Great Britain, both nationally and locally.
+          - ref: "3.1.3.2.7"
+            foundation: >-
+              The aims and importance of the Society of Saint Vincent de Paul (SVP).
+          - ref: "3.1.3.2.8"
+            foundation: >-
+              The aims and importance of either the Corrymeela community or Pax Christi.
+  - ref: "3.1.4"
+    title: Hinduism
+    subtopics:
+      - title: Ideas about the nature of God and existence
+        objectives:
+          - ref: "3.1.4.1.1"
+            foundation: >-
+              Brahman: different Hindu understandings of brahman; ultimate reality as divine
+              consciousness (nirguna) and manifestation of God in form (saguna); spiritual worlds.
+          - ref: "3.1.4.1.2"
+            foundation: >-
+              Different understandings of the three features of the divine: • everywhere, as
+              non-personal (brahman) • within the heart • beyond, as a personal loving God •
+              Brihadaranyaka Upanishad 391.
+          - ref: "3.1.4.1.3"
+            foundation: >-
+              How the divine presents: • the Tri-murti: Brahma, Vishnu and Shiva • male and female
+              deities, including Ganesha, Lakshmi, Hanuman, Saraswati • the concept of avatara,
+              including Krishna, Rama.
+          - ref: "3.1.4.1.4"
+            foundation: >-
+              Matter (prakriti); the three qualities (tri-guna); illusion (maya); cosmology (Rig
+              Veda 10.129.6-7); the cycle of four ages; many worlds and their diverse inhabitants.
+              GCSE Religious Studies A 8062. GCSE exams June 2018 onwards. Version 1.2 10 November
+              2017
+      - title: Beliefs about the nature of human life
+        objectives:
+          - ref: "3.1.4.1.5"
+            foundation: >-
+              The concept of atman, as individual, eternal inner self, distinct from material mind
+              and body.
+          - ref: "3.1.4.1.6"
+            foundation: >-
+              Cycle of birth and death: samsara; moral action and reaction: the law of karma;
+              types of liberation: moksha.
+          - ref: "3.1.4.1.7"
+            foundation: >-
+              Individual free will and responses to suffering; knowledge and ignorance.
+          - ref: "3.1.4.1.8"
+            foundation: >-
+              Personal virtues including ahimsa, respect, empathy, mind/sense control, humility,
+              love.
+          - ref: "3.1.4.1.9"
+            foundation: >-
+              The four aims of human life: dharma, artha, kama, moksha.
+          - ref: "3.1.4.1.10"
+            foundation: >-
+              The meaning of dharma; sanatana dharma; varnashrama dharma.
+      - title: Worship and festivals
+        objectives:
+          - ref: "3.1.4.2.1"
+            foundation: >-
+              Places of worship and their importance: home; temple; outdoors (such as shrines);
+              the space of the heart
+          - ref: "3.1.4.2.2"
+            foundation: >-
+              Different forms of worship/meditation and their significance: havan, puja, arati,
+              darshan, bhajan/ kirtan, japa/mantra; key differences in worship in Shaivism and
+              Vaishnavism and different Hindu views about the importance of worship.
+          - ref: "3.1.4.2.3"
+            foundation: >-
+              Focuses of worship and representations of the divine and their importance: • one God
+              (personal or non-personal) • the many deities, guru and other elders • holy land,
+              hills and rivers • sacred plants and animals • the murti as a representation of God.
+          - ref: "3.1.4.2.4"
+            foundation: >-
+              Sacred festivals and their importance for Hindus in Great Britain today, including
+              the origins and meaning of: • Diwali • Holi.
+      - title: Lifestyle
+        objectives:
+          - ref: "3.1.4.2.5"
+            foundation: >-
+              The four paths towards yoga (union with the divine), their differences and their
+              importance: • action (karma yoga) • knowledge (jnana yoga) • meditation (astanga
+              yoga) • devotion (bhakti yoga).
+          - ref: "3.1.4.2.6"
+            foundation: >-
+              Pilgrimage: • the role of pilgrimage • practices and purposes • sacred sites,
+              including Varanasi • Kumbh Mela.
+          - ref: "3.1.4.2.7"
+            foundation: >-
+              The work and significance of: • Hindu environmental projects including ‘cow
+              protection’ and their significance. • Charities that promote well-being, social
+              inclusion and women’s rights.
+  - ref: "3.1.5"
+    title: Islam
+    subtopics:
+      - title: Key Beliefs
+        objectives:
+          - ref: "3.1.5.1.1"
+            foundation: >-
+              The six articles of faith in Sunni Islam and five roots of Usul ad-Din in Shi’a
+              Islam, including key similarities and differences.
+          - ref: "3.1.5.1.2"
+            foundation: >-
+              Tawhid (the Oneness of God), Qur’an Surah 112.
+          - ref: "3.1.5.1.3"
+            foundation: >-
+              The nature of God: omnipotence, beneficence, mercy, fairness and justice/Adalat in
+              Shi’a Islam, including different ideas about God’s relationship with the world:
+              immanence and transcendence.
+          - ref: "3.1.5.1.4"
+            foundation: >-
+              Angels, their nature and role, including Jibril and Mika’il.
+          - ref: "3.1.5.1.5"
+            foundation: >-
+              Predestination and human freedom and its relationship to the Day of Judgement.
+          - ref: "3.1.5.1.6"
+            foundation: >-
+              Akhirah (life after death), human responsibility and accountability, resurrection,
+              heaven and hell.
+      - title: Authority
+        objectives:
+          - ref: "3.1.5.1.7"
+            foundation: >-
+              Risalah (Prophethood) including the role and importance of Adam, Ibrahim and
+              Muhammad.
+          - ref: "3.1.5.1.8"
+            foundation: >-
+              The holy books: • Qur’an: revelation and authority • the Torah, the Psalms, the
+              Gospel, the Scrolls of Abraham and their authority.
+          - ref: "3.1.5.1.9"
+            foundation: >-
+              The imamate in Shi'a Islam: its role and significance.
+      - title: Worship
+        objectives:
+          - ref: "3.1.5.2.1"
+            foundation: >-
+              Five Pillars of Sunni Islam and the Ten Obligatory Acts of Shi’a Islam (students
+              should study the Five Pillars and jihad in both Sunni and Shi’a Islam and the
+              additional duties of Shi’a Islam).
+          - ref: "3.1.5.2.2"
+            foundation: >-
+              Shahadah: declaration of faith and its place in Muslim practice.
+          - ref: "3.1.5.2.3"
+            foundation: >-
+              Salah and its significance: how and why Muslims pray including times, directions,
+              ablution (wudu), movements (rak’ahs) and recitations; salah in the home and mosque
+              and elsewhere; Friday prayer: Jummah; key differences in the practice of salah in
+              Sunni and Shi’a Islam, and different Muslim views about the importance of prayer.
+      - title: Duties and festivals
+        objectives:
+          - ref: "3.1.5.2.4"
+            foundation: >-
+              Sawm: the role and significance of fasting during the month of Ramadan including
+              origins, duties, benefits of fasting, the exceptions and their reasons, and the
+              Night of Power, Qur’an 96:1-5. GCSE Religious Studies A 8062. GCSE exams June 2018
+              onwards. Version 1.2 10 November 2017
+          - ref: "3.1.5.2.5"
+            foundation: >-
+              Zakah: the role and significance of giving alms including origins, how and why it is
+              given, benefits of receipt, Khums in Shi’a Islam.
+          - ref: "3.1.5.2.6"
+            foundation: >-
+              Hajj: the role and significance of the pilgrimage to Makkah including origins, how
+              hajj is performed, the actions pilgrims perform at sites including the Ka’aba at
+              Makkah, Mina, Arafat, Muzdalifah and their significance.
+          - ref: "3.1.5.2.7"
+            foundation: >-
+              Jihad: different understandings of jihad: the meaning and significance of greater
+              and lesser jihad; origins, influence and conditions for the declaration of lesser
+              jihad.
+          - ref: "3.1.5.2.8"
+            foundation: >-
+              Festivals and commemorations and their importance for Muslims in Great Britain
+              today, including the origins and meanings of Id-ul-Adha, Id-ul-Fitr, Ashura.
+  - ref: "3.1.6"
+    title: Judaism
+    subtopics:
+      - title: Key beliefs
+        objectives:
+          - ref: "3.1.6.1.1"
+            foundation: >-
+              The nature of God: • God as one • God as Creator • God as Law-Giver and Judge,
+              loving and merciful.
+          - ref: "3.1.6.1.2"
+            foundation: >-
+              The divine presence (Shekhinah).
+          - ref: "3.1.6.1.3"
+            foundation: >-
+              Beliefs about life after death, including judgement and resurrection.
+          - ref: "3.1.6.1.4"
+            foundation: >-
+              The nature and role of the Messiah, including different views on the role and
+              importance of the Messiah.
+      - title: The Covenant and the mitzvot
+        objectives:
+          - ref: "3.1.6.1.5"
+            foundation: >-
+              The promised land and the Covenant with Abraham, Genesis 12:1-3.
+          - ref: "3.1.6.1.6"
+            foundation: >-
+              The Covenant at Sinai and its importance including the role of Moses and the Ten
+              Commandments, Exodus 20:1-17.
+          - ref: "3.1.6.1.7"
+            foundation: >-
+              Key moral principles including justice, healing the world, charity and kindness to
+              others.
+          - ref: "3.1.6.1.8"
+            foundation: >-
+              The importance of the sanctity of human life, including the concept of ‘saving a
+              life’ (Pikuach Nefesh).
+          - ref: "3.1.6.1.9"
+            foundation: >-
+              The relationship between free will and the 613 mitzvot.
+          - ref: "3.1.6.1.10"
+            foundation: >-
+              Mitzvot between man and God and mitzvot between man and man, including the
+              difference between them and their importance.
+      - title: The synagogue and worship
+        objectives:
+          - ref: "3.1.6.2.1"
+            foundation: >-
+              The synagogue and its importance.
+          - ref: "3.1.6.2.2"
+            foundation: >-
+              The design and religious features of synagogues including bimah (reading platform),
+              aron hakodesh (ark), ner tamid (ever burning light) and associated practices;
+              differences between Orthodox and Reform synagogues.
+          - ref: "3.1.6.2.3"
+            foundation: >-
+              Public acts of worship including: • synagogue services in both Orthodox and Reform
+              synagogues • the significance of prayer, including the Amidah, the standing prayer.
+          - ref: "3.1.6.2.4"
+            foundation: >-
+              Shabbat in the home and synagogue and its significance.
+          - ref: "3.1.6.2.5"
+            foundation: >-
+              Worship in the home and private prayer.
+          - ref: "3.1.6.2.6"
+            foundation: >-
+              Tenakh (the written law) and Talmud (the oral law), and their study, use and
+              significance in daily life.
+      - title: Family life and festivals
+        objectives:
+          - ref: "3.1.6.2.7"
+            foundation: >-
+              Rituals and their significance: • ceremonies associated with birth including Brit
+              Milah. • Bar and Bat Mitzvah • the marriage ceremony • mourning rituals.
+          - ref: "3.1.6.2.8"
+            foundation: >-
+              Dietary laws and their significance, including different Jewish views about their
+              importance. • kosher and trefah • separation of milk and meat.
+          - ref: "3.1.6.2.9"
+            foundation: >-
+              Festivals and their importance for Jews in Great Britain today, including the
+              origins and meaning of: • Rosh Hashanah and Yom Kippur • Pesach.
+  - ref: "3.1.7"
+    title: Sikhism
+    subtopics:
+      - title: Key beliefs
+        objectives:
+          - ref: "3.1.7.1.1"
+            foundation: >-
+              The nature of God as expressed in the Mool Mantra: the content and significance of
+              the Mool Mantra, Guru Granth Sahib (GGS) 1a.
+          - ref: "3.1.7.1.2"
+            foundation: >-
+              God as Creator, including different aspects of God’s relationship with creation: •
+              God shown in and through the universe • God as separate from the universe
+          - ref: "3.1.7.1.3"
+            foundation: >-
+              The nature of human life as an opportunity to unite with God, including the
+              development of Sikh virtues such as wisdom, truthful living, justice, temperance,
+              self-control, patience, courage, humility, contentment.
+          - ref: "3.1.7.1.4"
+            foundation: >-
+              Beliefs in karma and rebirth, and the aim of mukti; the meaning of mukti, including
+              the different aspects of mukti – positive and negative.
+          - ref: "3.1.7.1.5"
+            foundation: >-
+              The five stages of liberation (five khands) and barriers to mukti (illusion,
+              self-centredness, lust, anger, greed, worldly attachment, pride).
+          - ref: "3.1.7.1.6"
+            foundation: >-
+              The importance of being gurmukh (God-centred) rather than manmukh (man-centred) and
+              the elimination of pride or ego (haumai).
+      - title: Beliefs about the nature of human life
+        objectives:
+          - ref: "3.1.7.1.7"
+            foundation: >-
+              Belief in the oneness of humanity and in the equality of all, including complete
+              equality of women with men.
+          - ref: "3.1.7.1.8"
+            foundation: >-
+              The expression of the equality of all in: • the stories of the lives of Gurus,
+              including Guru Nanak and Guru Gobind Singh • the Guru Granth Sahib • in Sikhism
+              today.
+          - ref: "3.1.7.1.9"
+            foundation: >-
+              Sewa: the importance and priority of service to others, including physical (tan),
+              mental (man) and material (dhan).
+          - ref: "3.1.7.1.10"
+            foundation: >-
+              The role and importance of the sangat (religious community).
+      - title: Worship and service
+        objectives:
+          - ref: "3.1.7.2.1"
+            foundation: >-
+              Religious features of the gurdwara: design, furniture, and artefacts; the practices
+              associated with these features and their importance, including the palki and takht.
+          - ref: "3.1.7.2.2"
+            foundation: >-
+              The role of the gurdwara within the Sikh community.
+          - ref: "3.1.7.2.3"
+            foundation: >-
+              The role of prayer in the home, GGS 305:4.
+          - ref: "3.1.7.2.4"
+            foundation: >-
+              The role and importance of the akhand path.
+          - ref: "3.1.7.2.5"
+            foundation: >-
+              The meaning and significance of langar as an expression of sewa.
+          - ref: "3.1.7.2.6"
+            foundation: >-
+              The significance of meditating on the name of God (nam japna) in daily life and in
+              the gurdwara.
+      - title: Festivals and lifestyle
+        objectives:
+          - ref: "3.1.7.2.7"
+            foundation: >-
+              Festivals and their importance for Sikhs in Great Britain today, including the
+              origins and significance of the following: • Vaisakhi (Baisakhi) • Divali •
+              Gurpurbs, including Guru Nanak’s birthday and differences in the way gurpurbs are
+              celebrated in India and Great Britain.
+          - ref: "3.1.7.2.8"
+            foundation: >-
+              The importance of visiting Sikh historical gurdwaras, including the Golden Temple
+              (Harimandir Sahib) in Amritsar.
+          - ref: "3.1.7.2.9"
+            foundation: >-
+              Birth and naming ceremonies including their meaning and significance.
+          - ref: "3.1.7.2.10"
+            foundation: >-
+              The initiation ceremony (Amrit Sanskar), including the meaning and importance of the
+              Khalsa and the five Ks, and the different perspectives of sahajdhari and amritdhari
+              Sikhs.
+          - ref: "3.1.7.2.11"
+            foundation: >-
+              The significance and use of the names Singh and Kaur.
+          - ref: "3.1.7.2.12"
+            foundation: >-
+              Students should be aware of different religious perspectives on the issues studied
+              within and / or between religious and non-religious beliefs such as atheism and
+              humanism. Students must also study religious, philosophical and ethical arguments
+              related to the issues raised, and their impact and influence on the modern world.
+              Students will be expected to show their understanding of religion through the
+              application of teachings from religion and beliefs. They will also be expected to
+              make specific references to sources of wisdom and authority including scripture
+              and/or sacred texts. They may refer to any relevant religious text such as the Pali
+              Canon, the sermons of the Buddha, the Bible, the Catechism of the Catholic Church,
+              the Vedas and Upanishads, the Qur’an and Hadith, the Torah and Talmud, and the Guru
+              Granth Sahib. As part of the supporting material for this specification, AQA will
+              publish a list of appropriate texts; alternatives may be used and no questions will
+              be set on them. Students must demonstrate knowledge and understanding that: • the
+              religious traditions of Great Britain are, in the main, Christian • the religious
+              traditions in Great Britain are diverse.
+  - ref: "3.2.1.1"
+    title: "Theme A: Relationships and families"
+    subtopics:
+      - title: "Theme A: Relationships and families"
+        objectives:
+          - ref: "3.2.1.1.1"
+            foundation: >-
+              Students should study religious teachings, and religious, philosophical and ethical
+              arguments, relating to the issues that follow, and their impact and influence in the
+              modern world. They should be aware of contrasting perspectives in contemporary
+              British society on all of these issues. They must be able to explain contrasting
+              beliefs on the following three issues with reference to the main religious tradition
+              in Britain (Christianity) and one or more other religious traditions: •
+              Contraception. • Sexual relationships before marriage. • Homosexual relationships.
+              GCSE Religious Studies A 8062. GCSE exams June 2018 onwards. Version 1.2 10 November
+              2017
+      - title: Sex, marriage and divorce
+        objectives:
+          - ref: "3.2.1.1.2"
+            foundation: >-
+              Human sexuality including: heterosexual and homosexual relationships.
+          - ref: "3.2.1.1.3"
+            foundation: >-
+              Sexual relationships before and outside of marriage.
+          - ref: "3.2.1.1.4"
+            foundation: >-
+              Contraception and family planning.
+          - ref: "3.2.1.1.5"
+            foundation: >-
+              The nature and purpose of marriage.
+          - ref: "3.2.1.1.6"
+            foundation: >-
+              Same-sex marriage and cohabitation.
+          - ref: "3.2.1.1.7"
+            foundation: >-
+              Divorce, including reasons for divorce, and remarrying.
+          - ref: "3.2.1.1.8"
+            foundation: >-
+              Ethical arguments related to divorce, including those based on the sanctity of
+              marriage vows and compassion.
+      - title: Families and gender equality
+        objectives:
+          - ref: "3.2.1.1.9"
+            foundation: >-
+              The nature of families, including: • the role of parents and children • extended
+              families and the nuclear family.
+          - ref: "3.2.1.1.10"
+            foundation: >-
+              The purpose of families, including: • procreation • stability and the protection of
+              children • educating children in a faith.
+          - ref: "3.2.1.1.11"
+            foundation: >-
+              Contemporary family issues including: • same-sex parents • polygamy.
+          - ref: "3.2.1.1.12"
+            foundation: >-
+              The roles of men and women.
+          - ref: "3.2.1.1.13"
+            foundation: >-
+              Gender equality.
+          - ref: "3.2.1.1.14"
+            foundation: >-
+              Gender prejudice and discrimination, including examples.
+  - ref: "3.2.1.2"
+    title: "Theme B: Religion and life"
+    subtopics:
+      - title: "Theme B: Religion and life"
+        objectives:
+          - ref: "3.2.1.2.1"
+            foundation: >-
+              Students should study religious teachings, and religious, philosophical and ethical
+              arguments, relating to the issues that follow, and their impact and influence in the
+              modern world. They should be aware of contrasting perspectives in contemporary
+              British society on all of these issues. They must be able to explain contrasting
+              beliefs on the following three issues with reference to the main religious tradition
+              in Britain (Christianity) and one or more other religious traditions: • Abortion. •
+              Euthanasia. • Animal experimentation.
+      - title: The origins and value of the universe
+        objectives:
+          - ref: "3.2.1.2.2"
+            foundation: >-
+              The origins of the universe, including: • religious teachings about the origins of
+              the universe, and different interpretations of these • the relationship between
+              scientific views, such as the Big Bang theory, and religious views.
+          - ref: "3.2.1.2.3"
+            foundation: >-
+              The value of the world and the duty of human beings to protect it, including
+              religious teaching about stewardship, dominion, responsibility, awe and wonder.
+          - ref: "3.2.1.2.4"
+            foundation: >-
+              The use and abuse of the environment, including the use of natural resources,
+              pollution.
+          - ref: "3.2.1.2.5"
+            foundation: >-
+              The use and abuse of animals, including: • animal experimentation • the use of
+              animals for food.
+      - title: The origins and value of human life
+        objectives:
+          - ref: "3.2.1.2.6"
+            foundation: >-
+              The origins of life, including: • religious teachings about the origins of human
+              life, and different interpretations of these • the relationship between scientific
+              views, such as evolution, and religious views.
+          - ref: "3.2.1.2.7"
+            foundation: >-
+              The concepts of sanctity of life and the quality of life.
+          - ref: "3.2.1.2.8"
+            foundation: >-
+              Abortion, including situations when the mother's life is at risk.
+          - ref: "3.2.1.2.9"
+            foundation: >-
+              Ethical arguments related to abortion, including those based on the sanctity of life
+              and quality of life.
+          - ref: "3.2.1.2.10"
+            foundation: >-
+              Euthanasia.
+          - ref: "3.2.1.2.11"
+            foundation: >-
+              Beliefs about death and an afterlife, and their impact on beliefs about the value of
+              human life.
+  - ref: "3.2.1.3"
+    title: "Theme C: The existence of God and revelation"
+    subtopics:
+      - title: "Theme C: The existence of God and revelation"
+        objectives:
+          - ref: "3.2.1.3.1"
+            foundation: >-
+              Students should study religious teachings, and religious and philosophical
+              arguments, relating to the issues that follow, and their impact and influence in the
+              modern world. They should be aware of contrasting perspectives in contemporary
+              British society on all of these issues. They must be able to explain contrasting
+              beliefs on the following three issues with reference to the main religious tradition
+              in Britain (Christianity) and non-religious beliefs such as atheism and humanism: •
+              Visions. • Miracles. • Nature as general revelation.
+      - title: Philosophical arguments for and against the existence of God
+        objectives:
+          - ref: "3.2.1.3.2"
+            foundation: >-
+              The Design argument, including its strengths and weaknesses.
+          - ref: "3.2.1.3.3"
+            foundation: >-
+              The First Cause argument, including its strengths and weaknesses.
+          - ref: "3.2.1.3.4"
+            foundation: >-
+              The argument from miracles, including its strengths and weaknesses, and one example
+              of a miracle.
+          - ref: "3.2.1.3.5"
+            foundation: >-
+              Evil and suffering as an argument against the existence of God.
+          - ref: "3.2.1.3.6"
+            foundation: >-
+              Arguments based on science against the existence of God.
+      - title: The nature of the divine and revelation
+        objectives:
+          - ref: "3.2.1.3.7"
+            foundation: >-
+              Special revelation as a source of knowledge about the divine (God, gods or ultimate
+              reality) including visions and one example of a vision.
+          - ref: "3.2.1.3.8"
+            foundation: >-
+              Enlightenment as a source of knowledge about the divine.
+          - ref: "3.2.1.3.9"
+            foundation: >-
+              General revelation: nature and scripture as a way of understanding the divine.
+          - ref: "3.2.1.3.10"
+            foundation: >-
+              Different ideas about the divine that come from these sources: • omnipotent and
+              omniscient • personal and impersonal • immanent and transcendent.
+          - ref: "3.2.1.3.11"
+            foundation: >-
+              The value of general and special revelation and enlightenment as sources of
+              knowledge about the divine, including: • the problems of different ideas about the
+              divine arising from these experiences • alternative explanations for the
+              experiences, and the possibility that the people who claimed to have them were lying
+              or mistaken. GCSE Religious Studies A 8062. GCSE exams June 2018 onwards. Version
+              1.2 10 November 2017
+  - ref: "3.2.1.4"
+    title: "Theme D: Religion, peace and conflict"
+    subtopics:
+      - title: "Theme D: Religion, peace and conflict"
+        objectives:
+          - ref: "3.2.1.4.1"
+            foundation: >-
+              Students should study religious teachings, and religious, philosophical and ethical
+              arguments, relating to the issues that follow, and their impact and influence in the
+              modern world. They should be aware of contrasting perspectives in contemporary
+              British society on all of these issues. They must be able to explain contrasting
+              beliefs on the following three issues with reference to the main religious tradition
+              in Britain (Christianity) and one or more other religious traditions: • Violence. •
+              Weapons of mass destruction. • Pacifism.
+      - title: Religion, violence, terrorism and war
+        objectives:
+          - ref: "3.2.1.4.2"
+            foundation: >-
+              The meaning and significance of: • peace • justice • forgiveness • reconciliation.
+          - ref: "3.2.1.4.3"
+            foundation: >-
+              Violence, including violent protest.
+          - ref: "3.2.1.4.4"
+            foundation: >-
+              Terrorism.
+          - ref: "3.2.1.4.5"
+            foundation: >-
+              Reasons for war, including greed, self-defence and retaliation.
+          - ref: "3.2.1.4.6"
+            foundation: >-
+              The just war theory, including the criteria for a just war.
+          - ref: "3.2.1.4.7"
+            foundation: >-
+              Holy war.
+          - ref: "3.2.1.4.8"
+            foundation: >-
+              Pacifism.
+      - title: Religion and belief in 21st century conflict
+        objectives:
+          - ref: "3.2.1.4.9"
+            foundation: >-
+              Religion and belief as a cause of war and violence in the contemporary world.
+          - ref: "3.2.1.4.10"
+            foundation: >-
+              Nuclear weapons, including nuclear deterrence.
+          - ref: "3.2.1.4.11"
+            foundation: >-
+              The use of weapons of mass destruction.
+          - ref: "3.2.1.4.12"
+            foundation: >-
+              Religion and peace-making in the contemporary world including the work of
+              individuals influenced by religious teaching.
+          - ref: "3.2.1.4.13"
+            foundation: >-
+              Religious responses to the victims of war including the work of one present day
+              religious organisation.
+  - ref: "3.2.1.5"
+    title: "Theme E: Religion, crime and punishment"
+    subtopics:
+      - title: "Theme E: Religion, crime and punishment"
+        objectives:
+          - ref: "3.2.1.5.1"
+            foundation: >-
+              Students should study religious teachings, and religious, philosophical and ethical
+              arguments, relating to the issues that follow, and their impact and influence in the
+              modern world. They should be aware of contrasting perspectives in contemporary
+              British society on all of these issues. They must be able to explain contrasting
+              beliefs on the following three issues with reference to the main religious tradition
+              in Britain (Christianity) and one or more other religious traditions: • Corporal
+              punishment. • Death penalty. • Forgiveness.
+      - title: Religion, crime and the causes of crime
+        objectives:
+          - ref: "3.2.1.5.2"
+            foundation: >-
+              Good and evil intentions and actions, including whether it can ever be good to cause
+              suffering.
+          - ref: "3.2.1.5.3"
+            foundation: >-
+              Reasons for crime, including: • poverty and upbringing • mental illness and
+              addiction • greed and hate • opposition to an unjust law.
+          - ref: "3.2.1.5.4"
+            foundation: >-
+              Views about people who break the law for these reasons.
+          - ref: "3.2.1.5.5"
+            foundation: >-
+              Views about different types of crime, including hate crimes, theft and murder.
+      - title: Religion and punishment
+        objectives:
+          - ref: "3.2.1.5.6"
+            foundation: >-
+              The aims of punishment, including: • retribution • deterrence • reformation.
+          - ref: "3.2.1.5.7"
+            foundation: >-
+              The treatment of criminals, including: • prison • corporal punishment • community
+              service.
+          - ref: "3.2.1.5.8"
+            foundation: >-
+              Forgiveness.
+          - ref: "3.2.1.5.9"
+            foundation: >-
+              The death penalty.
+          - ref: "3.2.1.5.10"
+            foundation: >-
+              Ethical arguments related to the death penalty, including those based on the
+              principle of utility and sanctity of life.
+  - ref: "3.2.1.6"
+    title: "Theme F: Religion, human rights and social justice"
+    subtopics:
+      - title: "Theme F: Religion, human rights and social justice"
+        objectives:
+          - ref: "3.2.1.6.1"
+            foundation: >-
+              Students should study religious teachings, and religious, philosophical and ethical
+              arguments, relating to the issues that follow, and their impact and influence in the
+              modern world. They should be aware of contrasting perspectives in contemporary
+              British society on all of these issues. They must be able to explain contrasting
+              beliefs on the following three issues with reference to the main religious tradition
+              in Britain (Christianity) and one or more other religious traditions: • Status of
+              women in religion. • The uses of wealth. • Freedom of religious expression.
+      - title: Human rights
+        objectives:
+          - ref: "3.2.1.6.2"
+            foundation: >-
+              Prejudice and discrimination in religion and belief, including the status and
+              treatment within religion of women and homosexuals.
+          - ref: "3.2.1.6.3"
+            foundation: >-
+              Issues of equality, freedom of religion and belief including freedom of religious
+              expression.
+          - ref: "3.2.1.6.4"
+            foundation: >-
+              Human rights and the responsibilities that come with rights, including the
+              responsibility to respect the rights of others.
+          - ref: "3.2.1.6.5"
+            foundation: >-
+              Social justice.
+          - ref: "3.2.1.6.6"
+            foundation: >-
+              Racial prejudice and discrimination.
+          - ref: "3.2.1.6.7"
+            foundation: >-
+              Ethical arguments related to racial discrimination (including positive
+              discrimination), including those based on the ideals of equality and justice.
+      - title: Wealth and poverty
+        objectives:
+          - ref: "3.2.1.6.8"
+            foundation: >-
+              Wealth, including: • the right attitude to wealth • the uses of wealth.
+          - ref: "3.2.1.6.9"
+            foundation: >-
+              The responsibilities of wealth, including the duty to tackle poverty and its causes.
+          - ref: "3.2.1.6.10"
+            foundation: >-
+              Exploitation of the poor including issues relating to: GCSE Religious Studies A
+              8062. GCSE exams June 2018 onwards. Version 1.2 10 November 2017 • fair pay •
+              excessive interest on loans • people-trafficking.
+          - ref: "3.2.1.6.11"
+            foundation: >-
+              The responsibilities of those living in poverty to help themselves overcome the
+              difficulties they face.
+          - ref: "3.2.1.6.12"
+            foundation: >-
+              Charity, including issues related to giving money to the poor.
+  - ref: "3.2.2.1"
+    title: "Theme G: St Mark’s gospel: the life of Jesus"
+    subtopics:
+      - title: The early ministry of Jesus
+        objectives:
+          - ref: "3.2.2.1.1"
+            foundation: >-
+              John’s preparation for Jesus’ ministry: 1:1–8.
+          - ref: "3.2.2.1.2"
+            foundation: >-
+              Jesus’ baptism and temptation: 1:9–13.
+          - ref: "3.2.2.1.3"
+            foundation: >-
+              The paralysed man: 2:1–12.
+          - ref: "3.2.2.1.4"
+            foundation: >-
+              Jairus’ daughter: 5:21–24a, 35–43.
+          - ref: "3.2.2.1.5"
+            foundation: >-
+              The rejection at Nazareth: 6:1–6.
+          - ref: "3.2.2.1.6"
+            foundation: >-
+              The feeding of the five thousand: 6:30–44.
+      - title: The later ministry of Jesus
+        objectives:
+          - ref: "3.2.2.1.7"
+            foundation: >-
+              The conversation at Caesarea Philippi: 8:27–33.
+          - ref: "3.2.2.1.8"
+            foundation: >-
+              The transfiguration of Jesus: 9:2–9.
+          - ref: "3.2.2.1.9"
+            foundation: >-
+              Jesus’ passion prediction: 10:32–34.
+          - ref: "3.2.2.1.10"
+            foundation: >-
+              The request of James and John: 10:35–45.
+          - ref: "3.2.2.1.11"
+            foundation: >-
+              Bartimaeus: 10:46–52.
+          - ref: "3.2.2.1.12"
+            foundation: >-
+              The entry into Jerusalem: 11:1–11.
+      - title: The final days in Jerusalem
+        objectives:
+          - ref: "3.2.2.1.13"
+            foundation: >-
+              The Last Supper: 14:12–26.
+          - ref: "3.2.2.1.14"
+            foundation: >-
+              Jesus in Gethsemane: 14:32–52.
+          - ref: "3.2.2.1.15"
+            foundation: >-
+              The trial before the Jewish authorities: 14:53, 57–65.
+          - ref: "3.2.2.1.16"
+            foundation: >-
+              The trial before Pilate: 15:1–15.
+          - ref: "3.2.2.1.17"
+            foundation: >-
+              The crucifixion and burial: 15:21–47.
+          - ref: "3.2.2.1.18"
+            foundation: >-
+              The empty tomb: 16:1–8.
+      - title: Significance
+        objectives:
+          - ref: "3.2.2.1.19"
+            foundation: >-
+              The titles Son of Man, Son of God, Christ (Messiah) and Son of David, including
+              their meaning for 1st century Jews and Jesus.
+          - ref: "3.2.2.1.20"
+            foundation: >-
+              The significance for 21st century Christians of Jesus’ understanding of the titles
+              Son of Man, Son of God, Christ (Messiah) and Son of David.
+          - ref: "3.2.2.1.21"
+            foundation: >-
+              St Mark’s portrayal of Jesus as a teacher and miracle worker, including contrasting
+              views on the historicity of the miracle stories.
+          - ref: "3.2.2.1.22"
+            foundation: >-
+              Differing beliefs about the meaning of Jesus’ words and actions at the Last Supper.
+          - ref: "3.2.2.1.23"
+            foundation: >-
+              Differing beliefs about the significance of Jesus' death and resurrection, and
+              different explanations given for the empty tomb.
+          - ref: "3.2.2.1.24"
+            foundation: >-
+              Differing views on the authority of St Mark ’s Gospel relating to the life of Jesus
+              in relation to the challenges posed by secular sources of contemporary authority.
+  - ref: "3.2.2.2"
+    title: "Theme H: St Mark’s Gospel as a source of religious, moral and spiritual truths"
+    subtopics:
+      - title: The Kingdom of God
+        objectives:
+          - ref: "3.2.2.2.1"
+            foundation: >-
+              Parable of the sower: 4:1–9, 14–20.
+          - ref: "3.2.2.2.2"
+            foundation: >-
+              Parable of the growing seed: 4:26–29.
+          - ref: "3.2.2.2.3"
+            foundation: >-
+              Parable of the mustard seed: 4:30–32.
+          - ref: "3.2.2.2.4"
+            foundation: >-
+              Jesus and the children: 10:13–16.
+          - ref: "3.2.2.2.5"
+            foundation: >-
+              The rich man: 10:17–27.
+          - ref: "3.2.2.2.6"
+            foundation: >-
+              The greatest commandment: 12:28–34.
+      - title: Jesus’ relationships with those disregarded by society
+        objectives:
+          - ref: "3.2.2.2.7"
+            foundation: >-
+              The man with leprosy: 1:40–45.
+          - ref: "3.2.2.2.8"
+            foundation: >-
+              The call of Levi: 2:13–17.
+          - ref: "3.2.2.2.9"
+            foundation: >-
+              The Greek (Syro-Phoenician) woman’s daughter: 7:24–30.
+          - ref: "3.2.2.2.10"
+            foundation: >-
+              The epileptic (demon-possessed) boy: 9:14–29.
+          - ref: "3.2.2.2.11"
+            foundation: >-
+              The widow at the treasury: 12:41–44.
+          - ref: "3.2.2.2.12"
+            foundation: >-
+              The anointing at Bethany: 14:1–9.
+      - title: Faith and discipleship
+        objectives:
+          - ref: "3.2.2.2.13"
+            foundation: >-
+              The call of the first disciples: 1:16–20.
+          - ref: "3.2.2.2.14"
+            foundation: >-
+              The woman with a haemorrhage: 5:24b–34.
+          - ref: "3.2.2.2.15"
+            foundation: >-
+              The mission of the Twelve: 6:7–13.
+          - ref: "3.2.2.2.16"
+            foundation: >-
+              The cost and rewards of discipleship: 8:34–38; 10:28–31.
+          - ref: "3.2.2.2.17"
+            foundation: >-
+              Peter’s denials: 14:27–31, 66–72.
+          - ref: "3.2.2.2.18"
+            foundation: >-
+              The commission and ascension: 16:14–20.
+      - title: Significance
+        objectives:
+          - ref: "3.2.2.2.19"
+            foundation: >-
+              The significance and importance for Jesus, for the people of his day and for people
+              in the 21st century, of key events in the life of Jesus recorded St Mark.
+          - ref: "3.2.2.2.20"
+            foundation: >-
+              Different ways in which the Kingdom of God might be understood, including as a
+              present reality and a future hope, and as a personal inner state and a community.
+          - ref: "3.2.2.2.21"
+            foundation: >-
+              Reasons for 1st century attitudes and those of Jesus to those disregarded by
+              society.
+          - ref: "3.2.2.2.22"
+            foundation: >-
+              The significance and importance for Christians of Jesus’ attitudes to those
+              disregarded by the society of his day. GCSE Religious Studies A 8062. GCSE exams
+              June 2018 onwards. Version 1.2 10 November 2017
+          - ref: "3.2.2.2.23"
+            foundation: >-
+              Different views on the significance and importance for Jesus’ disciples and for 21st
+              century Christians of discipleship as seen in incidents relating to Jesus’ disciples
+              and in Jesus’ teaching.
+          - ref: "3.2.2.2.24"
+            foundation: >-
+              Different views on the nature and importance of faith as seen in St Mark’s Gospel.
+          - ref: "3.2.2.2.25"
+            foundation: >-
+              Differing views on the authority of Jesus’ teaching as recorded by St Mark in
+              relation to the challenges posed by secular sources of contemporary authority. GCSE
+              Religious Studies A 8062. GCSE exams June 2018 onwards. Version 1.2 10 November 2017
