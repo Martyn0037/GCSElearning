@@ -8,6 +8,8 @@ import { getGetCurrentUserQueryKey, useLogin } from "../api/generated/endpoints"
 import { ApiError } from "../api/http";
 import { homePathForRole } from "../auth/roles";
 import { useSession } from "../auth/useSession";
+import { Logo } from "../components/AppShell";
+import { Button } from "../components/ui";
 import { FullPageMessage } from "../components/FullPageMessage";
 
 /** Where to go after login: back to the page that sent us here, if any. */
@@ -60,20 +62,30 @@ export function LoginPage() {
 
   const hasError = login.isError;
   const inputClass =
-    "mt-1 block min-h-12 w-full rounded-lg border border-slate-300 px-3 text-lg focus:border-brand-600 focus:outline-2 focus:outline-brand-600";
+    "mt-1.5 block min-h-12 w-full rounded-xl border border-slate-300 bg-surface px-4 text-lg text-slate-900 shadow-card transition focus:border-brand-600 focus:outline-2 focus:outline-brand-600";
 
   return (
-    <main className="flex min-h-dvh items-center justify-center bg-slate-50 p-4">
+    <main className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden bg-slate-50 px-4 py-10">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-0 h-80 bg-gradient-to-b from-brand-100 to-transparent"
+      />
+      <div className="relative mb-6 flex animate-fade-up flex-col items-center text-center">
+        <Logo className="size-14" />
+        <p className="mt-3 text-sm font-medium text-slate-600">
+          Revise smarter, one question at a time.
+        </p>
+      </div>
       <form
         onSubmit={handleSubmit}
         noValidate
-        className="w-full max-w-sm space-y-5 rounded-2xl bg-white p-6 shadow-sm"
+        className="relative w-full max-w-sm animate-fade-up space-y-5 rounded-3xl bg-surface p-6 shadow-raised"
         aria-describedby={hasError ? ids.error : undefined}
       >
-        <h1 className="text-2xl font-bold text-slate-900">Sign in to GCSE Coach</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Sign in to GCSE Coach</h1>
 
         {hasError && (
-          <p id={ids.error} role="alert" className="rounded-lg bg-red-50 p-3 text-red-800">
+          <p id={ids.error} role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-900">
             {errorMessage(login.error)}
           </p>
         )}
@@ -117,23 +129,25 @@ export function LoginPage() {
           />
         </div>
 
-        <button
+        <Button
           type="submit"
+          size="lg"
+          block
           disabled={login.isPending || !identifier.trim() || !password}
-          className="min-h-12 w-full rounded-lg bg-brand-700 text-lg font-semibold text-white hover:bg-brand-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 disabled:opacity-60"
         >
           {login.isPending ? "Signing in…" : "Sign in"}
-        </button>
+        </Button>
 
-        <p className="text-sm text-slate-600">
+        <p className="text-center text-sm text-slate-600">
           Forgotten your password? Ask your parent or carer to reset it.
         </p>
-        <p className="text-sm">
-          <Link to="/privacy" className="text-brand-700 underline">
-            Privacy notice
-          </Link>
-        </p>
       </form>
+      <Link
+        to="/privacy"
+        className="relative mt-6 inline-flex min-h-11 items-center text-sm font-medium text-slate-600 hover:text-brand-ink"
+      >
+        Privacy notice
+      </Link>
     </main>
   );
 }

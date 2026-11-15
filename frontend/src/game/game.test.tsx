@@ -452,7 +452,7 @@ describe("boss battle", () => {
     await user.click(await screen.findByRole("radio", { name: /C\s*6/ }));
     await user.click(screen.getByRole("button", { name: "Check answer" }));
     expect(await screen.findByText("Number: question 2 of 2")).toBeInTheDocument();
-    expect(screen.queryByText("✓ Correct!")).not.toBeInTheDocument();
+    expect(screen.queryByText("Correct!")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "End the battle now" }));
 
     // Assert: results
@@ -641,7 +641,8 @@ describe("sounds", () => {
     renderApp("/");
     const user = userEvent.setup();
 
-    const toggle = await screen.findByRole("checkbox", { name: "Sounds" });
+    await user.click(await screen.findByRole("button", { name: "Account menu" }));
+    const toggle = screen.getByRole("checkbox", { name: "Sounds" });
     expect(toggle).not.toBeChecked();
     await user.click(toggle);
 

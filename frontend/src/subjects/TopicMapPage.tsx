@@ -1,25 +1,25 @@
 // frontend/src/subjects/TopicMapPage.tsx
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 
 import { useGetMyTopicMap } from "../api/generated/endpoints";
 import type { UserOut } from "../api/generated/model";
 import { ApiError } from "../api/http";
 import { AppShell } from "../components/AppShell";
+import { ButtonLink, LoadingCards, PageHeader } from "../components/ui";
 import { TopicList } from "./TopicList";
 
 /** A subject's topic map for the student. */
 export function TopicMapPage({ user }: { user: UserOut }) {
   const { enrolmentId = "" } = useParams();
   const map = useGetMyTopicMap(enrolmentId);
+  const back = { to: "/", label: "Back to subjects" };
 
   return (
     <AppShell user={user}>
-      <Link to="/" className="inline-flex min-h-11 items-center text-brand-700 underline">
-        ‹ Back to subjects
-      </Link>
-      {map.isPending && <p role="status">Loading…</p>}
+      {!map.isSuccess && <PageHeader title="Topics" back={back} />}
+      {map.isPending && <LoadingCards rows={4} label="Loading topics…" />}
       {map.isError && (
-        <p role="alert" className="mt-4 rounded-lg bg-amber-50 p-3 text-amber-900">
+        <p role="alert" className="rounded-2xl bg-amber-50 p-4 text-amber-900">
           {map.error instanceof ApiError && map.error.code === "SUBJECT_NOT_READY"
             ? "This subject is still being set up. Check back soon."
             : map.error instanceof ApiError && map.error.status === 404
@@ -29,19 +29,23 @@ export function TopicMapPage({ user }: { user: UserOut }) {
       )}
       {map.isSuccess && (
         <>
-          <div className="mt-2 flex items-baseline justify-between gap-3">
-            <h1 className="text-2xl font-bold text-slate-900">{map.data.subjectName}</h1>
-            <Link
-              to={`/progress/${map.data.enrolmentId}`}
-              className="inline-flex min-h-11 items-center text-brand-700 underline"
-            >
-              Progress
-            </Link>
-          </div>
-          <p className="mb-4 text-sm text-slate-600">
-            {map.data.specification.code} · {map.data.specification.version}
-            {map.data.tier ? ` · ${map.data.tier === "higher" ? "Higher" : "Foundation"} tier` : ""}
-          </p>
+          <PageHeader
+            back={back}
+            title={map.data.subjectName}
+            subtitle={
+              <>
+                {map.data.specification.code} · {map.data.specification.version}
+                {map.data.tier
+                  ? ` · ${map.data.tier === "higher" ? "Higher" : "Foundation"} tier`
+                  : ""}
+              </>
+            }
+            action={
+              <ButtonLink to={`/progress/${map.data.enrolmentId}`} variant="secondary" icon="chart">
+                Progress
+              </ButtonLink>
+            }
+          />
           <TopicList topics={map.data.topics} enrolmentId={map.data.enrolmentId} />
         </>
       )}

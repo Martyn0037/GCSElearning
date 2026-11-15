@@ -11,9 +11,15 @@ export function FullPageMessage({
 }) {
   return (
     <main
-      className="flex min-h-dvh items-center justify-center p-6 text-lg text-slate-700"
+      className="flex min-h-dvh flex-col items-center justify-center gap-4 bg-slate-50 p-6 text-center text-slate-700"
       aria-busy={busy}
     >
+      {busy && (
+        <span
+          aria-hidden="true"
+          className="size-8 animate-spin rounded-full border-[3px] border-brand-200 border-t-brand-600"
+        />
+      )}
       <p role="status">{children}</p>
     </main>
   );

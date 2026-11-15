@@ -16,7 +16,7 @@ interface SubjectDetailsProps {
 }
 
 const fieldClass =
-  "mt-1 block min-h-12 w-full rounded-lg border border-slate-300 bg-white px-3 text-base focus:border-brand-600 focus:outline-2 focus:outline-brand-600";
+  "mt-1 block min-h-12 w-full rounded-lg border border-slate-300 bg-surface px-3 text-base focus:border-brand-600 focus:outline-2 focus:outline-brand-600";
 
 /** Board, tier and set-text choices for one chosen catalogue subject. */
 export function SubjectDetails({ draft, subject, boards, onChange }: SubjectDetailsProps) {
@@ -71,7 +71,7 @@ export function SubjectDetails({ draft, subject, boards, onChange }: SubjectDeta
             ).map(([value, label]) => (
               <label
                 key={value}
-                className="flex min-h-12 cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-white px-2 text-center has-[:checked]:border-brand-700 has-[:checked]:bg-brand-50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brand-600"
+                className="flex min-h-12 cursor-pointer items-center justify-center rounded-lg border border-slate-300 bg-surface px-2 text-center has-[:checked]:border-brand-700 has-[:checked]:bg-brand-50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brand-600"
               >
                 <input
                   type="radio"

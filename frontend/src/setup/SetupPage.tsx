@@ -14,6 +14,8 @@ import {
 import type { CatalogueOut, UserOut } from "../api/generated/model";
 import { ApiError } from "../api/http";
 import { AppShell } from "../components/AppShell";
+import { buttonClass } from "../components/styles";
+import { LoadingCards } from "../components/ui";
 import type { SubjectDraft } from "./setupModel";
 import {
   customKey,
@@ -32,7 +34,7 @@ export function SetupPage({ user }: { user: UserOut }) {
 
   let body;
   if (catalogue.isPending || mine.isPending) {
-    body = <p role="status">Loading…</p>;
+    body = <LoadingCards rows={5} label="Loading…" />;
   } else if (catalogue.isError || mine.isError) {
     body = <p role="alert">Couldn&apos;t load the subject list. Please refresh the page.</p>;
   } else {
@@ -117,7 +119,7 @@ function SetupForm({ catalogue, initial, firstTime }: SetupFormProps) {
         {catalogue.subjects.map((subject) => {
           const draft = byKey.get(subject.id);
           return (
-            <div key={subject.id} className="rounded-xl bg-white p-3 shadow-sm">
+            <div key={subject.id} className="rounded-xl bg-surface p-3 shadow-sm">
               <label className="flex min-h-11 cursor-pointer items-center gap-3 text-lg font-medium text-slate-900">
                 <input
                   type="checkbox"
@@ -142,7 +144,7 @@ function SetupForm({ catalogue, initial, firstTime }: SetupFormProps) {
         })}
       </fieldset>
 
-      <div className="rounded-xl bg-white p-3 shadow-sm">
+      <div className="rounded-xl bg-surface p-3 shadow-sm">
         <label htmlFor={ids.custom} className="block font-medium text-slate-900">
           Studying something that isn&apos;t listed?
         </label>
@@ -167,7 +169,7 @@ function SetupForm({ catalogue, initial, firstTime }: SetupFormProps) {
             type="button"
             onClick={addCustom}
             disabled={!customName.trim()}
-            className="min-h-12 rounded-lg border border-brand-700 px-4 font-semibold text-brand-700 disabled:opacity-50"
+            className="min-h-12 rounded-lg border border-brand-700 px-4 font-semibold text-brand-ink disabled:opacity-50"
           >
             Add
           </button>
@@ -188,7 +190,7 @@ function SetupForm({ catalogue, initial, firstTime }: SetupFormProps) {
                   onClick={() => {
                     setDrafts((current) => current.filter((d) => d.key !== draft.key));
                   }}
-                  className="min-h-11 px-2 text-sm text-red-700 underline"
+                  className="min-h-11 rounded-lg px-3 text-sm font-medium text-red-800 hover:bg-red-50"
                   aria-label={`Remove ${draft.customName ?? ""}`}
                 >
                   Remove
@@ -208,7 +210,7 @@ function SetupForm({ catalogue, initial, firstTime }: SetupFormProps) {
       <button
         type="submit"
         disabled={drafts.length === 0 || save.isPending}
-        className="min-h-12 w-full rounded-lg bg-brand-700 text-lg font-semibold text-white hover:bg-brand-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 disabled:opacity-60"
+        className={`${buttonClass("primary", true, "lg")} sticky bottom-24 z-10`}
       >
         {save.isPending ? "Saving…" : "Save my subjects"}
       </button>

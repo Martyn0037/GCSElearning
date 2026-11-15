@@ -20,6 +20,7 @@ import type {
   Tier,
 } from "../api/generated/model";
 import { ApiError } from "../api/http";
+import { buttonClass } from "../components/styles";
 
 const REASON_TEXT: Record<AttentionReason, string> = {
   no_specification: "No content loaded for this subject and board yet",
@@ -29,7 +30,7 @@ const REASON_TEXT: Record<AttentionReason, string> = {
 };
 
 const fieldClass =
-  "mt-1 block min-h-11 w-full rounded-lg border border-slate-300 bg-white px-2 focus:outline-2 focus:outline-brand-600";
+  "mt-1 block min-h-11 w-full rounded-lg border border-slate-300 bg-surface px-2 focus:outline-2 focus:outline-brand-600";
 
 /** Students' subjects that need the admin to confirm or correct something. */
 export function AttentionList() {
@@ -120,7 +121,7 @@ function EnrolmentCard({ enrolment, catalogue, specs }: EnrolmentCardProps) {
   }
 
   return (
-    <article className="rounded-xl bg-white p-4 shadow-sm">
+    <article className="rounded-xl bg-surface p-4 shadow-sm">
       <h3 className="text-lg font-semibold">
         {enrolment.studentName}: {enrolment.subjectName}
         {enrolment.isCustom && <span className="text-sm text-slate-600"> (typed in)</span>}
@@ -198,7 +199,7 @@ function EnrolmentCard({ enrolment, catalogue, specs }: EnrolmentCardProps) {
         type="button"
         onClick={confirm}
         disabled={update.isPending || (!boardId && !tier && !specId)}
-        className="mt-3 min-h-11 rounded-lg bg-brand-700 px-4 font-semibold text-white disabled:opacity-60"
+        className={`mt-3 ${buttonClass("primary")}`}
       >
         Confirm
       </button>

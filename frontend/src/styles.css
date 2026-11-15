@@ -1,11 +1,124 @@
 /* frontend/src/styles.css */
 @import "tailwindcss";
 
+/*
+ * Design tokens. Components use Tailwind's slate/green/red/amber scales plus
+ * these semantic tokens; dark mode (below) remaps the scales, so every screen
+ * follows the phone's light/dark setting without per-class `dark:` variants.
+ */
 @theme {
   --color-brand-50: #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c7d2fe;
+  --color-brand-500: #6366f1;
   --color-brand-600: #4f46e5;
   --color-brand-700: #4338ca;
   --color-brand-800: #3730a3;
+  --color-brand-900: #312e81;
+  /* Brand-coloured text and links: dark indigo on light, light indigo on dark. */
+  --color-brand-ink: #4338ca;
+  /* Cards, sheets and bars sitting on the page background. */
+  --color-surface: #ffffff;
+  --color-surface-glass: rgb(255 255 255 / 0.8);
+  --color-xp: #d97706;
+
+  --font-sans:
+    "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.06);
+  --shadow-raised: 0 4px 6px -1px rgb(15 23 42 / 0.08), 0 10px 24px -6px rgb(15 23 42 / 0.12);
+  --shadow-brand: 0 10px 24px -8px rgb(67 56 202 / 0.55);
+
+  --animate-fade-up: fade-up 240ms ease-out both;
+  --animate-pop: pop 400ms ease-out both;
+  --animate-shimmer: shimmer 1.4s ease-in-out infinite;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  @keyframes pop {
+    0% {
+      transform: scale(0.6);
+      opacity: 0;
+    }
+    60% {
+      transform: scale(1.12);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  @keyframes shimmer {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
+}
+
+:root {
+  color-scheme: light dark;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  @apply bg-slate-50 font-sans text-slate-900 antialiased;
+  font-feature-settings: "cv11", "ss01";
+}
+
+/* Dark theme: invert the neutral scale and flip the light tints to deep ones. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-surface: #131c2e;
+    --color-surface-glass: rgb(19 28 46 / 0.82);
+    --color-brand-ink: #a5b4fc;
+    --color-brand-50: #1e1b4b;
+    --color-brand-100: #272463;
+    --color-brand-200: #3730a3;
+    --color-xp: #fbbf24;
+
+    --color-slate-50: #0b1120;
+    --color-slate-100: #1a2335;
+    --color-slate-200: #253046;
+    --color-slate-300: #354159;
+    --color-slate-400: #5b6880;
+    --color-slate-500: #8391a7;
+    --color-slate-600: #a3afc2;
+    --color-slate-700: #c3ccda;
+    --color-slate-800: #dde3ec;
+    --color-slate-900: #f1f5f9;
+
+    --color-green-50: #0c2a1c;
+    --color-green-100: #12391f;
+    --color-green-200: #1d4d2e;
+    --color-green-800: #86efac;
+    --color-green-900: #bbf7d0;
+    --color-red-50: #2a1215;
+    --color-red-100: #3b1519;
+    --color-red-200: #5c1f25;
+    --color-red-800: #fca5a5;
+    --color-red-900: #fecaca;
+    --color-amber-50: #2a1d0a;
+    --color-amber-100: #3a280c;
+    --color-amber-900: #fde68a;
+    --color-orange-50: #2a1a0d;
+    --color-orange-900: #fed7aa;
+
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.3), 0 0 0 1px rgb(255 255 255 / 0.04);
+    --shadow-raised: 0 10px 24px -6px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.05);
+  }
 }
 
 /*
@@ -17,23 +130,14 @@
 }
 
 /* "+10 XP": a small pop. Reduced-motion users get it instantly (rule below). */
-@keyframes xp-pop {
-  0% {
-    transform: scale(0.6);
-    opacity: 0;
-  }
-  60% {
-    transform: scale(1.15);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
 .xp-pop {
   display: inline-block;
-  animation: xp-pop 400ms ease-out;
+  animation: var(--animate-pop);
+}
+
+/* Room for the bottom tab bar and the phone's home indicator. */
+.pb-safe {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
 }
 
 /* Respect users who ask for less motion (WCAG 2.3.3). */
@@ -42,6 +146,7 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }

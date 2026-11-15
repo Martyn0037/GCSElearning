@@ -510,3 +510,30 @@ curriculum content comes only from the exam board's spec, never from model knowl
 **Trade-offs.**
 - The bank top-up now pre-generates only for skills the student has started. Pre-generating for every open skill (~1,250 across 13 subjects) would spend the AI budget on skills he may never open. The first question on a new skill is generated on demand, so it can take a few seconds longer.
 - With every topic open, he can practise things not yet taught. That's his choice; the topic map's rings show where he stands.
+
+## ADR-022 — Design system: tokens, dark mode and shared components
+
+**Status:** Accepted (2026-11-15).
+
+**Context.** Each screen styled its own buttons, cards and loading text, so the app looked inconsistent and dated. There was no dark mode, and navigation was a row of underlined links.
+
+**Decision.**
+- **Tokens in one stylesheet** (`frontend/src/styles.css`):
+  - A fuller brand scale.
+  - Semantic `surface`, `surface-glass` and `brand-ink` (brand-coloured text) colours.
+  - Card, raised and brand shadows.
+  - Fade, pop and shimmer animations, all switched off for reduced motion.
+- **Dark mode follows the phone's setting.** Under `prefers-color-scheme: dark`, the stylesheet remaps Tailwind's slate scale and the light green, red and amber tints. Components keep writing ordinary utilities (`text-slate-700`, `bg-green-50`), so no `dark:` variants are needed. Mid-tone colours behind white text (buttons) are left alone. Charts and rings read the same CSS variables.
+- **Shared components** (`frontend/src/components/`):
+  - `ui.tsx`: Button, ButtonLink, Card, PageHeader, BackLink, Chip, Skeleton, LoadingCards, ErrorNotice, EmptyState, SectionTitle.
+  - `styles.ts`: `buttonClass` and `cardClass`.
+  - `Icon.tsx`: a hand-drawn 24px icon set.
+- **No new dependencies.** There's no icon library and no web font: the system UI font is used, because the CSP allows only same-origin fonts.
+- **Navigation:**
+  - A sticky translucent header with the logo and an account menu (Sounds, Change my subjects, Privacy notice, Sign out).
+  - For the student, a bottom tab bar (Home, Daily, Mistakes, Badges), within thumb reach on a phone.
+- **Loading** shows skeleton placeholders instead of "Loading…" text. Screen readers still hear "Loading…".
+
+**Trade-offs.**
+- Remapping the colour scale is global: a new component that puts white text on a light tint would break in dark mode. The rule is to use the shared Button variants for anything with white text.
+- Topic sections are folded away by default to keep the topic map short, at the cost of one extra tap to see them.

@@ -79,7 +79,9 @@ describe("routes", () => {
     const { router } = renderApp("/");
 
     vi.spyOn(console, "warn").mockImplementation(() => undefined);
-    await userEvent.setup().click(await screen.findByRole("button", { name: "Sign out" }));
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole("button", { name: "Account menu" }));
+    await user.click(screen.getByRole("button", { name: "Sign out" }));
 
     await screen.findByRole("heading", { name: "Sign in to GCSE Coach" });
     expect(router.state.location.pathname).toBe("/login");

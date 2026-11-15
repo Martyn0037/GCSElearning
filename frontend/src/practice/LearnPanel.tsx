@@ -4,6 +4,9 @@ import { useState } from "react";
 
 import { getGetLearnCardQueryKey, getLearnCard } from "../api/generated/endpoints";
 import { ApiError } from "../api/http";
+import { Icon } from "../components/Icon";
+import { buttonClass } from "../components/styles";
+import { Skeleton } from "../components/ui";
 import { MathText } from "./MathText";
 
 const MESSAGES: Record<string, string> = {
@@ -27,19 +30,32 @@ export function LearnPanel({ itemId }: { itemId: string }) {
         onClick={() => {
           setOpen(true);
         }}
-        className="min-h-11 rounded-lg border border-slate-300 px-4 font-medium text-slate-800 hover:bg-slate-50"
+        className={`${buttonClass("secondary", true)} text-slate-800`}
       >
-        <span aria-hidden="true">📖 </span>Learn this skill
+        <Icon name="book" className="size-4 text-brand-ink" />
+        Learn this skill
       </button>
     );
   }
   return (
     <section
       aria-label="Learn this skill"
-      className="space-y-2 rounded-lg bg-brand-50 p-3 text-slate-800"
+      className="w-full animate-fade-up space-y-3 rounded-2xl bg-surface p-5 text-slate-800 shadow-card"
     >
-      <h3 className="font-semibold text-slate-900">Learn this skill</h3>
-      {card.isPending && <p role="status">Loading…</p>}
+      <h3 className="flex items-center gap-2 font-semibold text-slate-900">
+        <span className="grid size-8 place-items-center rounded-lg bg-brand-50 text-brand-ink">
+          <Icon name="book" className="size-4" />
+        </span>
+        Learn this skill
+      </h3>
+      {card.isPending && (
+        <div role="status" aria-busy="true" className="space-y-2">
+          <span className="sr-only">Loading…</span>
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+          <Skeleton className="h-4 w-2/3" />
+        </div>
+      )}
       {card.isError && (
         <p role="status">
           {card.error instanceof ApiError
@@ -52,11 +68,11 @@ export function LearnPanel({ itemId }: { itemId: string }) {
           <p className="text-sm text-slate-600">
             {card.data.objectiveRef}: <MathText text={card.data.objectiveText} />
           </p>
-          <p className="whitespace-pre-line">
+          <p className="leading-relaxed whitespace-pre-line">
             <MathText text={card.data.explanation} />
           </p>
-          <h4 className="font-semibold">Worked example</h4>
-          <p className="whitespace-pre-line">
+          <h4 className="pt-1 font-semibold text-slate-900">Worked example</h4>
+          <p className="rounded-xl bg-slate-50 p-3 leading-relaxed whitespace-pre-line">
             <MathText text={card.data.workedExample} />
           </p>
         </>

@@ -20,12 +20,12 @@ export function Costs() {
         </p>
       )}
       <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-xl bg-white p-3 shadow-sm">
+        <div className="rounded-xl bg-surface p-3 shadow-sm">
           <p className="text-sm text-slate-600">Today</p>
           <p className="text-2xl font-bold">{gbp(c.todayGbp)}</p>
           <p className="text-xs text-slate-600">cap {gbp(c.dailyCapGbp)}</p>
         </div>
-        <div className="rounded-xl bg-white p-3 shadow-sm">
+        <div className="rounded-xl bg-surface p-3 shadow-sm">
           <p className="text-sm text-slate-600">This month</p>
           <p className="text-2xl font-bold">{gbp(c.monthGbp)}</p>
           <div
@@ -46,7 +46,7 @@ export function Costs() {
           </p>
         </div>
       </div>
-      <div className="overflow-x-auto rounded-xl bg-white shadow-sm">
+      <div className="overflow-x-auto rounded-xl bg-surface shadow-sm">
         <table className="w-full text-left text-sm">
           <caption className="p-2 text-left font-semibold">This month by purpose</caption>
           <thead className="bg-slate-100">
@@ -69,7 +69,7 @@ export function Costs() {
           </tbody>
         </table>
       </div>
-      <div className="overflow-x-auto rounded-xl bg-white p-3 shadow-sm">
+      <div className="overflow-x-auto rounded-xl bg-surface p-3 shadow-sm">
         <table className="w-full text-left text-sm">
           <caption className="text-left font-semibold">Last 30 days</caption>
           <tbody>

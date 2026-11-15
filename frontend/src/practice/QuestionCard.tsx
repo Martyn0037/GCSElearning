@@ -3,6 +3,8 @@ import type { SyntheticEvent } from "react";
 import { useId, useRef, useState } from "react";
 
 import type { PracticeItemOut } from "../api/generated/model";
+import { Icon } from "../components/Icon";
+import { Button, Chip } from "../components/ui";
 import { answerAsLatex } from "./answerPreview";
 import type { Edit } from "./editing";
 import { deleteBack, ESSAY_MAX_LENGTH, insertAt, MAX_LENGTH } from "./editing";
@@ -16,7 +18,7 @@ interface QuestionCardProps {
 }
 
 const inputClass =
-  "mt-1 block min-h-12 w-full rounded-lg border border-slate-300 px-3 text-lg focus:border-brand-600 focus:outline-2 focus:outline-brand-600";
+  "mt-1.5 block min-h-13 w-full rounded-xl border border-slate-300 bg-surface px-4 text-lg text-slate-900 shadow-card transition focus:border-brand-600 focus:outline-2 focus:outline-brand-600";
 
 /** One question with the right answer control for its type. */
 export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) {
@@ -53,15 +55,30 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" aria-labelledby={ids.stem}>
-      <div className="flex items-center justify-between text-sm text-slate-600">
-        <span>
-          Skill {item.objectiveRef} · Level {item.difficulty}
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-600">
+        <span className="flex items-center gap-2">
+          <Chip tone="brand">Skill {item.objectiveRef}</Chip>
+          <span
+            aria-hidden="true"
+            className="flex gap-0.5"
+            title={`Level ${String(item.difficulty)}`}
+          >
+            {[1, 2, 3, 4, 5].map((n) => (
+              <span
+                key={n}
+                className={`h-1.5 w-3 rounded-full ${n <= item.difficulty ? "bg-brand-600" : "bg-slate-200"}`}
+              />
+            ))}
+          </span>
+          <span className="sr-only">
+            Skill {item.objectiveRef} · Level {item.difficulty}
+          </span>
         </span>
-        <span>
+        <Chip>
           [{item.marks} {item.marks === 1 ? "mark" : "marks"}]
-        </span>
+        </Chip>
       </div>
-      <p id={ids.stem} className="text-xl leading-relaxed text-slate-900">
+      <p id={ids.stem} className="text-xl leading-relaxed font-medium text-slate-900">
         <MathText text={item.stem} />
       </p>
 
@@ -72,7 +89,7 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
             {item.options.map((option) => (
               <label
                 key={option.label}
-                className="flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-slate-300 bg-white px-4 text-lg has-[:checked]:border-brand-700 has-[:checked]:bg-brand-50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brand-600"
+                className="group flex min-h-14 cursor-pointer items-center gap-3 rounded-xl border border-slate-200 bg-surface px-3 py-2 text-lg text-slate-900 shadow-card transition hover:border-brand-500 active:scale-[0.99] has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 has-[:checked]:ring-1 has-[:checked]:ring-brand-600 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-brand-600"
               >
                 <input
                   type="radio"
@@ -84,7 +101,9 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
                   }}
                   className="sr-only"
                 />
-                <span className="font-semibold text-brand-700">{option.label}</span>
+                <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-slate-100 text-sm font-bold text-slate-700 transition group-has-[:checked]:bg-brand-600 group-has-[:checked]:text-white">
+                  {option.label}
+                </span>
                 <MathText text={option.text} />
               </label>
             ))}
@@ -127,11 +146,15 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
                 className={inputClass}
               />
             )}
-            {item.unit && <span className="text-lg text-slate-700">{item.unit}</span>}
+            {item.unit && <span className="text-lg font-medium text-slate-700">{item.unit}</span>}
           </div>
           {preview && (
-            <p className="mt-2 text-lg text-slate-800" aria-live="polite">
-              Looks like: <MathText text={`$${preview}$`} />
+            <p
+              className="mt-2 rounded-xl bg-slate-50 px-3 py-2 text-lg text-slate-800"
+              aria-live="polite"
+            >
+              <span className="text-sm text-slate-600">Looks like: </span>
+              <MathText text={`$${preview}$`} />
             </p>
           )}
           {essay && (
@@ -162,26 +185,32 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
             />
           </div>
           {item.keypad && (
-            <button
-              type="button"
-              className="mt-2 min-h-11 text-sm font-medium text-brand-700 underline"
+            <Button
+              variant="ghost"
+              className="mt-2"
               onClick={() => {
                 setUseKeyboard((current) => !current);
               }}
             >
               {useKeyboard ? "Use the on-screen keys only" : "Use keyboard instead"}
-            </button>
+            </Button>
           )}
         </div>
       )}
 
-      <button
-        type="submit"
-        disabled={!answer.trim() || submitting}
-        className="min-h-12 w-full rounded-lg bg-brand-700 text-lg font-semibold text-white hover:bg-brand-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-700 disabled:opacity-60"
-      >
-        {submitting ? "Checking…" : "Check answer"}
-      </button>
+      <Button type="submit" size="lg" block disabled={!answer.trim() || submitting}>
+        {submitting ? (
+          <>
+            <span className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+            Checking…
+          </>
+        ) : (
+          <>
+            Check answer
+            <Icon name="check" className="size-5" />
+          </>
+        )}
+      </Button>
     </form>
   );
 }

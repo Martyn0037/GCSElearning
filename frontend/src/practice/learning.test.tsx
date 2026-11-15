@@ -148,7 +148,7 @@ describe("written answers", () => {
 
     expect(await screen.findByText(/We couldn't mark this one right now/)).toBeInTheDocument();
     expect(screen.getByText(/It won't count against you/)).toBeInTheDocument();
-    expect(screen.queryByText("✗ Not quite")).not.toBeInTheDocument();
+    expect(screen.queryByText("Not quite")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Try a similar one" })).not.toBeInTheDocument();
   });
 

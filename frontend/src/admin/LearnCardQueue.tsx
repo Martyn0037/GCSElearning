@@ -7,6 +7,7 @@ import {
   useLearnCardQueue,
 } from "../api/generated/endpoints";
 import { MathText } from "../practice/MathText";
+import { buttonClass } from "../components/styles";
 
 /** Learn cards waiting for review (strict mode). */
 export function LearnCardQueue() {
@@ -23,7 +24,7 @@ export function LearnCardQueue() {
   return (
     <ul className="space-y-3">
       {queue.data.map((card) => (
-        <li key={card.id} className="space-y-2 rounded-xl bg-white p-4 shadow-sm">
+        <li key={card.id} className="space-y-2 rounded-xl bg-surface p-4 shadow-sm">
           <p className="text-sm text-slate-600">
             {card.objectiveRef}: <MathText text={card.objectiveText} />
           </p>
@@ -40,7 +41,7 @@ export function LearnCardQueue() {
               onClick={() => {
                 decide.mutate({ id: card.id, action: "approve" });
               }}
-              className="min-h-11 rounded-lg bg-green-700 px-4 font-semibold text-white disabled:opacity-60"
+              className={buttonClass("success")}
             >
               Approve
             </button>
@@ -50,7 +51,7 @@ export function LearnCardQueue() {
               onClick={() => {
                 decide.mutate({ id: card.id, action: "reject" });
               }}
-              className="min-h-11 rounded-lg bg-slate-700 px-4 font-semibold text-white disabled:opacity-60"
+              className={buttonClass("neutral")}
             >
               Reject
             </button>

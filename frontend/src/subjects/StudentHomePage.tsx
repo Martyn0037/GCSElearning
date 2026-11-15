@@ -4,7 +4,13 @@ import { Link, Navigate } from "react-router";
 import { useGetMySubjects } from "../api/generated/endpoints";
 import type { EnrolmentOut, UserOut } from "../api/generated/model";
 import { AppShell } from "../components/AppShell";
+import { Icon } from "../components/Icon";
+import { Chip, ErrorNotice, LoadingCards, SectionTitle } from "../components/ui";
+import { cardClass } from "../components/styles";
 import { HomeDashboard } from "../game/HomeDashboard";
+import { subjectAccent } from "./subjectAccent";
+
+const today = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long" });
 
 /**
  * Student home: Continue, level, streak, today's challenge, then their
@@ -17,13 +23,27 @@ export function StudentHomePage({ user }: { user: UserOut }) {
 
   return (
     <AppShell user={user}>
-      <h1 className="text-2xl font-bold text-slate-900">Hi {user.displayName}!</h1>
+      <div className="mb-5">
+        <p className="text-sm font-medium text-slate-600">{today.format(new Date())}</p>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Hi {user.displayName}!</h1>
+      </div>
       <HomeDashboard />
-      <h2 className="mt-6 mb-2 text-lg font-semibold text-slate-800">Your subjects</h2>
-      {mine.isPending && <p role="status">Loading…</p>}
-      {mine.isError && <p role="alert">Couldn&apos;t load your subjects. Please refresh.</p>}
+      <SectionTitle
+        action={
+          <Link
+            to="/setup"
+            className="inline-flex min-h-11 items-center rounded-lg px-2 text-sm font-medium text-brand-ink hover:bg-brand-50"
+          >
+            Change my subjects
+          </Link>
+        }
+      >
+        Your subjects
+      </SectionTitle>
+      {mine.isPending && <LoadingCards rows={2} />}
+      {mine.isError && <ErrorNotice>Couldn&apos;t load your subjects. Please refresh.</ErrorNotice>}
       {mine.isSuccess && (
-        <ul className="space-y-2">
+        <ul className="space-y-2.5">
           {mine.data.subjects.map((subject) => (
             <li key={subject.id}>
               <SubjectRow subject={subject} />
@@ -31,20 +51,6 @@ export function StudentHomePage({ user }: { user: UserOut }) {
           ))}
         </ul>
       )}
-      <div className="mt-6 flex flex-wrap gap-x-6">
-        <Link
-          to="/mistakes"
-          className="inline-flex min-h-11 items-center text-brand-700 underline underline-offset-4"
-        >
-          My mistakes
-        </Link>
-        <Link
-          to="/setup"
-          className="inline-flex min-h-11 items-center text-brand-700 underline underline-offset-4"
-        >
-          Change my subjects
-        </Link>
-      </div>
     </AppShell>
   );
 }
@@ -53,29 +59,32 @@ function SubjectRow({ subject }: { subject: EnrolmentOut }) {
   const detail = [subject.boardName, subject.tier && capitalise(subject.tier)]
     .filter(Boolean)
     .join(" · ");
+  const accent = subjectAccent(subject.subjectName);
   const content = (
     <>
-      <span className="flex flex-col">
-        <span className="text-lg font-semibold text-slate-900">{subject.subjectName}</span>
-        {detail && <span className="text-sm text-slate-600">{detail}</span>}
+      <span
+        aria-hidden="true"
+        className={`grid size-11 shrink-0 place-items-center rounded-xl text-lg font-bold ${accent}`}
+      >
+        {subject.subjectName.charAt(0)}
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate font-semibold text-slate-900">{subject.subjectName}</span>
+        {detail && <span className="truncate text-sm text-slate-600">{detail}</span>}
       </span>
       {subject.status === "active" ? (
-        <span aria-hidden="true" className="text-2xl text-brand-700">
-          ›
-        </span>
+        <Icon name="chevronRight" className="size-5 text-slate-400" />
       ) : (
-        <span className="rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-900">
-          Being set up
-        </span>
+        <Chip tone="warn">Being set up</Chip>
       )}
     </>
   );
-  const rowClass = "flex min-h-16 items-center justify-between rounded-xl bg-white p-4 shadow-sm";
+  const rowClass = `${cardClass} flex min-h-16 items-center gap-3 p-3.5`;
 
   return subject.status === "active" ? (
     <Link
       to={`/subjects/${subject.id}`}
-      className={`${rowClass} hover:bg-brand-50 focus-visible:outline-2 focus-visible:outline-brand-700`}
+      className={`${rowClass} transition hover:shadow-raised focus-visible:outline-2 focus-visible:outline-brand-600`}
     >
       {content}
     </Link>

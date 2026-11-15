@@ -13,6 +13,9 @@ import {
 import type { PracticeItemOut, UserOut } from "../api/generated/model";
 import { ApiError } from "../api/http";
 import { AppShell } from "../components/AppShell";
+import { Icon } from "../components/Icon";
+import { Button, Chip, ErrorNotice, Skeleton } from "../components/ui";
+import { cardClass } from "../components/styles";
 import { MathText } from "./MathText";
 import { LearnPanel } from "./LearnPanel";
 import { QuestionCard } from "./QuestionCard";
@@ -61,6 +64,8 @@ export function PracticeSession({ user, fetchNext, back, done }: PracticeSession
   });
   // One idempotency key per item, reused if the answer request is retried.
   const keys = useRef(new Map<string, string>());
+  // This sitting's tally, shown in the header ("3 of 4 right").
+  const [tally, setTally] = useState({ answered: 0, right: 0 });
 
   const { mutate: requestNext } = next;
   const { reset: resetAnswer } = answer;
@@ -80,7 +85,18 @@ export function PracticeSession({ user, fetchNext, back, done }: PracticeSession
     if (!item) return;
     const key = keys.current.get(item.id) ?? crypto.randomUUID();
     keys.current.set(item.id, key);
-    answer.mutate({ itemId: item.id, answer: value, key });
+    answer.mutate(
+      { itemId: item.id, answer: value, key },
+      {
+        onSuccess: (marked) => {
+          if (marked.marked === false) return; // still being marked
+          setTally((t) => ({
+            answered: t.answered + 1,
+            right: t.right + (marked.correct && !marked.assisted ? 1 : 0),
+          }));
+        },
+      },
+    );
   }
 
   function trySimilar() {
@@ -102,79 +118,100 @@ export function PracticeSession({ user, fetchNext, back, done }: PracticeSession
 
   return (
     <AppShell user={user}>
-      <Link to={back.to} className="inline-flex min-h-11 items-center text-brand-700 underline">
-        ‹ {back.label}
-      </Link>
+      <h1 className="sr-only">Practice</h1>
+      <div className="mb-4 flex min-h-11 items-center justify-between gap-3">
+        <Link
+          to={back.to}
+          className="-ml-2 inline-flex min-h-11 items-center gap-1 rounded-lg px-2 text-sm font-medium text-brand-ink hover:bg-brand-50"
+        >
+          <Icon name="chevronLeft" className="size-4" />
+          {back.label}
+        </Link>
+        {tally.answered > 0 && (
+          <span
+            className="inline-flex animate-fade-up items-center gap-1.5 rounded-full bg-surface px-3 py-1.5 text-sm font-semibold text-slate-700 shadow-card tabular-nums"
+            aria-label={`This session: ${String(tally.right)} of ${String(tally.answered)} right`}
+          >
+            <Icon name="check" className="size-4 text-green-800" />
+            {tally.right}/{tally.answered}
+          </span>
+        )}
+      </div>
 
       {next.isPending && (
-        <p role="status" className="mt-6 text-slate-700">
-          Getting your next question…
-        </p>
+        <div className={`${cardClass} space-y-4 p-5`} aria-busy="true">
+          <p role="status" className="sr-only">
+            Getting your next question…
+          </p>
+          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="h-6 w-full" />
+          <Skeleton className="h-6 w-4/5" />
+          <div className="space-y-2 pt-2">
+            <Skeleton className="h-14 w-full rounded-xl" />
+            <Skeleton className="h-14 w-full rounded-xl" />
+          </div>
+        </div>
       )}
-      {finished && <div className="mt-6">{done.content}</div>}
+      {finished && <div>{done.content}</div>}
       {next.isError && !finished && (
-        <div role="alert" className="mt-6 space-y-3 rounded-xl bg-amber-50 p-4 text-amber-900">
-          <p>{errorMessage(next.error, "Couldn't load a question. Please try again.")}</p>
-          <button type="button" onClick={loadNext} className="min-h-11 font-semibold underline">
-            Try again
-          </button>
+        <ErrorNotice onRetry={loadNext}>
+          {errorMessage(next.error, "Couldn't load a question. Please try again.")}
+        </ErrorNotice>
+      )}
+
+      {item && next.isSuccess && result && (
+        <div key={`result-${item.id}`} className="animate-fade-up space-y-4">
+          <div className={`${cardClass} p-5`}>
+            <ResultPanel
+              result={result}
+              onNext={loadNext}
+              onSimilar={trySimilar}
+              similarPending={similar.isPending}
+              similarError={
+                similar.isError
+                  ? errorMessage(similar.error, "Couldn't load a similar question.")
+                  : null
+              }
+            />
+          </div>
+          <TutorPanel key={`tutor-after-${item.id}`} itemId={item.id} />
         </div>
       )}
 
-      {item && next.isSuccess && (
-        <div className="mt-4 space-y-4 rounded-2xl bg-white p-4 shadow-sm">
-          {item.review && !result && (
-            <p className="inline-block rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-900">
-              Review: you got this one wrong before
-            </p>
-          )}
-          {result ? (
-            <>
-              <ResultPanel
-                result={result}
-                onNext={loadNext}
-                onSimilar={trySimilar}
-                similarPending={similar.isPending}
-                similarError={
-                  similar.isError
-                    ? errorMessage(similar.error, "Couldn't load a similar question.")
-                    : null
-                }
-              />
-              <TutorPanel key={`tutor-after-${item.id}`} itemId={item.id} />
-            </>
-          ) : (
-            <>
-              <QuestionCard
-                key={item.id}
-                item={item}
-                submitting={answer.isPending}
-                onSubmit={submit}
-              />
-              {answer.isPending && item.questionType === "extended" && (
-                <p role="status" className="text-slate-700">
-                  Marking your answer against the mark scheme… this can take up to a minute.
-                </p>
-              )}
-              {answer.isError && (
-                <p role="alert" className="text-red-800">
-                  {errorMessage(answer.error, "Couldn't check that. Please try again.")}
-                </p>
-              )}
-              <HintPanel
-                item={item}
-                pending={hint.isPending}
-                onReveal={() => {
-                  hint.mutate({ itemId: item.id }, { onSuccess: setServed });
-                }}
-              />
-              <div className="flex flex-wrap gap-2">
-                <LearnPanel key={`learn-${item.id}`} itemId={item.id} />
-                <TutorPanel key={`tutor-${item.id}`} itemId={item.id} />
-              </div>
-              <FlagControl key={item.id} onSend={sendFlag} pending={flag.isPending} />
-            </>
-          )}
+      {item && next.isSuccess && !result && (
+        <div key={`question-${item.id}`} className="animate-fade-up space-y-4">
+          <div className={`${cardClass} space-y-4 p-5`}>
+            {item.review && (
+              <Chip tone="warn">
+                <Icon name="refresh" className="size-3.5" />
+                Review: you got this one wrong before
+              </Chip>
+            )}
+            <QuestionCard item={item} submitting={answer.isPending} onSubmit={submit} />
+            {answer.isPending && item.questionType === "extended" && (
+              <p role="status" className="flex items-center gap-2 text-sm text-slate-700">
+                <span className="size-4 shrink-0 animate-spin rounded-full border-2 border-brand-600 border-t-transparent" />
+                Marking your answer against the mark scheme… this can take up to a minute.
+              </p>
+            )}
+            {answer.isError && (
+              <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-900">
+                {errorMessage(answer.error, "Couldn't check that. Please try again.")}
+              </p>
+            )}
+          </div>
+          <HintPanel
+            item={item}
+            pending={hint.isPending}
+            onReveal={() => {
+              hint.mutate({ itemId: item.id }, { onSuccess: setServed });
+            }}
+          />
+          <div className="grid gap-2">
+            <LearnPanel key={`learn-${item.id}`} itemId={item.id} />
+            <TutorPanel key={`tutor-${item.id}`} itemId={item.id} />
+          </div>
+          <FlagControl key={`flag-${item.id}`} onSend={sendFlag} pending={flag.isPending} />
         </div>
       )}
     </AppShell>
@@ -196,31 +233,32 @@ function HintPanel({
       {item.hints.length > 0 && (
         <ol className="space-y-2" aria-live="polite">
           {item.hints.map((text, index) => (
-            <li key={index} className="rounded-lg bg-brand-50 p-3 text-slate-800">
-              <span className="font-semibold">
-                {index === 3 ? "Full solution" : `Hint ${index + 1}`}:{" "}
+            <li
+              key={index}
+              className="flex animate-fade-up gap-3 rounded-2xl bg-amber-50 p-4 text-slate-800"
+            >
+              <Icon name="bulb" className="mt-0.5 size-5 text-amber-900" />
+              <span>
+                <span className="font-semibold text-amber-900">
+                  {index === 3 ? "Full solution" : `Hint ${String(index + 1)}`}:{" "}
+                </span>
+                <MathText text={text} />
               </span>
-              <MathText text={text} />
             </li>
           ))}
         </ol>
       )}
       {item.hintsRemaining > 0 && (
         <>
-          <button
-            type="button"
-            onClick={onReveal}
-            disabled={pending}
-            className="min-h-11 rounded-lg border border-brand-700 px-4 font-semibold text-brand-700 disabled:opacity-60"
-          >
+          <Button variant="secondary" block icon="bulb" onClick={onReveal} disabled={pending}>
             {item.hints.length === 0
               ? "I'm stuck"
               : nextIsSolution
                 ? "Show full solution"
                 : "Another hint"}
-          </button>
+          </Button>
           {nextIsSolution && (
-            <p className="text-sm text-slate-600">
+            <p className="text-center text-sm text-slate-600">
               Seeing the full solution means this one won&apos;t count towards levelling up.
             </p>
           )}
@@ -240,14 +278,14 @@ function FlagControl({ onSend, pending }: { onSend: (reason: string) => void; pe
         onClick={() => {
           setOpen(true);
         }}
-        className="min-h-11 text-sm text-slate-600 underline"
+        className="mx-auto flex min-h-11 items-center gap-1.5 rounded-lg px-3 text-sm text-slate-500 hover:bg-slate-100 hover:text-slate-700"
       >
-        🚩 This looks wrong
+        <span aria-hidden="true">🚩</span> This looks wrong
       </button>
     );
   }
   return (
-    <div className="space-y-2 rounded-lg border border-slate-200 p-3">
+    <div className={`${cardClass} animate-fade-up space-y-3 p-4`}>
       <label className="block text-sm font-medium text-slate-800">
         What looks wrong? (optional)
         <input
@@ -256,29 +294,27 @@ function FlagControl({ onSend, pending }: { onSend: (reason: string) => void; pe
           onChange={(e) => {
             setReason(e.target.value);
           }}
-          className="mt-1 block min-h-11 w-full rounded-lg border border-slate-300 px-3"
+          className="mt-1 block min-h-11 w-full rounded-xl border border-slate-300 bg-surface px-3 focus:border-brand-600 focus:outline-2 focus:outline-brand-600"
         />
       </label>
       <div className="flex gap-3">
-        <button
-          type="button"
+        <Button
+          variant="neutral"
           disabled={pending}
           onClick={() => {
             onSend(reason.trim());
           }}
-          className="min-h-11 rounded-lg bg-slate-800 px-4 font-semibold text-white disabled:opacity-60"
         >
           Report and skip
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="ghost"
           onClick={() => {
             setOpen(false);
           }}
-          className="min-h-11 px-2 underline"
         >
           Cancel
-        </button>
+        </Button>
       </div>
     </div>
   );

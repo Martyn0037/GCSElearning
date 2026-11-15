@@ -7,6 +7,7 @@ import { getChallenge, nextChallengeItem, startDaily } from "../api/generated/en
 import type { UserOut } from "../api/generated/model";
 import { ApiError } from "../api/http";
 import { AppShell } from "../components/AppShell";
+import { buttonClass } from "../components/styles";
 import { PracticeSession } from "../practice/PracticeSession";
 
 const START_ERRORS: Record<string, string> = {
@@ -34,7 +35,7 @@ export function DailyChallengePage({ user }: { user: UserOut }) {
       <AppShell user={user}>
         <div role="alert" className="space-y-3 rounded-xl bg-amber-50 p-4 text-amber-900">
           <p>{message}</p>
-          <Link to="/" className="inline-flex min-h-11 items-center underline">
+          <Link to="/" className={buttonClass("secondary")}>
             Home
           </Link>
         </div>
@@ -70,7 +71,7 @@ function DailySummary({ challengeId }: { challengeId: string }) {
         {data.score} of {data.maxScore} right
         {data.bonusXp ? ` · +${String(data.bonusXp)} bonus XP` : ""}
       </p>
-      <Link to="/" className="inline-flex min-h-11 items-center font-semibold underline">
+      <Link to="/" className={buttonClass("primary", true, "lg")}>
         Back home
       </Link>
     </div>

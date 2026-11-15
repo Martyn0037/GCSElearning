@@ -7,6 +7,7 @@ import type { ReviewDecision, ReviewQuestionOut } from "../api/generated/model";
 
 type ReviewDecisionAction = ReviewDecision["action"];
 import { MathText } from "../practice/MathText";
+import { buttonClass } from "../components/styles";
 
 type Filter = "all" | "pending_review" | "flagged";
 
@@ -73,7 +74,7 @@ function ReviewItem({
   onDecide: (action: ReviewDecisionAction) => void;
 }) {
   return (
-    <li className="space-y-2 rounded-xl bg-white p-4 shadow-sm">
+    <li className="space-y-2 rounded-xl bg-surface p-4 shadow-sm">
       <p className="text-sm text-slate-600">
         {question.subjectName} · {question.objectiveRef} · level {question.difficulty} ·{" "}
         {question.questionType} · confidence {Math.round(question.confidence * 100)}%
@@ -129,7 +130,7 @@ function ReviewItem({
           onClick={() => {
             onDecide("approve");
           }}
-          className="min-h-11 rounded-lg bg-green-700 px-4 font-semibold text-white disabled:opacity-60"
+          className={buttonClass("success")}
         >
           Approve
         </button>
@@ -139,7 +140,7 @@ function ReviewItem({
           onClick={() => {
             onDecide("reject");
           }}
-          className="min-h-11 rounded-lg bg-slate-700 px-4 font-semibold text-white disabled:opacity-60"
+          className={buttonClass("neutral")}
         >
           Reject
         </button>

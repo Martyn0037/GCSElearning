@@ -4,6 +4,8 @@ import { Link, useParams } from "react-router";
 
 import { nextPracticeItem, nextReviewItem } from "../api/generated/endpoints";
 import type { UserOut } from "../api/generated/model";
+import { buttonClass } from "../components/styles";
+import { EmptyState } from "../components/ui";
 import { PracticeSession } from "./PracticeSession";
 
 /** Practise one topic. */
@@ -32,12 +34,11 @@ export function ReviewPage({ user }: { user: UserOut }) {
       done={{
         code: "NO_REVIEWS_DUE",
         content: (
-          <div className="space-y-3 rounded-xl bg-green-50 p-4 text-green-900">
-            <p className="text-lg font-semibold">All caught up for today. ✓</p>
-            <Link to="/mistakes" className="inline-flex min-h-11 items-center underline">
+          <EmptyState icon="check" title="All caught up for today.">
+            <Link to="/mistakes" className={`${buttonClass("secondary")} mt-2`}>
               See my mistakes
             </Link>
-          </div>
+          </EmptyState>
         ),
       }}
     />

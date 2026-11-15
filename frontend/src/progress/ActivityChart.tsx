@@ -15,7 +15,8 @@ import type { DailyActivity } from "../api/generated/model";
 // Categorical slots 1 and 2 of the reference palette (validated on the light
 // surface: CVD ΔE 24.7, normal-vision ΔE 33.6, contrast ≥ 3:1).
 const COLOURS = { right: "#2a78d6", notRight: "#eb6834" } as const;
-const INK = { axis: "#52514e", grid: "#e7e6e2" };
+// Theme-aware: these CSS variables are remapped in dark mode.
+const INK = { axis: "var(--color-slate-600)", grid: "var(--color-slate-200)" };
 
 interface Row {
   label: string;
@@ -71,7 +72,12 @@ export function ActivityChart({ daily }: { daily: readonly DailyActivity[] }) {
             />
             <Tooltip
               cursor={{ fill: "rgba(0,0,0,0.04)" }}
-              contentStyle={{ borderRadius: 8, borderColor: INK.grid, fontSize: 13 }}
+              contentStyle={{
+                borderRadius: 12,
+                borderColor: INK.grid,
+                background: "var(--color-surface)",
+                fontSize: 13,
+              }}
             />
             <Legend wrapperStyle={{ fontSize: 13, color: INK.axis }} iconType="square" />
             <Bar
@@ -80,7 +86,7 @@ export function ActivityChart({ daily }: { daily: readonly DailyActivity[] }) {
               stackId="day"
               isAnimationActive={false}
               fill={COLOURS.right}
-              stroke="#fcfcfb"
+              stroke="var(--color-surface)"
               strokeWidth={1}
             />
             <Bar
@@ -89,7 +95,7 @@ export function ActivityChart({ daily }: { daily: readonly DailyActivity[] }) {
               stackId="day"
               isAnimationActive={false}
               fill={COLOURS.notRight}
-              stroke="#fcfcfb"
+              stroke="var(--color-surface)"
               strokeWidth={1}
               radius={[4, 4, 0, 0]}
             />
@@ -100,7 +106,7 @@ export function ActivityChart({ daily }: { daily: readonly DailyActivity[] }) {
         {total} answers in the last 30 days.
       </figcaption>
       <details className="text-sm">
-        <summary className="min-h-11 cursor-pointer text-brand-700 underline">
+        <summary className="flex min-h-11 cursor-pointer items-center font-medium text-brand-ink">
           Show as a table
         </summary>
         <table className="mt-2 w-full text-left">

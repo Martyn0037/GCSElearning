@@ -93,8 +93,11 @@ describe("PracticePage", () => {
     await user.click(await screen.findByRole("radio", { name: /C\s*6/ }));
     await user.click(screen.getByRole("button", { name: "Check answer" }));
 
-    expect(await screen.findByText("✓ Correct!")).toBeInTheDocument();
+    expect(await screen.findByText("Correct!")).toBeInTheDocument();
     expect(screen.getByText(/Level up! You're now on level 2/)).toBeInTheDocument();
+    // The marked question's form is replaced by the result, not left beside it.
+    expect(screen.queryByRole("button", { name: /Check answer|Checking/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("radio")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Next question" }));
     expect(await screen.findByText("Work out the length.")).toBeInTheDocument();
   });
@@ -133,7 +136,7 @@ describe("PracticePage", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Something went wrong.");
     await user.click(screen.getByRole("button", { name: "Check answer" }));
 
-    expect(await screen.findByText("✓ Correct!")).toBeInTheDocument();
+    expect(await screen.findByText("Correct!")).toBeInTheDocument();
     expect(keys[0]).toBeTruthy();
     expect(keys[1]).toBe(keys[0]);
   });
@@ -168,8 +171,8 @@ describe("PracticePage", () => {
     await user.click(await screen.findByRole("radio", { name: /A\s*2/ }));
     await user.click(screen.getByRole("button", { name: "Check answer" }));
 
-    expect(await screen.findByText("✗ Not quite")).toBeInTheDocument();
-    expect(screen.getByText(/Correct answer:/)).toHaveTextContent("C: 6");
+    expect(await screen.findByText("Not quite")).toBeInTheDocument();
+    expect(screen.getByText(/Correct answer:/).closest("p")).toHaveTextContent("C: 6");
     expect(screen.getByText("Common factors are 1, 2, 3, 6.")).toBeVisible();
   });
 
@@ -185,7 +188,7 @@ describe("PracticePage", () => {
     renderApp(practisePath);
     const user = userEvent.setup();
 
-    await user.click(await screen.findByRole("button", { name: "🚩 This looks wrong" }));
+    await user.click(await screen.findByRole("button", { name: "This looks wrong" }));
     await user.type(screen.getByLabelText(/What looks wrong/), "Two answers fit");
     await user.click(screen.getByRole("button", { name: "Report and skip" }));
 

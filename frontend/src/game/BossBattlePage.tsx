@@ -13,6 +13,8 @@ import {
 import type { ChallengeOut, UserOut } from "../api/generated/model";
 import { ApiError } from "../api/http";
 import { AppShell } from "../components/AppShell";
+import { BackLink } from "../components/ui";
+import { buttonClass } from "../components/styles";
 import { MathText } from "../practice/MathText";
 import { QuestionCard } from "../practice/QuestionCard";
 import { describeEstimate } from "./estimate";
@@ -34,13 +36,11 @@ export function BossBattlePage({ user }: { user: UserOut }) {
 
   return (
     <AppShell user={user}>
-      <Link to={back.to} className="inline-flex min-h-11 items-center text-brand-700 underline">
-        ‹ {back.label}
-      </Link>
+      <BackLink to={back.to}>{back.label}</BackLink>
       {start.isSuccess ? (
         <Battle initial={start.data} />
       ) : (
-        <section className="mt-4 space-y-3 rounded-2xl bg-white p-4 shadow-sm">
+        <section className="mt-4 space-y-3 rounded-2xl bg-surface p-4 shadow-sm">
           <h1 className="text-2xl font-bold text-slate-900">Boss battle</h1>
           <ul className="list-disc space-y-1 pl-5 text-slate-800">
             <li>A short mock paper covering the whole topic.</li>
@@ -60,7 +60,7 @@ export function BossBattlePage({ user }: { user: UserOut }) {
             onClick={() => {
               start.mutate();
             }}
-            className="min-h-12 w-full rounded-lg bg-brand-700 text-lg font-semibold text-white hover:bg-brand-800 disabled:opacity-60"
+            className={buttonClass("primary", true, "lg")}
           >
             {start.isPending ? "Starting…" : "Start the clock"}
           </button>
@@ -145,7 +145,7 @@ function Battle({ initial }: { initial: ChallengeOut }) {
   if (finished) return <BossResults challenge={state.data} />;
 
   return (
-    <div className="mt-4 space-y-4 rounded-2xl bg-white p-4 shadow-sm">
+    <div className="mt-4 space-y-4 rounded-2xl bg-surface p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <p className="font-semibold text-slate-900">
           {state.data.topicTitle}: question {Math.min(state.data.answered + 1, state.data.total)} of{" "}
@@ -177,7 +177,7 @@ function Battle({ initial }: { initial: ChallengeOut }) {
         onClick={() => {
           end.mutate();
         }}
-        className="min-h-11 text-slate-700 underline"
+        className={buttonClass("ghost")}
       >
         End the battle now
       </button>
@@ -188,9 +188,9 @@ function Battle({ initial }: { initial: ChallengeOut }) {
 function BossResults({ challenge }: { challenge: ChallengeOut }) {
   return (
     <div className="mt-4 space-y-4">
-      <section className="space-y-2 rounded-2xl bg-white p-4 shadow-sm">
+      <section className="space-y-2 rounded-2xl bg-surface p-4 shadow-sm">
         <h1 className="text-2xl font-bold text-slate-900">Boss battle: {challenge.topicTitle}</h1>
-        <p className="text-3xl font-bold text-brand-800">
+        <p className="text-3xl font-bold text-brand-ink">
           {challenge.score} / {challenge.maxScore} marks ({challenge.percent ?? 0}%)
         </p>
         {challenge.grade && (
@@ -210,12 +210,12 @@ function BossResults({ challenge }: { challenge: ChallengeOut }) {
           <p className="text-slate-700">Your best on this topic: {challenge.previousBest}%</p>
         )}
         {challenge.bonusXp ? (
-          <p className="font-semibold text-brand-800">+{challenge.bonusXp} bonus XP</p>
+          <p className="font-semibold text-brand-ink">+{challenge.bonusXp} bonus XP</p>
         ) : null}
       </section>
       <ol className="space-y-3">
         {challenge.results.map((r) => (
-          <li key={r.position} className="space-y-2 rounded-xl bg-white p-4 shadow-sm">
+          <li key={r.position} className="space-y-2 rounded-xl bg-surface p-4 shadow-sm">
             <p className="text-sm text-slate-600">
               Question {r.position} · {r.marksEarned}/{r.marks} {r.marks === 1 ? "mark" : "marks"}
               {!r.answered && " · not answered"}
@@ -244,7 +244,7 @@ function BossResults({ challenge }: { challenge: ChallengeOut }) {
       </ol>
       <Link
         to={`/subjects/${challenge.enrolmentId ?? ""}`}
-        className="flex min-h-12 items-center justify-center rounded-lg bg-brand-700 font-semibold text-white"
+        className={buttonClass("primary", true, "lg")}
       >
         Back to topics
       </Link>

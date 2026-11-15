@@ -26,12 +26,12 @@ export function RewardsPanel({
     <div className="space-y-2">
       <div className="flex flex-wrap items-center gap-2">
         {earned > 0 && (
-          <span className="xp-pop rounded-full bg-brand-50 px-3 py-1 font-semibold text-brand-800">
+          <span className="xp-pop rounded-full bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1 font-bold text-white shadow-sm">
             +{earned} XP
           </span>
         )}
         {rewards.streakExtended && (
-          <span className="rounded-full bg-orange-50 px-3 py-1 text-orange-900">
+          <span className="rounded-full bg-orange-50 px-3 py-1 font-medium text-orange-900">
             <span aria-hidden="true">🔥 </span>
             {rewards.streakDays}-day streak
           </span>
@@ -48,18 +48,20 @@ export function RewardsPanel({
         </p>
       )}
       {rewards.bonusXp > 0 && (
-        <p className="font-semibold text-brand-800">
+        <p className="font-semibold text-brand-ink">
           Challenge complete: +{rewards.bonusXp} bonus XP
         </p>
       )}
       {rewards.levelUp && (
-        <p className="rounded-lg bg-brand-700 p-3 font-semibold text-white">
+        <p className="animate-pop rounded-2xl bg-gradient-to-br from-brand-500 to-brand-800 p-4 text-center text-lg font-bold text-white shadow-brand">
           Level {rewards.level} reached!
         </p>
       )}
       {rewards.newBadges.map((badge) => (
-        <p key={badge.code} className="rounded-lg bg-amber-50 p-3 text-amber-900">
-          <span aria-hidden="true">🏅 </span>
+        <p key={badge.code} className="animate-pop rounded-2xl bg-amber-50 p-4 text-amber-900">
+          <span aria-hidden="true" className="mr-1 text-xl">
+            🏅
+          </span>
           <span className="font-semibold">New badge: {badge.name}</span>
           <span className="block text-sm">{badge.description}</span>
         </p>

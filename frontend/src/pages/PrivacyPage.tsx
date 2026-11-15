@@ -1,5 +1,5 @@
 // frontend/src/pages/PrivacyPage.tsx
-import { Link } from "react-router";
+import { BackLink } from "../components/ui";
 
 /** Kept in step with the backend's PRIVACY_POLICY_VERSION; consent records this version. */
 export const PRIVACY_POLICY_VERSION = "2026-11";
@@ -10,7 +10,7 @@ export const PRIVACY_POLICY_VERSION = "2026-11";
  */
 export function PrivacyPage() {
   return (
-    <main className="mx-auto max-w-2xl space-y-4 bg-slate-50 p-4 text-slate-800">
+    <main className="mx-auto max-w-2xl space-y-5 px-4 py-8 leading-relaxed text-slate-800">
       <h1 className="text-2xl font-bold text-slate-900">Privacy notice</h1>
       <p className="text-sm text-slate-600">Version {PRIVACY_POLICY_VERSION}</p>
       <section className="space-y-2">
@@ -63,9 +63,7 @@ export function PrivacyPage() {
           <li>Delete the account and all its data permanently, from the guardian page.</li>
         </ul>
       </section>
-      <Link to="/login" className="inline-flex min-h-11 items-center text-brand-700 underline">
-        ‹ Back to sign in
-      </Link>
+      <BackLink to="/login">Back to sign in</BackLink>
     </main>
   );
 }

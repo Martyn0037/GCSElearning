@@ -1,9 +1,10 @@
 // frontend/src/progress/ProgressPage.tsx
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 
 import { useMySubjectProgress } from "../api/generated/endpoints";
 import type { ObjectiveStat, TopicProgress, UserOut } from "../api/generated/model";
 import { AppShell } from "../components/AppShell";
+import { BackLink, ErrorNotice, LoadingCards } from "../components/ui";
 import { MathText } from "../practice/MathText";
 import { ActivityChart } from "./ActivityChart";
 import { MasteryRing } from "../game/Ring";
@@ -19,17 +20,14 @@ export function ProgressPage({ user }: { user: UserOut }) {
 
   return (
     <AppShell user={user}>
-      <Link
-        to={`/subjects/${enrolmentId}`}
-        className="inline-flex min-h-11 items-center text-brand-700 underline"
-      >
-        ‹ Back to topics
-      </Link>
-      {progress.isPending && <p role="status">Loading…</p>}
-      {progress.isError && <p role="alert">Couldn&apos;t load your progress. Please refresh.</p>}
+      <BackLink to={`/subjects/${enrolmentId}`}>Back to topics</BackLink>
+      {progress.isPending && <LoadingCards rows={3} />}
+      {progress.isError && (
+        <ErrorNotice>Couldn&apos;t load your progress. Please refresh.</ErrorNotice>
+      )}
       {progress.isSuccess && (
         <div className="mt-2 space-y-8">
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
             {progress.data.subjectName}: progress
           </h1>
 
@@ -84,7 +82,7 @@ function TopicBar({ topic }: { topic: TopicProgress }) {
         aria-valuemax={100}
         className="mt-1 h-3 w-full overflow-hidden rounded-full bg-slate-200"
       >
-        <div className="h-full rounded-full bg-[#2a78d6]" style={{ width: `${value}%` }} />
+        <div className="h-full rounded-full bg-brand-600" style={{ width: `${value}%` }} />
       </div>
       <p className="mt-1 text-sm text-slate-600">
         {topic.objectivesPractised} of {topic.objectivesTotal} skills practised
@@ -100,7 +98,7 @@ function SkillList({ title, skills }: { title: string; skills: readonly Objectiv
       <h2 className="text-lg font-semibold">{title}</h2>
       <ul className="mt-2 space-y-2">
         {skills.map((skill) => (
-          <li key={skill.ref} className="rounded-lg bg-white p-3 shadow-sm">
+          <li key={skill.ref} className="rounded-lg bg-surface p-3 shadow-sm">
             <span className="font-semibold">{skill.ref}</span>{" "}
             <span className="text-slate-700">
               <MathText text={skill.text} />

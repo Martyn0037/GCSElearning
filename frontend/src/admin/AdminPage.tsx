@@ -54,7 +54,7 @@ function SpecificationTable() {
     return <p className="text-slate-700">None yet. Add files to curriculum/specs.</p>;
   }
   return (
-    <div className="overflow-x-auto rounded-xl bg-white shadow-sm">
+    <div className="overflow-x-auto rounded-xl bg-surface shadow-sm">
       <table className="w-full text-left text-sm">
         <thead className="bg-slate-100">
           <tr>

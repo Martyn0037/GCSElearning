@@ -2,6 +2,8 @@
 import { getMyMistake, getGetMyMistakeQueryKey } from "../api/generated/endpoints";
 import type { AnswerResultOut, MistakeOut } from "../api/generated/model";
 import { useQuery } from "@tanstack/react-query";
+import { Icon } from "../components/Icon";
+import { Button } from "../components/ui";
 import { RewardsPanel } from "../game/RewardsPanel";
 import { ExtendedResult } from "./ExtendedResult";
 import { MathText } from "./MathText";
@@ -34,23 +36,30 @@ export function ResultPanel({
       {written ? (
         <ExtendedResult result={result} />
       ) : (
-        <p
+        <div
           role="status"
-          className={`rounded-xl p-4 text-xl font-semibold ${result.correct ? "bg-green-50 text-green-900" : "bg-red-50 text-red-900"}`}
+          className={`flex items-center gap-4 rounded-2xl p-4 ${result.correct ? "bg-green-50 text-green-900" : "bg-red-50 text-red-900"}`}
         >
-          {result.correct ? "✓ Correct!" : "✗ Not quite"}
-          {result.assisted && (
-            <span className="block text-base font-normal">
-              You used the full solution for this one.
+          <span
+            className={`grid size-12 shrink-0 animate-pop place-items-center rounded-full text-white ${result.correct ? "bg-green-600" : "bg-red-600"}`}
+          >
+            <Icon name={result.correct ? "check" : "x"} className="size-6" />
+          </span>
+          <span>
+            <span className="block text-xl font-bold">
+              {result.correct ? "Correct!" : "Not quite"}
             </span>
-          )}
-        </p>
+            {result.assisted && (
+              <span className="block text-sm">You used the full solution for this one.</span>
+            )}
+          </span>
+        </div>
       )}
 
       {result.rewards && <RewardsPanel rewards={result.rewards} challenge={result.challenge} />}
 
       {result.review && result.mistakeResolved && (
-        <p className="font-semibold text-green-800">
+        <p className="rounded-xl bg-green-50 p-3 font-semibold text-green-800">
           Fixed! You won&apos;t see this mistake again.
         </p>
       )}
@@ -63,14 +72,21 @@ export function ResultPanel({
       )}
 
       {!result.correct && !written && (
-        <p className="text-slate-800">
-          Correct answer: <MathText text={result.correctAnswer} />
+        <p className="rounded-xl border border-slate-200 p-3 text-slate-800">
+          <span className="block text-xs font-semibold tracking-wide text-slate-500 uppercase">
+            Correct answer
+          </span>
+          <span className="sr-only">Correct answer: </span>
+          <span className="text-lg font-semibold">
+            <MathText text={result.correctAnswer} />
+          </span>
         </p>
       )}
       {result.mistakeId && wrong && <MistakeExplanation mistakeId={result.mistakeId} />}
 
       {levelChange > 0 && (
-        <p className="font-semibold text-brand-700">
+        <p className="flex items-center gap-2 rounded-xl bg-brand-50 p-3 font-semibold text-brand-ink">
+          <Icon name="sparkles" className="size-5" />
           Level up! You&apos;re now on level {result.levelAfter}.
         </p>
       )}
@@ -78,37 +94,47 @@ export function ResultPanel({
         <p className="text-slate-700">Let&apos;s rebuild on level {result.levelAfter} for a bit.</p>
       )}
 
-      <details className="rounded-lg bg-slate-50 p-3" open={!result.correct && !written}>
-        <summary className="min-h-11 cursor-pointer font-medium">Worked solution</summary>
-        <p className="mt-2 text-slate-800">
+      <details
+        className="group rounded-xl bg-slate-50 px-4 open:pb-4"
+        open={!result.correct && !written}
+      >
+        <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between font-semibold text-slate-800 [&::-webkit-details-marker]:hidden">
+          Worked solution
+          <Icon
+            name="chevronDown"
+            className="size-4 text-slate-500 transition-transform group-open:rotate-180"
+          />
+        </summary>
+        <p className="leading-relaxed text-slate-800">
           <MathText text={result.workedSolution} />
         </p>
       </details>
 
-      {wrong && !result.review && (
-        <>
-          <button
-            type="button"
-            onClick={onSimilar}
-            disabled={similarPending}
-            className="min-h-12 w-full rounded-lg border-2 border-brand-700 text-lg font-semibold text-brand-700 disabled:opacity-60"
-          >
-            {similarPending ? "Finding one…" : "Try a similar one"}
-          </button>
-          {similarError && (
-            <p role="alert" className="text-amber-900">
-              {similarError}
-            </p>
-          )}
-        </>
-      )}
-      <button
-        type="button"
-        onClick={onNext}
-        className="min-h-12 w-full rounded-lg bg-brand-700 text-lg font-semibold text-white hover:bg-brand-800"
-      >
-        {result.challenge?.completed ? "See results" : "Next question"}
-      </button>
+      <div className="space-y-2 pt-1">
+        <Button size="lg" block onClick={onNext}>
+          {result.challenge?.completed ? "See results" : "Next question"}
+          <Icon name="chevronRight" className="size-5" />
+        </Button>
+        {wrong && !result.review && (
+          <>
+            <Button
+              variant="secondary"
+              size="lg"
+              block
+              icon="refresh"
+              onClick={onSimilar}
+              disabled={similarPending}
+            >
+              {similarPending ? "Finding one…" : "Try a similar one"}
+            </Button>
+            {similarError && (
+              <p role="alert" className="text-sm text-amber-900">
+                {similarError}
+              </p>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -130,14 +156,21 @@ function MistakeExplanation({ mistakeId }: { mistakeId: string }) {
   if (!data || data.explanationStatus === "unavailable") return null;
   if (data.explanationStatus === "pending") {
     return (
-      <p role="status" className="rounded-lg bg-brand-50 p-3 text-slate-700">
+      <p
+        role="status"
+        className="flex items-center gap-2 rounded-xl bg-brand-50 p-3 text-slate-700"
+      >
+        <span className="size-4 shrink-0 animate-spin rounded-full border-2 border-brand-600 border-t-transparent" />
         Working out where it went wrong…
       </p>
     );
   }
   return (
-    <section aria-label="Where it went wrong" className="rounded-lg bg-brand-50 p-3 text-slate-800">
-      <h3 className="font-semibold">Where it went wrong</h3>
+    <section
+      aria-label="Where it went wrong"
+      className="animate-fade-up rounded-xl border-l-4 border-brand-600 bg-brand-50 p-4 text-slate-800"
+    >
+      <h3 className="font-semibold text-brand-ink">Where it went wrong</h3>
       <p className="mt-1">
         <MathText text={data.explanation ?? ""} />
       </p>

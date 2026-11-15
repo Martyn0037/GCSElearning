@@ -44,7 +44,7 @@ test("student answers, asks for a hint, gets one wrong and moves on", async ({ p
     .click();
   await expect(page.getByRole("radio", { name: /^A/ })).toBeChecked();
   await page.getByRole("button", { name: "Check answer" }).click();
-  await expect(page.getByText("✗ Not quite")).toBeVisible();
+  await expect(page.getByText("Not quite")).toBeVisible();
   await expect(page.getByText(/Correct answer:/)).toBeVisible();
   await expect(page.getByText("E2E fixture worked solution.")).toBeVisible();
 

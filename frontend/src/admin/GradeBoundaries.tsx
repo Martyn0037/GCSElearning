@@ -12,6 +12,7 @@ import type { GradeBoundariesIn } from "../api/generated/model";
 
 type Tier = GradeBoundariesIn["tier"];
 import { ApiError } from "../api/http";
+import { buttonClass } from "../components/styles";
 
 const GRADES: Record<string, number[]> = {
   foundation: [1, 2, 3, 4, 5],
@@ -78,7 +79,7 @@ function TierForm({ specId, tier }: { specId: string; tier: Tier }) {
   return (
     <form
       aria-labelledby={id}
-      className="rounded-xl bg-white p-4 shadow-sm"
+      className="rounded-xl bg-surface p-4 shadow-sm"
       onSubmit={(event) => {
         event.preventDefault();
         save.mutate();
@@ -112,11 +113,7 @@ function TierForm({ specId, tier }: { specId: string; tier: Tier }) {
           Saved.
         </p>
       )}
-      <button
-        type="submit"
-        disabled={save.isPending}
-        className="mt-3 min-h-11 rounded-lg bg-brand-700 px-4 font-semibold text-white disabled:opacity-60"
-      >
+      <button type="submit" disabled={save.isPending} className={`mt-3 ${buttonClass("primary")}`}>
         Save boundaries
       </button>
     </form>

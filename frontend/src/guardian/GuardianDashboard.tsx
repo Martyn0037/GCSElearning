@@ -13,6 +13,8 @@ import {
 import type { LinkedStudentOut, UserOut, WeeklySummaryOut } from "../api/generated/model";
 import { ApiError } from "../api/http";
 import { AppShell } from "../components/AppShell";
+import { buttonClass } from "../components/styles";
+import { LoadingCards } from "../components/ui";
 import { MasteryRing } from "../game/Ring";
 
 const dayName = new Intl.DateTimeFormat("en-GB", { weekday: "short" });
@@ -26,8 +28,8 @@ export function GuardianDashboard({ user }: { user: UserOut }) {
 
   return (
     <AppShell user={user}>
-      <h1 className="text-2xl font-bold text-slate-900">Progress dashboard</h1>
-      {students.isPending && <p role="status">Loading…</p>}
+      <h1 className="text-2xl font-bold tracking-tight text-slate-900">Progress dashboard</h1>
+      {students.isPending && <LoadingCards rows={2} />}
       {students.isError && <p role="alert">Couldn&apos;t load your students. Please refresh.</p>}
       {students.isSuccess && students.data.length === 0 && (
         <p className="mt-4 text-slate-700">No students are linked to your account yet.</p>
@@ -65,7 +67,7 @@ function PrivacyLink() {
   return (
     <p className="text-slate-700">
       What GCSE Coach keeps, and how AI is used, is in the{" "}
-      <Link to="/privacy" className="text-brand-700 underline">
+      <Link to="/privacy" className="text-brand-ink underline">
         privacy notice
       </Link>
       .
@@ -85,7 +87,7 @@ function Week({ studentId }: { studentId: string }) {
           onClick={() => {
             setWeeksAgo((w) => w + 1);
           }}
-          className="min-h-11 px-2 text-brand-700 underline disabled:opacity-40"
+          className={buttonClass("ghost")}
         >
           ‹ Earlier
         </button>
@@ -100,12 +102,12 @@ function Week({ studentId }: { studentId: string }) {
           onClick={() => {
             setWeeksAgo((w) => w - 1);
           }}
-          className="min-h-11 px-2 text-brand-700 underline disabled:opacity-40"
+          className={buttonClass("ghost")}
         >
           Later ›
         </button>
       </div>
-      {summary.isPending && <p role="status">Loading…</p>}
+      {summary.isPending && <LoadingCards rows={2} />}
       {summary.isError && <p role="alert">Couldn&apos;t load this week.</p>}
       {summary.isSuccess && <WeekDetails week={summary.data} />}
     </section>
@@ -114,7 +116,7 @@ function Week({ studentId }: { studentId: string }) {
 
 function Tile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl bg-white p-3 shadow-sm">
+    <div className="rounded-xl bg-surface p-3 shadow-sm">
       <p className="text-sm text-slate-600">{label}</p>
       <p className="text-2xl font-bold text-slate-900">{value}</p>
     </div>
@@ -146,7 +148,7 @@ function WeekDetails({ week }: { week: WeeklySummaryOut }) {
       </div>
       <ol
         aria-label="Days practised"
-        className="flex justify-between rounded-xl bg-white p-3 shadow-sm"
+        className="flex justify-between rounded-xl bg-surface p-3 shadow-sm"
       >
         {days.map((day) => (
           <li key={day} className="flex flex-col items-center gap-1 text-xs text-slate-600">
@@ -160,7 +162,7 @@ function WeekDetails({ week }: { week: WeeklySummaryOut }) {
         ))}
       </ol>
       {week.subjects.map((subject) => (
-        <section key={subject.subjectName} className="rounded-xl bg-white p-4 shadow-sm">
+        <section key={subject.subjectName} className="rounded-xl bg-surface p-4 shadow-sm">
           <h3 className="font-semibold text-slate-900">{subject.subjectName}</h3>
           <p className="text-sm text-slate-600">
             {subject.answered} answered this week
@@ -182,7 +184,7 @@ function WeekDetails({ week }: { week: WeeklySummaryOut }) {
         </section>
       ))}
       {(week.badges.length > 0 || week.bossBattles.length > 0) && (
-        <section className="rounded-xl bg-white p-4 shadow-sm">
+        <section className="rounded-xl bg-surface p-4 shadow-sm">
           <h3 className="font-semibold text-slate-900">Achievements</h3>
           <ul className="mt-1 list-disc pl-5 text-slate-800">
             {week.badges.map((badge) => (
@@ -232,7 +234,7 @@ function YourData({ student }: { student: LinkedStudentOut }) {
     },
   });
   return (
-    <section aria-label="Your data" className="space-y-3 rounded-xl bg-white p-4 shadow-sm">
+    <section aria-label="Your data" className="space-y-3 rounded-xl bg-surface p-4 shadow-sm">
       <h2 className="text-lg font-semibold text-slate-900">{student.displayName}&apos;s data</h2>
       <button
         type="button"
@@ -294,7 +296,7 @@ function YourData({ student }: { student: LinkedStudentOut }) {
           <button
             type="submit"
             disabled={confirm !== "DELETE" || !password || remove.isPending}
-            className="min-h-11 rounded-lg bg-red-700 px-4 font-semibold text-white disabled:opacity-50"
+            className={buttonClass("danger")}
           >
             Delete permanently
           </button>

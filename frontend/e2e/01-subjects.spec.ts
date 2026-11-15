@@ -43,5 +43,7 @@ test("student sets up subjects and every topic is open", async ({ browser }) => 
     has: studentPage.getByRole("heading", { name: "1. Number" }),
   });
   await expect(numberTopic.getByRole("link", { name: "Practise Number" })).toBeVisible();
+  // Sections are folded away until opened.
+  await numberTopic.getByText(/\d+ sections?/).click();
   await expect(numberTopic.getByText("Structure and calculation")).toBeVisible();
 });

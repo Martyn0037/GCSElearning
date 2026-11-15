@@ -97,7 +97,7 @@ async function answerWrongly() {
   const user = userEvent.setup();
   await user.click(await screen.findByRole("radio", { name: /A\s*2/ }));
   await user.click(screen.getByRole("button", { name: "Check answer" }));
-  await screen.findByText("✗ Not quite");
+  await screen.findByText("Not quite");
   return user;
 }
 
@@ -181,7 +181,7 @@ describe("reviews", () => {
     api({ "POST /api/v1/practice/reviews/next": () => apiError(409, "NO_REVIEWS_DUE", "x") });
     renderApp("/review");
 
-    expect(await screen.findByText("All caught up for today. ✓")).toBeInTheDocument();
+    expect(await screen.findByText("All caught up for today.")).toBeInTheDocument();
   });
 });
 

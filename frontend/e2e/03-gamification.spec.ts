@@ -46,7 +46,7 @@ test("home dashboard, daily challenge, badges and rings", async ({ page }) => {
   await expect(page.getByText(/Today's challenge done/)).toBeVisible();
 
   // Badges page lists the catalogue.
-  await page.getByRole("link", { name: /^Badges/ }).click();
+  await page.getByRole("link", { name: /^Badges \(/ }).click(); // the home tile, not the tab
   await expect(page.getByRole("heading", { name: "Badges" })).toBeVisible();
   await expect(page.getByText("Fixed 10 mistakes")).toBeVisible();
 

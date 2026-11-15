@@ -6,6 +6,19 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed — Design refresh (ADR-022)
+- **New look:** a design system with tokens, a sticky header with an account menu, a bottom tab bar for the student (Home, Daily, Mistakes, Badges), and consistent buttons, cards, chips and icons across every screen.
+- **Dark mode** follows the phone's setting, including charts, mastery rings and the browser's theme colour.
+- **Home:** a gradient Continue card, level, streak, XP and badge tiles, a daily-challenge card with progress, and subject cards with colour accents.
+- **Practice:** a session tally ("3/4"), skeleton loading, clearer answer options, a result banner, a styled tutor chat, and learn cards.
+- **Topic map:** compact cards with the mastery ring, folded sections, and Practise and Boss battle side by side.
+- **Badges:** a grid of medals with overall progress.
+- **Sign-in and not-found pages** redesigned. Loading spinners replace plain text.
+- Sounds and Change my subjects moved into the account menu.
+
+### Fixed
+- After answering, the question (with a stuck "Checking…" button) stayed on screen above the result. Two sibling elements shared a React key, so React left the old form in place. Each now has its own key, and a test checks the form is gone.
+
 ### Changed — Simplified for one student (ADR-021)
 - **Every topic is open:** no "covered at school" lock in practice, the daily challenge, the dashboard or the topic map.
 - **Every listed subject works straight away:** a board with no imported spec falls back to the subject's imported spec, for new choices and (on import) for subjects already saved.

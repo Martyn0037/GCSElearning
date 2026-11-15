@@ -1,7 +1,6 @@
 // frontend/src/progress/MistakesPage.tsx
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { Link } from "react-router";
 
 import {
   getListMyMistakesQueryKey,
@@ -10,6 +9,7 @@ import {
 } from "../api/generated/endpoints";
 import type { MistakeOut, MistakeTopicGroup, UserOut } from "../api/generated/model";
 import { AppShell } from "../components/AppShell";
+import { PageHeader } from "../components/ui";
 import { MathText } from "../practice/MathText";
 
 const PAGE_SIZE = 20;
@@ -29,17 +29,18 @@ export function MistakesPage({ user }: { user: UserOut }) {
 
   return (
     <AppShell user={user}>
-      <Link to="/" className="inline-flex min-h-11 items-center text-brand-700 underline">
-        ‹ Home
-      </Link>
-      <h1 className="mt-2 text-2xl font-bold text-slate-900">My mistakes</h1>
-      <p className="text-slate-700">
-        Each one comes back for review until you get it right twice in a row.
-      </p>
+      <PageHeader
+        title="My mistakes"
+        subtitle="Each one comes back for review until you get it right twice in a row."
+      />
 
       {groups.isSuccess && groups.data.length > 0 && <GroupSummary groups={groups.data} />}
 
-      <div role="tablist" aria-label="Which mistakes" className="mt-6 flex gap-2">
+      <div
+        role="tablist"
+        aria-label="Which mistakes"
+        className="mt-6 grid grid-cols-2 gap-1 rounded-xl bg-slate-200/70 p-1"
+      >
         {[
           [false, "To fix"],
           [true, "Fixed"],
@@ -52,7 +53,7 @@ export function MistakesPage({ user }: { user: UserOut }) {
             onClick={() => {
               setFixed(Boolean(value));
             }}
-            className={`min-h-11 rounded-full px-4 font-medium ${fixed === value ? "bg-brand-700 text-white" : "bg-white text-slate-800 shadow-sm"}`}
+            className={`min-h-10 rounded-lg px-4 text-sm font-semibold transition ${fixed === value ? "bg-surface text-slate-900 shadow-card" : "text-slate-600 hover:text-slate-900"}`}
           >
             {label}
           </button>
@@ -67,7 +68,7 @@ function GroupSummary({ groups }: { groups: readonly MistakeTopicGroup[] }) {
   return (
     <section aria-label="Mistakes by topic" className="mt-4 space-y-2">
       {groups.map((group) => (
-        <div key={group.topicId} className="rounded-xl bg-white p-3 shadow-sm">
+        <div key={group.topicId} className="rounded-xl bg-surface p-3 shadow-sm">
           <p className="font-semibold text-slate-900">
             {group.subjectName}: {group.topicRef}. {group.topicTitle}
           </p>
@@ -136,7 +137,7 @@ function MistakeList({ fixed }: { fixed: boolean }) {
           type="button"
           onClick={() => void pages.fetchNextPage()}
           disabled={pages.isFetchingNextPage}
-          className="mt-4 min-h-11 w-full rounded-lg bg-white font-medium shadow-sm disabled:opacity-60"
+          className="mt-4 min-h-11 w-full rounded-lg bg-surface font-medium shadow-sm disabled:opacity-60"
         >
           {pages.isFetchingNextPage ? "Loading…" : "Show more"}
         </button>
@@ -147,7 +148,7 @@ function MistakeList({ fixed }: { fixed: boolean }) {
 
 function MistakeCard({ mistake }: { mistake: MistakeOut }) {
   return (
-    <article className="space-y-2 rounded-xl bg-white p-4 shadow-sm">
+    <article className="space-y-2 rounded-xl bg-surface p-4 shadow-sm">
       <p className="text-sm text-slate-600">
         {mistake.subjectName} · {mistake.topicTitle} · Skill {mistake.objectiveRef}
       </p>

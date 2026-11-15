@@ -57,7 +57,12 @@ describe("MathKeypad on a question", () => {
     // Assert
     expect(input).toHaveValue("3/5");
     expect(screen.getByText(/Looks like:/)).toBeInTheDocument();
-    expect(screen.getByText(/Looks like:/).querySelector("math")).not.toBeNull();
+    expect(
+      screen
+        .getByText(/Looks like:/)
+        .closest("p")
+        ?.querySelector("math"),
+    ).not.toBeNull();
     expect(onSubmit).toHaveBeenCalledWith("3/5");
   });
 

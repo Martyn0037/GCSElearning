@@ -72,7 +72,7 @@ const NUMBER_KEYS: readonly Key[] = [
 ];
 
 const keyClass =
-  "min-h-12 rounded-lg border border-slate-300 bg-white text-xl font-medium text-slate-900 shadow-sm hover:bg-slate-50 active:bg-brand-50 focus-visible:outline-2 focus-visible:outline-brand-600";
+  "min-h-12 rounded-xl text-xl font-medium shadow-card ring-1 ring-slate-200 transition select-none active:scale-95 focus-visible:outline-2 focus-visible:outline-brand-600";
 
 /** Number keys in a 4-column grid, then this question's symbol keys. Keys never submit. */
 export function MathKeypad({ onInsert, onBackspace, onClear, symbols }: MathKeypadProps) {
@@ -92,7 +92,7 @@ export function MathKeypad({ onInsert, onBackspace, onClear, symbols }: MathKeyp
               key={key.label}
               type="button"
               aria-label={key.name}
-              className={`${keyClass} bg-brand-50`}
+              className={`${keyClass} bg-brand-50 text-brand-ink hover:bg-brand-100`}
               onClick={() => {
                 press(key);
               }}
@@ -108,7 +108,7 @@ export function MathKeypad({ onInsert, onBackspace, onClear, symbols }: MathKeyp
             key={key.name ?? key.label}
             type="button"
             aria-label={key.name}
-            className={`${keyClass} ${key.wide ? "col-span-2" : ""}`}
+            className={`${keyClass} bg-surface text-slate-900 hover:bg-slate-50 active:bg-brand-50 ${key.wide ? "col-span-2" : ""}`}
             onClick={() => {
               press(key);
             }}
