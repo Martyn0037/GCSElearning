@@ -7,13 +7,21 @@ export interface Edit {
   caret: number;
 }
 
-const MAX_LENGTH = 200;
+/** Longest short answer; written (extended) answers allow `ESSAY_MAX_LENGTH`. */
+export const MAX_LENGTH = 200;
+export const ESSAY_MAX_LENGTH = 4000;
 
 /** Replace the selection (or insert at the caret) with `text`, within the length limit. */
-export function insertAt(value: string, text: string, start: number, end: number): Edit {
+export function insertAt(
+  value: string,
+  text: string,
+  start: number,
+  end: number,
+  maxLength: number = MAX_LENGTH,
+): Edit {
   const from = Math.max(0, Math.min(start, value.length));
   const to = Math.max(from, Math.min(end, value.length));
-  const room = MAX_LENGTH - (value.length - (to - from));
+  const room = maxLength - (value.length - (to - from));
   const added = text.slice(0, Math.max(0, room));
   return { value: value.slice(0, from) + added + value.slice(to), caret: from + added.length };
 }

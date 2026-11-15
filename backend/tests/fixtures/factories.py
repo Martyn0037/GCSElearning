@@ -166,6 +166,19 @@ async def create_question(
         QuestionType.MULTIPLE_CHOICE: {"correct_option": "C"},
         QuestionType.NUMERIC: {"value": "4.75", "tolerance": "0", "unit": "cm"},
         QuestionType.SHORT_TEXT: {"accepted": ["prime", "prime number"]},
+        QuestionType.EXTENDED: {
+            "marking_points": [
+                {"text": "States a prime has exactly two factors", "marks": 2, "ao": "AO1"},
+                {"text": "Notes 1 has only one factor", "marks": 2, "ao": "AO2"},
+                {"text": "Concludes 1 is not prime", "marks": 2, "ao": "AO3"},
+            ],
+            "levels": [
+                {"level": 1, "min_marks": 1, "max_marks": 2, "descriptor": "Basic"},
+                {"level": 2, "min_marks": 3, "max_marks": 4, "descriptor": "Clear"},
+                {"level": 3, "min_marks": 5, "max_marks": 6, "descriptor": "Thorough"},
+            ],
+            "model_answer": "A prime has exactly two factors; 1 has one, so it isn't prime.",
+        },
     }
     answer = answer or keys[qtype]
     question = Question(
@@ -182,7 +195,7 @@ async def create_question(
         if qtype is QuestionType.MULTIPLE_CHOICE
         else None,
         answer=answer,
-        marks=1,
+        marks=6 if qtype is QuestionType.EXTENDED else 1,
         worked_solution="The worked solution.",
         status=QuestionStatus(status),
         verified=True,

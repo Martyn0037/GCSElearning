@@ -6,6 +6,7 @@
  */
 import * as zod from "zod";
 
+export const answerResultOutMarkedDefault = true;
 export const AnswerResultOut = zod
   .object({
     assisted: zod.boolean(),
@@ -33,6 +34,45 @@ export const AnswerResultOut = zod
     itemId: zod.uuid(),
     levelAfter: zod.int(),
     levelBefore: zod.int(),
+    marked: zod
+      .boolean()
+      .default(answerResultOutMarkedDefault)
+      .describe("False when an extended answer couldn't be marked right now"),
+    marking: zod
+      .union([
+        zod
+          .object({
+            improvements: zod.union([zod.string(), zod.null()]),
+            level: zod.union([zod.int(), zod.null()]),
+            levels: zod.array(
+              zod
+                .object({
+                  descriptor: zod.string(),
+                  level: zod.int(),
+                  maxMarks: zod.int(),
+                  minMarks: zod.int(),
+                })
+                .describe("One level of a levels-based mark scheme."),
+            ),
+            marks: zod.union([zod.int(), zod.null()]),
+            marksAvailable: zod.int(),
+            points: zod.array(
+              zod
+                .object({
+                  ao: zod.string(),
+                  awarded: zod.boolean(),
+                  marks: zod.int(),
+                  text: zod.string(),
+                })
+                .describe("One marking point, and whether the answer earned it."),
+            ),
+            strengths: zod.union([zod.string(), zod.null()]),
+          })
+          .describe("How an extended answer was marked (marks are null if it couldn't be marked)."),
+        zod.null(),
+      ])
+      .optional()
+      .describe("Extended answers: marks, points earned and feedback"),
     mistakeId: zod
       .union([zod.uuid(), zod.null()])
       .describe("Set when this answer opened (or is reviewing) a mistake"),

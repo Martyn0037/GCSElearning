@@ -235,7 +235,7 @@
         "description": "The student's answer: an option label, a number, or a short phrase.",
         "properties": {
           "answer": {
-            "maxLength": 200,
+            "maxLength": 4000,
             "minLength": 1,
             "title": "Answer",
             "type": "string"
@@ -286,6 +286,23 @@
           "levelBefore": {
             "title": "Levelbefore",
             "type": "integer"
+          },
+          "marked": {
+            "default": true,
+            "description": "False when an extended answer couldn't be marked right now",
+            "title": "Marked",
+            "type": "boolean"
+          },
+          "marking": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ExtendedMarkingOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Extended answers: marks, points earned and feedback"
           },
           "mistakeId": {
             "anyOf": [
@@ -1015,7 +1032,7 @@
             "$ref": "#/components/schemas/DailyStatusOut"
           },
           "level": {
-            "$ref": "#/components/schemas/LevelOut"
+            "$ref": "#/components/schemas/app__gamification__schemas__LevelOut"
           },
           "recentBadges": {
             "items": {
@@ -1270,6 +1287,85 @@
         "title": "ExplanationStatus",
         "type": "string"
       },
+      "ExtendedMarkingOut": {
+        "additionalProperties": false,
+        "description": "How an extended answer was marked (marks are null if it couldn't be marked).",
+        "properties": {
+          "improvements": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Improvements"
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Level"
+          },
+          "levels": {
+            "items": {
+              "$ref": "#/components/schemas/app__practice__schemas__LevelOut"
+            },
+            "title": "Levels",
+            "type": "array"
+          },
+          "marks": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marks"
+          },
+          "marksAvailable": {
+            "title": "Marksavailable",
+            "type": "integer"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/MarkPointOut"
+            },
+            "title": "Points",
+            "type": "array"
+          },
+          "strengths": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Strengths"
+          }
+        },
+        "required": [
+          "marks",
+          "marksAvailable",
+          "level",
+          "levels",
+          "points",
+          "strengths",
+          "improvements"
+        ],
+        "title": "ExtendedMarkingOut",
+        "type": "object"
+      },
       "FlagRequest": {
         "additionalProperties": false,
         "description": "A \"this looks wrong\" report.",
@@ -1445,34 +1541,34 @@
         "title": "GradeEstimateOut",
         "type": "object"
       },
-      "LevelOut": {
+      "LearnCardOut": {
         "additionalProperties": false,
-        "description": "Overall level and XP.",
+        "description": "A short explanation and worked example for the question's skill.",
         "properties": {
-          "level": {
-            "title": "Level",
-            "type": "integer"
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
           },
-          "totalXp": {
-            "title": "Totalxp",
-            "type": "integer"
+          "objectiveRef": {
+            "title": "Objectiveref",
+            "type": "string"
           },
-          "xpForLevel": {
-            "title": "Xpforlevel",
-            "type": "integer"
+          "objectiveText": {
+            "title": "Objectivetext",
+            "type": "string"
           },
-          "xpIntoLevel": {
-            "title": "Xpintolevel",
-            "type": "integer"
+          "workedExample": {
+            "title": "Workedexample",
+            "type": "string"
           }
         },
         "required": [
-          "level",
-          "totalXp",
-          "xpIntoLevel",
-          "xpForLevel"
+          "objectiveRef",
+          "objectiveText",
+          "explanation",
+          "workedExample"
         ],
-        "title": "LevelOut",
+        "title": "LearnCardOut",
         "type": "object"
       },
       "LoginRequest": {
@@ -1498,6 +1594,36 @@
           "password"
         ],
         "title": "LoginRequest",
+        "type": "object"
+      },
+      "MarkPointOut": {
+        "additionalProperties": false,
+        "description": "One marking point, and whether the answer earned it.",
+        "properties": {
+          "ao": {
+            "title": "Ao",
+            "type": "string"
+          },
+          "awarded": {
+            "title": "Awarded",
+            "type": "boolean"
+          },
+          "marks": {
+            "title": "Marks",
+            "type": "integer"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "marks",
+          "ao",
+          "awarded"
+        ],
+        "title": "MarkPointOut",
         "type": "object"
       },
       "MisconceptionCount": {
@@ -1971,7 +2097,8 @@
         "enum": [
           "multiple_choice",
           "numeric",
-          "short_text"
+          "short_text",
+          "extended"
         ],
         "title": "QuestionType",
         "type": "string"
@@ -2738,6 +2865,87 @@
         "title": "TopicStandingOut",
         "type": "object"
       },
+      "TutorAsk": {
+        "additionalProperties": false,
+        "description": "A student's message to the tutor.",
+        "properties": {
+          "message": {
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "title": "TutorAsk",
+        "type": "object"
+      },
+      "TutorMessageOut": {
+        "additionalProperties": false,
+        "description": "One message in the conversation.",
+        "properties": {
+          "content": {
+            "title": "Content",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/TutorRole"
+          }
+        },
+        "required": [
+          "id",
+          "role",
+          "content",
+          "createdAt"
+        ],
+        "title": "TutorMessageOut",
+        "type": "object"
+      },
+      "TutorRole": {
+        "description": "Who wrote a tutor message.",
+        "enum": [
+          "student",
+          "tutor"
+        ],
+        "title": "TutorRole",
+        "type": "string"
+      },
+      "TutorThreadOut": {
+        "additionalProperties": false,
+        "description": "The conversation about one question.",
+        "properties": {
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/TutorMessageOut"
+            },
+            "title": "Messages",
+            "type": "array"
+          },
+          "remaining": {
+            "description": "Messages the student can still send about this question",
+            "title": "Remaining",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "messages",
+          "remaining"
+        ],
+        "title": "TutorThreadOut",
+        "type": "object"
+      },
       "UserOut": {
         "additionalProperties": false,
         "description": "A user as visible to themselves, their guardian, or an admin.",
@@ -2790,6 +2998,66 @@
           "setupCompleted"
         ],
         "title": "UserOut",
+        "type": "object"
+      },
+      "app__gamification__schemas__LevelOut": {
+        "additionalProperties": false,
+        "description": "Overall level and XP.",
+        "properties": {
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          },
+          "totalXp": {
+            "title": "Totalxp",
+            "type": "integer"
+          },
+          "xpForLevel": {
+            "title": "Xpforlevel",
+            "type": "integer"
+          },
+          "xpIntoLevel": {
+            "title": "Xpintolevel",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "level",
+          "totalXp",
+          "xpIntoLevel",
+          "xpForLevel"
+        ],
+        "title": "LevelOut",
+        "type": "object"
+      },
+      "app__practice__schemas__LevelOut": {
+        "additionalProperties": false,
+        "description": "One level of a levels-based mark scheme.",
+        "properties": {
+          "descriptor": {
+            "title": "Descriptor",
+            "type": "string"
+          },
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          },
+          "maxMarks": {
+            "title": "Maxmarks",
+            "type": "integer"
+          },
+          "minMarks": {
+            "title": "Minmarks",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "level",
+          "minMarks",
+          "maxMarks",
+          "descriptor"
+        ],
+        "title": "LevelOut",
         "type": "object"
       }
     }
@@ -6414,6 +6682,110 @@
         ]
       }
     },
+    "/api/v1/practice/items/{item_id}/learn": {
+      "get": {
+        "description": "A short explanation and worked example for this question's skill.\n\n409 ``LEARN_PREPARING`` while it's being written (try again shortly).",
+        "operationId": "getLearnCard",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearnCardOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Learn",
+        "tags": [
+          "learning"
+        ]
+      }
+    },
     "/api/v1/practice/items/{item_id}/similar": {
       "post": {
         "description": "Another question on the same skill, straight after a wrong answer.",
@@ -6515,6 +6887,222 @@
         "summary": "Similar",
         "tags": [
           "practice"
+        ]
+      }
+    },
+    "/api/v1/practice/items/{item_id}/tutor": {
+      "get": {
+        "description": "The \"Ask about this question\" conversation so far.",
+        "operationId": "getTutorThread",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TutorThreadOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get Thread",
+        "tags": [
+          "learning"
+        ]
+      },
+      "post": {
+        "description": "Ask the tutor about this question. Off-topic messages get a polite redirect.",
+        "operationId": "askTutor",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Item Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TutorAsk"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TutorThreadOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Ask",
+        "tags": [
+          "learning"
         ]
       }
     },

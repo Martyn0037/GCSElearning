@@ -24,10 +24,27 @@ class GeneratedOption(_Out):
     text: str
 
 
+class GeneratedMarkPoint(_Out):
+    """One creditworthy point in an extended answer's mark scheme."""
+
+    text: str = Field(description="What the student must say or do to earn it")
+    marks: int = Field(description="Marks for this point, 1 or more")
+    ao: str = Field(description="Assessment objective it targets, e.g. AO1, AO2, AO3")
+
+
+class GeneratedLevel(_Out):
+    """One level of a levels-based mark scheme."""
+
+    level: int = Field(description="1 = lowest")
+    min_marks: int
+    max_marks: int
+    descriptor: str = Field(description="What an answer at this level shows")
+
+
 class GeneratedQuestion(_Out):
     """A question with its marking key, worked solution and four hints."""
 
-    question_type: Literal["multiple_choice", "numeric", "short_text"]
+    question_type: Literal["multiple_choice", "numeric", "short_text", "extended"]
     command_word: str = Field(description="The GCSE command word the stem starts with or uses")
     stem: str = Field(description="The question text; maths in LaTeX between $...$")
     options: list[GeneratedOption] = Field(
@@ -49,12 +66,33 @@ class GeneratedQuestion(_Out):
     accepted_answers: list[str] = Field(
         description="For short_text: every acceptable short answer; empty otherwise"
     )
-    marks: int = Field(description="Marks available, 1 to 6")
+    marking_points: list[GeneratedMarkPoint] = Field(
+        description="For extended: the creditworthy points with marks and AO; empty otherwise"
+    )
+    level_descriptors: list[GeneratedLevel] = Field(
+        description="For extended answers marked by levels: the levels, lowest first; else empty"
+    )
+    model_answer: str | None = Field(
+        description="For extended: a model answer that would earn full marks; null otherwise"
+    )
+    marks: int = Field(description="Marks available: 1 to 6, or 2 to 16 for extended")
     worked_solution: str = Field(description="Full worked solution, step by step")
     hints: list[str] = Field(
         description="Exactly 4 hints: 1 nudge, 2 strategy/first step, 3 most of the method "
         "without the final answer, 4 full worked solution"
     )
+
+
+class MarkingResult(_Out):
+    """Claude's marking of one extended answer against its mark scheme."""
+
+    awarded_points: list[int] = Field(
+        description="Numbers (1-based) of the marking points the answer earns"
+    )
+    level: int | None = Field(description="The level reached, for levels-based schemes")
+    marks: int = Field(description="Total marks awarded")
+    strengths: str = Field(description="1-2 sentences: what the answer did well")
+    improvements: str = Field(description="1-2 sentences: the most useful next step")
 
 
 class Verification(_Out):

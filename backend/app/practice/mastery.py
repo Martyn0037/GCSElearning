@@ -33,6 +33,7 @@ GUESS: dict[QuestionType, float] = {
     QuestionType.MULTIPLE_CHOICE: 0.25,
     QuestionType.NUMERIC: 0.05,
     QuestionType.SHORT_TEXT: 0.10,
+    QuestionType.EXTENDED: 0.05,  # 70%+ of the marks by luck is very unlikely
 }
 
 

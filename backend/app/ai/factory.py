@@ -12,6 +12,7 @@ from app.ai.gateway import AiGateway
 from app.core.clock import Clock
 from app.core.config import Settings
 from app.practice.explain import MistakeExplainer
+from app.practice.extended import ExtendedMarker
 from app.questions.generator import QuestionGenerator
 
 
@@ -37,6 +38,32 @@ def budget_limits(settings: Settings) -> BudgetLimits:
     return BudgetLimits(
         daily_usd=settings.ai_daily_budget_gbp / settings.usd_to_gbp,
         monthly_usd=settings.ai_monthly_budget_gbp / settings.usd_to_gbp,
+    )
+
+
+def build_gateway(
+    settings: Settings,
+    session_factory: async_sessionmaker[AsyncSession],
+    client: LlmClient | None,
+    breaker: CircuitBreaker,
+    clock: Clock,
+) -> AiGateway:
+    """A budgeted, circuit-protected gateway sharing the process's client and breaker."""
+    return AiGateway(
+        client, BudgetLedger(session_factory, budget_limits(settings)), breaker, settings, clock
+    )
+
+
+def build_marker(
+    settings: Settings,
+    session_factory: async_sessionmaker[AsyncSession],
+    client: LlmClient | None,
+    breaker: CircuitBreaker,
+    clock: Clock,
+) -> ExtendedMarker:
+    """Wire the extended-answer marker."""
+    return ExtendedMarker(
+        build_gateway(settings, session_factory, client, breaker, clock), settings
     )
 
 

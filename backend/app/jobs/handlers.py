@@ -16,6 +16,7 @@ from app.ai.gateway import AiUnavailableError
 from app.auth import rate_limit
 from app.core.clock import Clock
 from app.core.config import Settings
+from app.learning.learn import LEARN_JOB, LearnCardWriter
 from app.models.curriculum import Tier
 from app.practice.explain import MistakeExplainer
 from app.practice.service import EXPLAIN_JOB
@@ -41,6 +42,7 @@ class JobContext:
     explainer: MistakeExplainer
     settings: Settings
     clock: Clock
+    learn_writer: LearnCardWriter | None = None
 
 
 Handler = Callable[[JobContext, dict[str, Any]], Awaitable[None]]
@@ -93,7 +95,29 @@ async def explain_mistake(ctx: JobContext, payload: dict[str, Any]) -> None:
     logger.info("mistake_explained", extra={"status": status.value})
 
 
+async def generate_learn_card(ctx: JobContext, payload: dict[str, Any]) -> None:
+    """Write one learn card. Skips quietly without Claude or budget.
+
+    Raises:
+        RetryLaterError: On a transient Claude failure (outage, invalid output).
+    """
+    if ctx.learn_writer is None:
+        logger.info("learn_card_skipped", extra={"reason": "no_writer"})
+        return
+    tier = Tier(payload["tier"]) if payload.get("tier") else None
+    try:
+        await ctx.learn_writer.write(uuid.UUID(payload["objective_id"]), tier)
+    except ObjectiveNotAvailableError:
+        logger.info("learn_card_skipped_objective_unavailable")
+    except AiUnavailableError as exc:
+        if exc.reason in {"no_api_key", "budget"}:
+            logger.info("learn_card_skipped", extra={"reason": exc.reason})
+            return
+        raise RetryLaterError(f"{exc.reason}: {exc}") from exc
+
+
 HANDLERS: dict[str, Handler] = {
+    LEARN_JOB: generate_learn_card,
     EXPLAIN_JOB: explain_mistake,
     GENERATE_JOB: generate_question,
     TOP_UP_JOB: top_up_bank,

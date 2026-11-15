@@ -3,6 +3,7 @@ import { getMyMistake, getGetMyMistakeQueryKey } from "../api/generated/endpoint
 import type { AnswerResultOut, MistakeOut } from "../api/generated/model";
 import { useQuery } from "@tanstack/react-query";
 import { RewardsPanel } from "../game/RewardsPanel";
+import { ExtendedResult } from "./ExtendedResult";
 import { MathText } from "./MathText";
 
 /** How often, and how many times, to check for the explanation. */
@@ -26,20 +27,25 @@ export function ResultPanel({
   similarError,
 }: ResultPanelProps) {
   const levelChange = result.levelAfter - result.levelBefore;
-  const wrong = !result.correct || result.assisted;
+  const wrong = (!result.correct || result.assisted) && result.marked !== false;
+  const written = result.marking != null;
   return (
     <div className="space-y-4" aria-live="polite">
-      <p
-        role="status"
-        className={`rounded-xl p-4 text-xl font-semibold ${result.correct ? "bg-green-50 text-green-900" : "bg-red-50 text-red-900"}`}
-      >
-        {result.correct ? "✓ Correct!" : "✗ Not quite"}
-        {result.assisted && (
-          <span className="block text-base font-normal">
-            You used the full solution for this one.
-          </span>
-        )}
-      </p>
+      {written ? (
+        <ExtendedResult result={result} />
+      ) : (
+        <p
+          role="status"
+          className={`rounded-xl p-4 text-xl font-semibold ${result.correct ? "bg-green-50 text-green-900" : "bg-red-50 text-red-900"}`}
+        >
+          {result.correct ? "✓ Correct!" : "✗ Not quite"}
+          {result.assisted && (
+            <span className="block text-base font-normal">
+              You used the full solution for this one.
+            </span>
+          )}
+        </p>
+      )}
 
       {result.rewards && <RewardsPanel rewards={result.rewards} challenge={result.challenge} />}
 
@@ -56,7 +62,7 @@ export function ResultPanel({
         </p>
       )}
 
-      {!result.correct && (
+      {!result.correct && !written && (
         <p className="text-slate-800">
           Correct answer: <MathText text={result.correctAnswer} />
         </p>
@@ -72,7 +78,7 @@ export function ResultPanel({
         <p className="text-slate-700">Let&apos;s rebuild on level {result.levelAfter} for a bit.</p>
       )}
 
-      <details className="rounded-lg bg-slate-50 p-3" open={!result.correct}>
+      <details className="rounded-lg bg-slate-50 p-3" open={!result.correct && !written}>
         <summary className="min-h-11 cursor-pointer font-medium">Worked solution</summary>
         <p className="mt-2 text-slate-800">
           <MathText text={result.workedSolution} />

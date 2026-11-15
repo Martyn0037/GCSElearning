@@ -25,6 +25,7 @@ from app.models.gamification import (
     XpEvent,
     XpSource,
 )
+from app.models.learning import LearnCard, LearnCardStatus, TutorMessage, TutorRole
 from app.models.ops import AiUsage, Job, JobStatus, UsageStatus
 from app.models.question import (
     Difficulty,
@@ -58,6 +59,8 @@ __all__ = [
     "Hint",
     "Job",
     "JobStatus",
+    "LearnCard",
+    "LearnCardStatus",
     "LearningObjective",
     "Mistake",
     "ObjectiveProgress",
@@ -79,6 +82,8 @@ __all__ = [
     "Subtopic",
     "Tier",
     "Topic",
+    "TutorMessage",
+    "TutorRole",
     "UsageStatus",
     "User",
     "UserBadge",

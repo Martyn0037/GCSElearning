@@ -6,7 +6,7 @@
  */
 import * as zod from "zod";
 
-export const LevelOut = zod
+export const AppGamificationSchemasLevelOut = zod
   .object({
     level: zod.int(),
     totalXp: zod.int(),
@@ -15,5 +15,7 @@ export const LevelOut = zod
   })
   .describe("Overall level and XP.");
 
-export type LevelOut = zod.input<typeof LevelOut>;
-export type LevelOutOutput = zod.output<typeof LevelOut>;
+export type AppGamificationSchemasLevelOut = zod.input<typeof AppGamificationSchemasLevelOut>;
+export type AppGamificationSchemasLevelOutOutput = zod.output<
+  typeof AppGamificationSchemasLevelOut
+>;

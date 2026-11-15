@@ -15,7 +15,14 @@ from pydantic import BaseModel
 
 from app.ai.client import Effort, LlmCallError, LlmResponse
 from app.ai.pricing import TokenUsage
-from app.questions.llm_schemas import GeneratedOption, GeneratedQuestion, Verification
+from app.questions.llm_schemas import (
+    GeneratedLevel,
+    GeneratedMarkPoint,
+    GeneratedOption,
+    GeneratedQuestion,
+    MarkingResult,
+    Verification,
+)
 
 USAGE = TokenUsage(
     input_tokens=1200, output_tokens=800, cache_read_tokens=900, cache_write_tokens=0
@@ -68,6 +75,9 @@ class FakeLlmClient:
         )
 
 
+NO_SCHEME: dict[str, Any] = {"marking_points": [], "level_descriptors": [], "model_answer": None}
+
+
 def mcq(**overrides: Any) -> GeneratedQuestion:
     """A valid multiple-choice question (as if recorded from Claude)."""
     data: dict[str, Any] = {
@@ -86,6 +96,7 @@ def mcq(**overrides: Any) -> GeneratedQuestion:
         "unit": None,
         "check_expression": None,
         "accepted_answers": [],
+        **NO_SCHEME,
         "marks": 1,
         "worked_solution": (
             "Factors of 12: 1, 2, 3, 4, 6, 12. Factors of 18: 1, 2, 3, 6, 9, 18. Highest common: 6."
@@ -114,6 +125,7 @@ def numeric(**overrides: Any) -> GeneratedQuestion:
         "unit": None,
         "check_expression": "7/2 + 1.25",
         "accepted_answers": [],
+        **NO_SCHEME,
         "marks": 2,
         "worked_solution": "$\\frac{7}{2} = 3.5$, and $3.5 + 1.25 = 4.75$.",
         "hints": [
@@ -140,6 +152,7 @@ def short_text(**overrides: Any) -> GeneratedQuestion:
         "unit": None,
         "check_expression": None,
         "accepted_answers": ["prime", "prime number", "a prime"],
+        **NO_SCHEME,
         "marks": 1,
         "worked_solution": "A number with exactly two factors (1 and itself) is a prime number.",
         "hints": [
@@ -151,6 +164,56 @@ def short_text(**overrides: Any) -> GeneratedQuestion:
     }
     data.update(overrides)
     return GeneratedQuestion(**data)
+
+
+def extended(**overrides: Any) -> GeneratedQuestion:
+    """A valid 6-mark extended question with points and levels."""
+    data: dict[str, Any] = {
+        "question_type": "extended",
+        "command_word": "Explain",
+        "stem": "Explain why $1$ is not a prime number. Use the definition of a prime.",
+        "options": [],
+        "correct_option": None,
+        "numeric_answer": None,
+        "numeric_tolerance": None,
+        "unit": None,
+        "check_expression": None,
+        "accepted_answers": [],
+        "marking_points": [
+            GeneratedMarkPoint(text="States a prime has exactly two factors", marks=2, ao="AO1"),
+            GeneratedMarkPoint(text="Notes 1 has only one factor", marks=2, ao="AO2"),
+            GeneratedMarkPoint(text="Concludes 1 is not prime", marks=2, ao="AO3"),
+        ],
+        "level_descriptors": [
+            GeneratedLevel(level=1, min_marks=1, max_marks=2, descriptor="Basic"),
+            GeneratedLevel(level=2, min_marks=3, max_marks=4, descriptor="Clear"),
+            GeneratedLevel(level=3, min_marks=5, max_marks=6, descriptor="Thorough"),
+        ],
+        "model_answer": "A prime has exactly two factors. 1 has one factor, so it is not prime.",
+        "marks": 6,
+        "worked_solution": "Use the definition: exactly two distinct factors.",
+        "hints": [
+            "What is the definition of a prime number?",
+            "Count the factors of 1.",
+            "Compare that count with the definition.",
+            "1 has one factor; primes need exactly two, so 1 is not prime.",
+        ],
+    }
+    data.update(overrides)
+    return GeneratedQuestion(**data)
+
+
+def marking(**overrides: Any) -> MarkingResult:
+    """Claude's marking of an extended answer."""
+    data: dict[str, Any] = {
+        "awarded_points": [1, 2],
+        "level": 2,
+        "marks": 4,
+        "strengths": "You used the definition of a prime.",
+        "improvements": "Finish with a clear conclusion.",
+    }
+    data.update(overrides)
+    return MarkingResult(**data)
 
 
 def verification(**overrides: Any) -> Verification:

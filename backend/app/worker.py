@@ -17,7 +17,13 @@ from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from app.ai.factory import build_breaker, build_explainer, build_generator, build_llm_client
+from app.ai.factory import (
+    build_breaker,
+    build_explainer,
+    build_gateway,
+    build_generator,
+    build_llm_client,
+)
 from app.core.clock import Clock, SystemClock
 from app.core.config import Settings, get_settings
 from app.core.context import trace_id_var
@@ -31,6 +37,7 @@ from app.jobs.handlers import (
     JobContext,
     RetryLaterError,
 )
+from app.learning.learn import LearnCardWriter
 
 logger = logging.getLogger("app.worker")
 
@@ -118,6 +125,11 @@ async def main(settings: Settings | None = None, clock: Clock | None = None) -> 
         build_explainer(settings, session_factory, client, breaker, clock),
         settings,
         clock,
+        LearnCardWriter(
+            session_factory,
+            build_gateway(settings, session_factory, client, breaker, clock),
+            settings,
+        ),
     )
     stop = asyncio.Event()
     loop = asyncio.get_running_loop()

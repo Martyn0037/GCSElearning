@@ -64,7 +64,7 @@ references. Anything unclear is marked `TODO`; nothing is invented.
 3. Question engine ✅
 4. Memory and mistakes ✅
 5. Gamification ✅
-6. Extended answers and tutor chat
+6. Extended answers and tutor chat ✅
 7. Guardian and admin tools
 8. Production
 

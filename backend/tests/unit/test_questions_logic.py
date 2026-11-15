@@ -330,6 +330,7 @@ def test_generation_prompt_should_contain_objective_and_avoid_list() -> None:
     ctx = ObjectiveContext(
         subject="Mathematics",
         board="Pearson Edexcel",
+        subject_slug="maths",
         spec_code="1MA1",
         spec_version="Issue 2",
         topic="Number",

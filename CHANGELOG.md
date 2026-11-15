@@ -6,6 +6,21 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added — Phase 6 (Extended answers and tutor chat)
+- **Written (extended) questions,** marked by Claude against a mark scheme:
+  - The mark scheme has marking points with their AOs, level descriptors and a model answer.
+  - The result shows the mark, the level, which points were earned, what went well, the next step and the model answer.
+  - If Claude is unavailable, the mark scheme is shown and nothing counts against the student.
+  - English, humanities and languages questions now include written answers from level 3; Maths and sciences at level 5.
+- **"Ask about this question"** tutor:
+  - Socratic and limited to the question.
+  - Off-topic messages get a polite redirect.
+  - It doesn't give answers away before the student answers.
+  - Rate-limited and within the AI budget.
+- **"Learn this skill" cards:** a short explanation and worked example per skill, written in the background, cached and reviewable.
+- **Essay box** with a word count; the symbol keys work in it too.
+- **Docs:** ADR-018 and migration 0006.
+
 ### Added — Every subject's content
 - **Specs on the most common board for every catalogue subject,** copied word for word from the official PDFs:
   - Maths 1MA1 (all 6 topics)

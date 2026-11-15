@@ -5,7 +5,7 @@ import { useId, useRef, useState } from "react";
 import type { PracticeItemOut } from "../api/generated/model";
 import { answerAsLatex } from "./answerPreview";
 import type { Edit } from "./editing";
-import { deleteBack, insertAt } from "./editing";
+import { deleteBack, ESSAY_MAX_LENGTH, insertAt, MAX_LENGTH } from "./editing";
 import { MathKeypad } from "./MathKeypad";
 import { MathText } from "./MathText";
 
@@ -26,12 +26,17 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
   const [useKeyboard, setUseKeyboard] = useState(false);
   const ids = { answer: useId(), stem: useId(), hint: useId() };
   const input = useRef<HTMLInputElement>(null);
+  const area = useRef<HTMLTextAreaElement>(null);
+  // Written answers get a large box; everything else a single line.
+  const essay = item.questionType === "extended";
+  const maxLength = essay ? ESSAY_MAX_LENGTH : MAX_LENGTH;
   const keysOnly = item.keypad && !useKeyboard;
-  const preview = answerAsLatex(answer);
+  const preview = essay ? null : answerAsLatex(answer);
+  const words = answer.trim() ? answer.trim().split(/\s+/).length : 0;
 
   /** Apply a key press at the caret (or over the selection), then put the caret after it. */
   function edit(change: (value: string, start: number, end: number) => Edit) {
-    const element = input.current;
+    const element = essay ? area.current : input.current;
     const start = element?.selectionStart ?? answer.length;
     const end = element?.selectionEnd ?? start;
     const next = change(answer, start, end);
@@ -91,21 +96,37 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
             Your answer
           </label>
           <div className="flex items-center gap-2">
-            <input
-              ref={input}
-              id={ids.answer}
-              value={answer}
-              onChange={(e) => {
-                setAnswer(e.target.value);
-              }}
-              maxLength={200}
-              autoComplete="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              inputMode={keysOnly ? "none" : item.questionType === "numeric" ? "decimal" : "text"}
-              aria-describedby={ids.hint}
-              className={inputClass}
-            />
+            {essay ? (
+              <textarea
+                ref={area}
+                id={ids.answer}
+                value={answer}
+                onChange={(e) => {
+                  setAnswer(e.target.value);
+                }}
+                rows={10}
+                maxLength={ESSAY_MAX_LENGTH}
+                spellCheck
+                aria-describedby={ids.hint}
+                className={`${inputClass} py-2 leading-relaxed`}
+              />
+            ) : (
+              <input
+                ref={input}
+                id={ids.answer}
+                value={answer}
+                onChange={(e) => {
+                  setAnswer(e.target.value);
+                }}
+                maxLength={MAX_LENGTH}
+                autoComplete="off"
+                autoCapitalize="none"
+                spellCheck={false}
+                inputMode={keysOnly ? "none" : item.questionType === "numeric" ? "decimal" : "text"}
+                aria-describedby={ids.hint}
+                className={inputClass}
+              />
+            )}
             {item.unit && <span className="text-lg text-slate-700">{item.unit}</span>}
           </div>
           {preview && (
@@ -113,17 +134,24 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
               Looks like: <MathText text={`$${preview}$`} />
             </p>
           )}
+          {essay && (
+            <p className="mt-1 text-sm text-slate-600" aria-live="polite">
+              {words} {words === 1 ? "word" : "words"}
+            </p>
+          )}
           <p id={ids.hint} className="mt-1 text-sm text-slate-600">
-            {item.keypad
-              ? "Tap the keys or type. For a fraction, use a/b: 3 a/b 5 gives 3/5."
-              : "Type your answer. Numbers and symbols are on the keys below."}
+            {essay
+              ? `Write your answer in full sentences. It's marked out of ${String(item.marks)} against the mark scheme.`
+              : item.keypad
+                ? "Tap the keys or type. For a fraction, use a/b: 3 a/b 5 gives 3/5."
+                : "Type your answer. Numbers and symbols are on the keys below."}
             {item.symbolKeys.includes("π") && " For π, use the π key: 1 a/b 2 π gives ½π."}
           </p>
           <div className="mt-3">
             <MathKeypad
               symbols={item.symbolKeys}
               onInsert={(text) => {
-                edit((value, start, end) => insertAt(value, text, start, end));
+                edit((value, start, end) => insertAt(value, text, start, end, maxLength));
               }}
               onBackspace={() => {
                 edit(deleteBack);

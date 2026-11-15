@@ -6,6 +6,7 @@ Returns a problem description (so the gateway can retry) or ``None``.
 
 from __future__ import annotations
 
+import itertools
 import re
 from decimal import Decimal, InvalidOperation
 
@@ -22,7 +23,16 @@ _COMMAND_WORDS = {normalise_text(w) for w in COMMAND_WORDS}
 
 
 def _texts(q: GeneratedQuestion) -> list[str]:
-    return [q.stem, q.worked_solution, *q.hints, *(o.text for o in q.options), *q.accepted_answers]
+    return [
+        q.stem,
+        q.worked_solution,
+        *q.hints,
+        *(o.text for o in q.options),
+        *q.accepted_answers,
+        *(p.text for p in q.marking_points),
+        *(level.descriptor for level in q.level_descriptors),
+        q.model_answer or "",
+    ]
 
 
 def _final_answers(q: GeneratedQuestion) -> list[str]:
@@ -32,6 +42,8 @@ def _final_answers(q: GeneratedQuestion) -> list[str]:
         return [correct] if len(normalise_text(correct)) >= 3 else []
     if q.question_type == "numeric" and q.numeric_answer:
         return [q.numeric_answer]
+    if q.question_type == "extended":
+        return []  # no single final answer to leak
     return [a for a in q.accepted_answers if len(normalise_text(a)) >= 3]
 
 
@@ -54,8 +66,9 @@ def check_generated(q: GeneratedQuestion, expected_type: str) -> str | None:
         return "contains HTML markup"
     if normalise_text(q.command_word) not in _COMMAND_WORDS:
         return f"command word {q.command_word!r} not allowed"
-    if not 1 <= q.marks <= 6:
-        return "marks must be 1-6"
+    low, high = (2, 16) if q.question_type == "extended" else (1, 6)
+    if not low <= q.marks <= high:
+        return f"marks must be {low}-{high}"
     if len(q.hints) != 4 or any(not h.strip() for h in q.hints):
         return "needs exactly four non-empty hints"
 
@@ -68,7 +81,38 @@ def check_generated(q: GeneratedQuestion, expected_type: str) -> str | None:
     return None
 
 
+def _check_extended(q: GeneratedQuestion) -> str | None:
+    if q.options or q.accepted_answers or q.numeric_answer or q.correct_option:
+        return "extended questions have no options, accepted answers or numeric answer"
+    if not q.marking_points:
+        return "extended questions need marking points"
+    if any(p.marks < 1 or p.marks > q.marks for p in q.marking_points):
+        return "each marking point needs 1 to the question's marks"
+    if any(not re.fullmatch(r"AO[1-4]", p.ao.strip()) for p in q.marking_points):
+        return "marking point AO must be AO1-AO4"
+    if sum(p.marks for p in q.marking_points) < q.marks:
+        return "marking points must add up to at least the marks available"
+    if not (q.model_answer or "").strip():
+        return "extended questions need a model answer"
+    levels = sorted(q.level_descriptors, key=lambda level: level.level)
+    if q.marks >= 6 and not levels:
+        return "6+ mark questions need level descriptors"
+    if levels:
+        if levels[0].min_marks != 1 or levels[-1].max_marks != q.marks:
+            return "levels must cover 1 to the total marks"
+        for lower, upper in itertools.pairwise(levels):
+            if upper.min_marks != lower.max_marks + 1:
+                return "levels must not overlap or leave gaps"
+        if any(level.min_marks > level.max_marks for level in levels):
+            return "a level's minimum is above its maximum"
+    return None
+
+
 def _check_type_fields(q: GeneratedQuestion) -> str | None:
+    if q.question_type == "extended":
+        return _check_extended(q)
+    if q.marking_points or q.level_descriptors or q.model_answer:
+        return "only extended questions have a mark scheme or model answer"
     if q.question_type == "multiple_choice":
         labels = [o.label for o in q.options]
         if sorted(labels) != ["A", "B", "C", "D"]:

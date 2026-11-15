@@ -8,7 +8,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, Request, Response, status
 
-from app.ai.factory import build_generator
+from app.ai.factory import build_generator, build_marker
 from app.auth import rate_limit
 from app.auth.dependencies import (
     ClockDep,
@@ -42,14 +42,16 @@ IdempotencyKey = Annotated[
 def _service(
     request: Request, session: SessionDep, settings: SettingsDep, now: NowDep, clock: ClockDep
 ) -> PracticeService:
-    generator = build_generator(
+    parts = (
         settings,
         request.app.state.session_factory,
         request.app.state.llm_client,
         request.app.state.circuit,
         clock,
     )
-    return PracticeService(session, settings, now, generator)
+    return PracticeService(
+        session, settings, now, build_generator(*parts), marker=build_marker(*parts)
+    )
 
 
 ServiceDep = Annotated[PracticeService, Depends(_service)]

@@ -24,6 +24,7 @@ from app.gamification.router import admin_router as boundaries_router
 from app.gamification.router import challenge_router
 from app.gamification.router import me_router as gamification_me_router
 from app.health.router import router as health_router
+from app.learning.router import router as learning_router
 from app.practice.me_router import router as me_router
 from app.practice.router import router as practice_router
 from app.users.router import router as users_router
@@ -89,6 +90,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         enrolment_router,
         practice_router,
         challenge_router,
+        learning_router,
         me_router,
         gamification_me_router,
         admin_router,

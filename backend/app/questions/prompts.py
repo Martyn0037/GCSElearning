@@ -43,6 +43,20 @@ COMMAND_WORDS: tuple[str, ...] = (
     "Describe",
     "Define",
     "Compare",
+    "Analyse",
+    "Evaluate",
+    "Assess",
+    "Discuss",
+    "Justify",
+    "Suggest",
+    "Outline",
+    "Summarise",
+    "Name",
+    "Complete",
+    "Translate",
+    "How far",
+    "To what extent",
+    "In what ways",
 )
 
 GENERATION_SYSTEM = """\
@@ -58,6 +72,7 @@ Rules you must always follow:
 - multiple_choice: exactly four options labelled A-D, one correct; wrong options should reflect common misconceptions; no "all of the above".
 - numeric: give the exact answer as a plain decimal or integer, the accepted tolerance (0 when exact), the unit if any, and a check_expression that evaluates to the answer using only numbers, + - * / ^ ( ), sqrt and pi.
 - short_text: list every acceptable short answer (a word or short phrase). For a maths answer (an exact value with pi, a surd, an expression or a ratio), write each accepted answer in LaTeX without $ delimiters (e.g. \\frac{1}{2}\\pi) and list the equivalent forms a student might write (e.g. \\frac{\\pi}{2}); the student types on a keypad with digits, a/b, pi, square root, powers, brackets and the letters used.
+- extended: a longer written answer marked against a mark scheme. Give marking_points (each with the marks it earns and its assessment objective, e.g. AO1 knowledge, AO2 application, AO3 analysis/evaluation), and for 6+ mark questions level_descriptors covering every mark from 1 to the total without gaps, plus a model_answer that would earn full marks. Marks 2 to 16. No options, numeric fields or accepted_answers.
 - Hints: exactly four. Hint 1 nudges (what is being asked, which idea is relevant). Hint 2 gives the strategy or first step. Hint 3 shows most of the method but stops before the final answer. Hint 4 is the full worked solution. Hints 1-3 must never state or give away the final answer.
 - The worked solution shows every step a student would write.
 """
@@ -69,7 +84,7 @@ Work in this order:
 2. Compare with the proposed key. answer_is_correct is true only if the key is correct and the only correct answer.
 3. Judge whether the question tests only the stated specification objective (within_objective), suits the stated tier (suitable_for_tier) and matches the stated difficulty level (difficulty_matches).
 4. Check the hints. They are a ladder the student climbs one at a time when stuck: hint 1 nudges, hint 2 gives the strategy, hint 3 shows most of the method, and hint 4 is deliberately the full worked solution including the final answer. Hint 4 stating the answer is correct and expected, never an issue, and hint 3 showing most of the method is expected too. Set hints_reveal_answer_early to true only if hint 1, 2 or 3 actually states the final answer (or the correct option letter).
-5. Check that marks, worked solution and key agree (mark_scheme_consistent).
+5. Check that marks, worked solution and key agree (mark_scheme_consistent). For extended questions, solved_answer is a one-sentence outline of a full-mark answer; check the marking points and levels are fair, correct, add up to the marks and would reward a good GCSE answer.
 6. Give a confidence from 0 to 1 and list any issues briefly. Be strict: a wrong question harms the student more than a missing one.
 """
 
@@ -80,6 +95,7 @@ class ObjectiveContext:
 
     subject: str
     board: str
+    subject_slug: str
     spec_code: str
     spec_version: str
     topic: str

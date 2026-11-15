@@ -6,7 +6,7 @@
  */
 import * as zod from "zod";
 
-export const answerRequestAnswerMax = 200;
+export const answerRequestAnswerMax = 4000;
 
 export const AnswerRequest = zod
   .object({

@@ -52,13 +52,30 @@ from app.questions.validation import check_generated
 logger = logging.getLogger(__name__)
 
 # Question types tried at each level, rotated so the bank stays varied.
+# Quantitative subjects lean on numbers; essay subjects on written answers.
 TYPES_BY_LEVEL: dict[int, tuple[QuestionType, ...]] = {
     1: (QuestionType.MULTIPLE_CHOICE, QuestionType.SHORT_TEXT),
     2: (QuestionType.MULTIPLE_CHOICE, QuestionType.NUMERIC),
     3: (QuestionType.NUMERIC, QuestionType.MULTIPLE_CHOICE),
     4: (QuestionType.NUMERIC, QuestionType.SHORT_TEXT),
-    5: (QuestionType.NUMERIC, QuestionType.SHORT_TEXT),
+    5: (QuestionType.NUMERIC, QuestionType.SHORT_TEXT, QuestionType.EXTENDED),
 }
+ESSAY_TYPES_BY_LEVEL: dict[int, tuple[QuestionType, ...]] = {
+    1: (QuestionType.MULTIPLE_CHOICE, QuestionType.SHORT_TEXT),
+    2: (QuestionType.MULTIPLE_CHOICE, QuestionType.SHORT_TEXT),
+    3: (QuestionType.SHORT_TEXT, QuestionType.EXTENDED),
+    4: (QuestionType.EXTENDED, QuestionType.SHORT_TEXT),
+    5: (QuestionType.EXTENDED,),
+}
+QUANTITATIVE_SUBJECTS = frozenset(
+    {"maths", "combined-science", "biology", "chemistry", "physics", "computer-science"}
+)
+
+
+def types_for(subject_slug: str, difficulty: int) -> tuple[QuestionType, ...]:
+    """Question types to rotate through for a subject at a level."""
+    table = TYPES_BY_LEVEL if subject_slug in QUANTITATIVE_SUBJECTS else ESSAY_TYPES_BY_LEVEL
+    return table[difficulty]
 
 
 class ObjectiveNotAvailableError(Exception):
@@ -82,6 +99,7 @@ async def load_context(
                 Specification,
                 Subject.name,
                 ExamBoard.name,
+                Subject.slug,
             )
             .join(Subtopic, Subtopic.id == LearningObjective.subtopic_id)
             .join(Topic, Topic.id == Subtopic.topic_id)
@@ -93,13 +111,14 @@ async def load_context(
     ).first()
     if row is None:
         raise ObjectiveNotAvailableError("objective not found")
-    objective, subtopic, topic, spec, subject, board = row
+    objective, subtopic, topic, spec, subject, board, slug = row
     wording = objective.text_for(tier if spec.tiered else None)
     if wording is None:
         raise ObjectiveNotAvailableError("objective not on this tier")
     return ObjectiveContext(
         subject=subject,
         board=board,
+        subject_slug=slug,
         spec_code=spec.code,
         spec_version=spec.version,
         topic=topic,
@@ -144,6 +163,8 @@ def _verifier_agrees(q: GeneratedQuestion, v: Verification) -> bool:
     letter or leading number is extracted rather than compared verbatim.
     """
     solved = v.solved_answer.strip()
+    if q.question_type == "extended":
+        return True  # no single answer: judged by answer_is_correct and the mark scheme
     if q.question_type == "multiple_choice":
         return _solved_option(solved) == (q.correct_option or "").lower()
     if q.question_type == "numeric":
@@ -199,6 +220,12 @@ def _answer_key(q: GeneratedQuestion) -> dict[str, object]:
         return {"correct_option": q.correct_option}
     if q.question_type == "numeric":
         return {"value": q.numeric_answer, "tolerance": q.numeric_tolerance or "0", "unit": q.unit}
+    if q.question_type == "extended":
+        return {
+            "marking_points": [p.model_dump() for p in q.marking_points],
+            "levels": [level.model_dump() for level in q.level_descriptors],
+            "model_answer": q.model_answer,
+        }
     return {"accepted": q.accepted_answers}
 
 
@@ -250,7 +277,7 @@ class QuestionGenerator:
                 .select_from(Question)
                 .where(Question.objective_id == objective_id)
             )
-        types = TYPES_BY_LEVEL[difficulty]
+        types = types_for(ctx.subject_slug, difficulty)
         question_type = types[(count or 0) % len(types)]
 
         generated = await self._gateway.structured(

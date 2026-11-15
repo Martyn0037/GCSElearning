@@ -13,18 +13,19 @@ from __future__ import annotations
 import asyncio
 import logging
 import uuid
-from datetime import datetime
+from dataclasses import dataclass
+from datetime import datetime, timedelta
 
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ai.gateway import AiUnavailableError
 from app.core.config import Settings
-from app.core.errors import ConflictError, NotFoundError
+from app.core.errors import ConflictError, InvalidRequestError, NotFoundError
 from app.gamification.challenges import ChallengeService
 from app.gamification.rewards import Rewards
 from app.gamification.schemas import RewardsOut
-from app.gamification.xp import level_for, xp_for_answer
+from app.gamification.xp import level_for, xp_for_answer, xp_for_marks
 from app.jobs.queue import enqueue
 from app.models.curriculum import LearningObjective, Subtopic
 from app.models.enrolment import StudentSubject
@@ -37,9 +38,11 @@ from app.models.question import (
     Question,
     QuestionFlag,
     QuestionStatus,
+    QuestionType,
 )
 from app.models.user import User
 from app.practice import mastery
+from app.practice.extended import ExtendedMark, ExtendedMarker, scheme
 from app.practice.items import (
     MAX_HINT_LEVEL,
     item_out,
@@ -48,10 +51,16 @@ from app.practice.items import (
 )
 from app.practice.ladder import LadderState, Outcome, advance
 from app.practice.review import FixedIntervalScheduler, ReviewScheduler, ReviewState, london_today
-from app.practice.schemas import AnswerResultOut, PracticeItemOut
+from app.practice.schemas import (
+    AnswerResultOut,
+    ExtendedMarkingOut,
+    LevelOut,
+    MarkPointOut,
+    PracticeItemOut,
+)
 from app.questions.bank import pick_question, request_generation
 from app.questions.generator import ObjectiveNotAvailableError, QuestionGenerator
-from app.questions.marking import MarkResult, mark
+from app.questions.marking import MAX_ANSWER_LENGTH, mark
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +68,39 @@ logger = logging.getLogger(__name__)
 # let the worker finish it in the background.
 SYNC_GENERATION_TIMEOUT_SECONDS = 25.0
 EXPLAIN_JOB = "explain_mistake"
+
+
+# A marking attempt older than this is assumed lost (e.g. the server restarted).
+MARKING_STALE_AFTER = timedelta(minutes=3)
+
+
+@dataclass(frozen=True, slots=True)
+class Marked:
+    """A marked answer, however it was marked."""
+
+    correct: bool
+    display: str  # the correct answer (or model answer) to show
+    xp: int
+    extended: ExtendedMark | None = None
+    unmarked: bool = False  # Claude couldn't mark this extended answer
+
+
+def marking_out(question: Question, extended: ExtendedMark | None) -> ExtendedMarkingOut:
+    """The marking breakdown shown under an extended answer."""
+    points, levels = scheme(question)
+    awarded = set(extended.awarded_points) if extended else set()
+    return ExtendedMarkingOut(
+        marks=extended.marks if extended else None,
+        marks_available=question.marks,
+        level=extended.level if extended else None,
+        levels=[LevelOut(**lv) for lv in levels],
+        points=[
+            MarkPointOut(text=p["text"], marks=p["marks"], ao=p["ao"], awarded=i in awarded)
+            for i, p in enumerate(points, 1)
+        ],
+        strengths=extended.strengths if extended else None,
+        improvements=extended.improvements if extended else None,
+    )
 
 
 class PracticeService:
@@ -71,6 +113,7 @@ class PracticeService:
         now: datetime,
         generator: QuestionGenerator | None,
         scheduler: ReviewScheduler | None = None,
+        marker: ExtendedMarker | None = None,
     ) -> None:
         """Create the service.
 
@@ -80,12 +123,14 @@ class PracticeService:
             now: Request time.
             generator: Used only when the bank is empty; ``None`` disables it.
             scheduler: When mistakes come back (default 1/3/7/14 days, ADR-006).
+            marker: Marks extended answers; ``None`` leaves them unmarked.
         """
         self._session = session
         self._settings = settings
         self._now = now
         self._generator = generator
         self._scheduler = scheduler or FixedIntervalScheduler()
+        self._marker = marker
 
     # ------------------------------------------------------------------ serve
 
@@ -251,34 +296,132 @@ class PracticeService:
         - XP, the streak and badges are updated (ADR-016); answering the last
           question of a challenge completes it and adds its bonus.
         - Boss battle answers don't move the ladder (they're set above it).
+        - Extended answers are marked by Claude outside any transaction
+          (ADR-018); if Claude can't mark them, the answer is kept, the mark
+          scheme is shown and nothing counts against the student.
 
         Raises:
             NotFoundError: Unknown or someone else's item.
             ConflictError: ``ALREADY_ANSWERED`` with a different idempotency key;
-                ``CHALLENGE_FINISHED`` or ``TIME_UP`` for a closed challenge.
+                ``CHALLENGE_FINISHED`` or ``TIME_UP`` for a closed challenge;
+                ``MARKING_IN_PROGRESS`` while the same answer is being marked.
+            InvalidRequestError: ``ANSWER_TOO_LONG`` for a short answer over 200
+                characters.
         """
         item = await self._item(student_id, item_id, lock=True)
+        replay = self._replay(item, idempotency_key)
+        if replay is not None:
+            return replay
+        question = await self._session.get(Question, item.question_id)
+        assert question is not None  # noqa: S101 - FK guarantees it
+        challenges = ChallengeService(self._session, self._now)
+        challenge = await self._open_challenge(item, challenges)
+
+        if question.question_type is QuestionType.EXTENDED:
+            return await self._submit_extended(
+                student_id, item, question, answer, idempotency_key, challenges
+            )
+        if len(answer) > MAX_ANSWER_LENGTH:
+            raise InvalidRequestError(
+                f"Answers are at most {MAX_ANSWER_LENGTH} characters.", code="ANSWER_TOO_LONG"
+            )
+        result = mark(question.question_type, question.answer, question.options, answer)
+        marked = Marked(
+            correct=result.correct,
+            display=result.correct_answer_display,
+            xp=xp_for_answer(question.difficulty, result.correct, item.hints_revealed),
+        )
+        return await self._finish(
+            item, question, answer, idempotency_key, marked, challenges, challenge
+        )
+
+    def _replay(self, item: PracticeItem, idempotency_key: str) -> AnswerResultOut | None:
+        """The stored result for a repeated request, or a conflict for a different one."""
         if item.answered_at is not None:
             if item.idempotency_key == idempotency_key and item.response:
                 return AnswerResultOut.model_validate(item.response["result"])
             raise ConflictError("This question has already been answered.", code="ALREADY_ANSWERED")
+        if item.marking_started_at is not None and (
+            self._now - item.marking_started_at < MARKING_STALE_AFTER
+        ):
+            raise ConflictError(
+                "Your answer is still being marked. Try again in a moment.",
+                code="MARKING_IN_PROGRESS",
+            )
+        return None
 
-        challenges = ChallengeService(self._session, self._now)
-        challenge: Challenge | None = None
-        if item.challenge_id is not None:
-            challenge = await self._session.get(Challenge, item.challenge_id, with_for_update=True)
-            assert challenge is not None  # noqa: S101 - FK guarantees it
-            await challenges.ensure_answerable(challenge)
+    async def _open_challenge(
+        self, item: PracticeItem, challenges: ChallengeService
+    ) -> Challenge | None:
+        if item.challenge_id is None:
+            return None
+        challenge = await self._session.get(Challenge, item.challenge_id, with_for_update=True)
+        assert challenge is not None  # noqa: S101 - FK guarantees it
+        await challenges.ensure_answerable(challenge)
+        return challenge
 
-        question = await self._session.get(Question, item.question_id)
-        assert question is not None  # noqa: S101 - FK guarantees it
-        result = mark(question.question_type, question.answer, question.options, answer)
+    async def _submit_extended(
+        self,
+        student_id: uuid.UUID,
+        item: PracticeItem,
+        question: Question,
+        answer: str,
+        idempotency_key: str,
+        challenges: ChallengeService,
+    ) -> AnswerResultOut:
+        """Mark a written answer in three steps so no lock is held while Claude marks it."""
+        # 1. Record that marking has started, and release the locks.
+        item.marking_started_at = self._now
+        item.idempotency_key = idempotency_key
+        item.response = {"answer": answer}
+        await self._session.commit()
+
+        # 2. Ask Claude, outside any transaction.
+        extended: ExtendedMark | None = None
+        if self._marker is not None:
+            try:
+                extended = await self._marker.mark(question, answer)
+            except AiUnavailableError as exc:
+                logger.info("extended_marking_unavailable", extra={"reason": exc.reason})
+
+        # 3. Apply the result (unless another request finished it meanwhile).
+        item = await self._item(student_id, item.id, lock=True)
+        await self._session.refresh(item)
+        if item.answered_at is not None:
+            return AnswerResultOut.model_validate((item.response or {})["result"])
+        challenge = await self._open_challenge(item, challenges)
+        model_answer = str(question.answer.get("model_answer") or question.worked_solution)
+        marked = Marked(
+            correct=extended.secure if extended else False,
+            display=model_answer,
+            xp=xp_for_marks(question.difficulty, extended.fraction, item.hints_revealed)
+            if extended
+            else 0,
+            extended=extended,
+            unmarked=extended is None,
+        )
+        return await self._finish(
+            item, question, answer, idempotency_key, marked, challenges, challenge
+        )
+
+    async def _finish(
+        self,
+        item: PracticeItem,
+        question: Question,
+        answer: str,
+        idempotency_key: str,
+        marked: Marked,
+        challenges: ChallengeService,
+        challenge: Challenge | None,
+    ) -> AnswerResultOut:
+        """Record a marked answer: mastery, ladder, mistakes, challenge, rewards."""
+        student_id = item.user_id
         assisted = item.hints_revealed >= MAX_HINT_LEVEL
         outcome = (
             Outcome.ASSISTED
             if assisted
             else Outcome.CORRECT
-            if result.correct
+            if marked.correct
             else Outcome.INCORRECT
         )
         is_review = item.mistake_id is not None
@@ -286,41 +429,45 @@ class PracticeService:
 
         progress = await self._progress(student_id, question.objective_id)
         before = progress.level
-        if not is_review and not is_boss:
-            new_state = advance(
-                LadderState(progress.level, tuple(Outcome(o) for o in progress.recent)), outcome
-            )
-            progress.level = new_state.level
-            progress.recent = [o.value for o in new_state.recent]
-        progress.mastery = mastery.update(
-            progress.mastery, outcome, question.difficulty, question.question_type
-        )
-        progress.attempts += 1
-        progress.correct += 1 if outcome is Outcome.CORRECT else 0
-        progress.updated_at = self._now
-
         mistake_id: uuid.UUID | None = None
         resolved = False
-        if is_review:
-            resolved = await self._review_answered(item, outcome is Outcome.CORRECT, answer, result)
-            mistake_id = item.mistake_id
-        elif outcome is not Outcome.CORRECT:
-            mistake_id = await self._record_mistake(
-                item, question, answer, result.correct_answer_display, assisted
+        if not marked.unmarked:  # an answer Claude couldn't mark doesn't count either way
+            if not is_review and not is_boss:
+                new_state = advance(
+                    LadderState(progress.level, tuple(Outcome(o) for o in progress.recent)),
+                    outcome,
+                )
+                progress.level = new_state.level
+                progress.recent = [o.value for o in new_state.recent]
+            progress.mastery = mastery.update(
+                progress.mastery, outcome, question.difficulty, question.question_type
             )
+            progress.attempts += 1
+            progress.correct += 1 if outcome is Outcome.CORRECT else 0
+            progress.updated_at = self._now
+            if is_review:
+                resolved = await self._review_answered(
+                    item, outcome is Outcome.CORRECT, answer, marked.display
+                )
+                mistake_id = item.mistake_id
+            elif outcome is not Outcome.CORRECT:
+                mistake_id = await self._record_mistake(
+                    item, question, answer, marked.display, assisted
+                )
 
         item.answered_at = self._now
-        item.correct = result.correct
+        item.correct = marked.correct
         item.assisted = assisted
+        item.marking_started_at = None
         await self._session.flush()
         progress_out, bonus = await challenges.after_answer(challenge) if challenge else (None, 0)
-        rewards = await self._rewards(item, question, result.correct, challenges, bonus)
+        rewards = await self._rewards(item, question, marked.xp, challenges, bonus)
 
         out = AnswerResultOut(
             item_id=item.id,
-            correct=result.correct,
+            correct=marked.correct,
             assisted=assisted,
-            correct_answer=result.correct_answer_display,
+            correct_answer=marked.display,
             worked_solution=question.worked_solution,
             level_before=before,
             level_after=progress.level,
@@ -329,6 +476,10 @@ class PracticeService:
             mistake_resolved=resolved,
             rewards=rewards,
             challenge=progress_out,
+            marked=not marked.unmarked,
+            marking=marking_out(question, marked.extended)
+            if question.question_type is QuestionType.EXTENDED
+            else None,
         )
         item.idempotency_key = idempotency_key
         item.response = {"answer": answer, "result": out.model_dump(mode="json")}
@@ -339,19 +490,14 @@ class PracticeService:
         self,
         item: PracticeItem,
         question: Question,
-        correct: bool,
+        xp: int,
         challenges: ChallengeService,
         bonus: int,
     ) -> RewardsOut:
         """XP for this answer (plus any challenge bonus), the streak, and new badges."""
         rewards = Rewards(self._session, self._now)
         total_after = await rewards.total_xp(item.user_id)  # includes any bonus just added
-        gained = await rewards.award(
-            item.user_id,
-            XpSource.ANSWER,
-            item.id,
-            xp_for_answer(question.difficulty, correct, item.hints_revealed),
-        )
+        gained = await rewards.award(item.user_id, XpSource.ANSWER, item.id, xp)
         total_after += gained
         level_before = level_for(total_after - gained - bonus).level
         streak = await rewards.record_activity(item.user_id)
@@ -453,7 +599,7 @@ class PracticeService:
         return mistake.id
 
     async def _review_answered(
-        self, item: PracticeItem, correct: bool, answer: str, result: MarkResult
+        self, item: PracticeItem, correct: bool, answer: str, correct_answer: str
     ) -> bool:
         """Reschedule (or resolve) the mistake this review item was for."""
         mistake = await self._session.get(Mistake, item.mistake_id, with_for_update=True)
@@ -470,7 +616,7 @@ class PracticeService:
         mistake.last_reviewed_at = self._now
         if not correct:
             mistake.student_answer = answer[:200]
-            mistake.correct_answer = result.correct_answer_display[:300]
+            mistake.correct_answer = correct_answer[:300]
         if state.resolved:
             mistake.resolved_at = self._now
         return state.resolved

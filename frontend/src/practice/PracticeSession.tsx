@@ -14,10 +14,14 @@ import type { PracticeItemOut, UserOut } from "../api/generated/model";
 import { ApiError } from "../api/http";
 import { AppShell } from "../components/AppShell";
 import { MathText } from "./MathText";
+import { LearnPanel } from "./LearnPanel";
 import { QuestionCard } from "./QuestionCard";
 import { ResultPanel } from "./ResultPanel";
+import { TutorPanel } from "./TutorPanel";
 
 const LOAD_ERRORS: Record<string, string> = {
+  MARKING_IN_PROGRESS: "Your answer is still being marked. Try again in a moment.",
+  ANSWER_TOO_LONG: "That answer is too long for this question.",
   QUESTIONS_PREPARING: "We're preparing questions for this topic. Try again in a minute.",
   TOPIC_LOCKED: "This topic hasn't been marked as covered at school yet.",
   SUBJECT_NOT_READY: "This subject is still being set up.",
@@ -126,17 +130,20 @@ export function PracticeSession({ user, fetchNext, back, done }: PracticeSession
             </p>
           )}
           {result ? (
-            <ResultPanel
-              result={result}
-              onNext={loadNext}
-              onSimilar={trySimilar}
-              similarPending={similar.isPending}
-              similarError={
-                similar.isError
-                  ? errorMessage(similar.error, "Couldn't load a similar question.")
-                  : null
-              }
-            />
+            <>
+              <ResultPanel
+                result={result}
+                onNext={loadNext}
+                onSimilar={trySimilar}
+                similarPending={similar.isPending}
+                similarError={
+                  similar.isError
+                    ? errorMessage(similar.error, "Couldn't load a similar question.")
+                    : null
+                }
+              />
+              <TutorPanel key={`tutor-after-${item.id}`} itemId={item.id} />
+            </>
           ) : (
             <>
               <QuestionCard
@@ -145,6 +152,11 @@ export function PracticeSession({ user, fetchNext, back, done }: PracticeSession
                 submitting={answer.isPending}
                 onSubmit={submit}
               />
+              {answer.isPending && item.questionType === "extended" && (
+                <p role="status" className="text-slate-700">
+                  Marking your answer against the mark scheme… this can take up to a minute.
+                </p>
+              )}
               {answer.isError && (
                 <p role="alert" className="text-red-800">
                   {errorMessage(answer.error, "Couldn't check that. Please try again.")}
@@ -157,6 +169,10 @@ export function PracticeSession({ user, fetchNext, back, done }: PracticeSession
                   hint.mutate({ itemId: item.id }, { onSuccess: setServed });
                 }}
               />
+              <div className="flex flex-wrap gap-2">
+                <LearnPanel key={`learn-${item.id}`} itemId={item.id} />
+                <TutorPanel key={`tutor-${item.id}`} itemId={item.id} />
+              </div>
               <FlagControl key={item.id} onSend={sendFlag} pending={flag.isPending} />
             </>
           )}

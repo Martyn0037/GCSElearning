@@ -6,7 +6,7 @@
  */
 import * as zod from "zod";
 
-export const answerPracticeItemBodyAnswerMax = 200;
+export const answerPracticeItemBodyAnswerMax = 4000;
 
 export const AnswerPracticeItemBody = zod
   .object({

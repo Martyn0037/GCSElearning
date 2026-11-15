@@ -38,6 +38,7 @@ class QuestionType(StrEnum):
     MULTIPLE_CHOICE = "multiple_choice"
     NUMERIC = "numeric"
     SHORT_TEXT = "short_text"
+    EXTENDED = "extended"  # marked by Claude against a mark scheme (ADR-018)
 
 
 class QuestionStatus(StrEnum):
@@ -72,6 +73,8 @@ class Question(TimestampMixin, Base):
     - multiple_choice: ``{"correct_option": "B"}``
     - numeric: ``{"value": "3.5", "tolerance": "0.01", "unit": "cm" | null}``
     - short_text: ``{"accepted": ["prime", "a prime number"]}``
+    - extended: ``{"marking_points": [{"text", "marks", "ao"}], "levels":
+      [{"level", "min_marks", "max_marks", "descriptor"}], "model_answer": str}``
     """
 
     __tablename__ = "questions"
@@ -175,6 +178,8 @@ class PracticeItem(Base):
         ForeignKey("challenges.id", ondelete="CASCADE"), index=True
     )
     position: Mapped[int | None] = mapped_column(SmallInteger)
+    # Extended answers: set while Claude marks the answer, outside any transaction.
+    marking_started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class ObjectiveProgress(Base):

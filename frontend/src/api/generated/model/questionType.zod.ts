@@ -7,7 +7,7 @@
 import * as zod from "zod";
 
 export const QuestionType = zod
-  .enum(["multiple_choice", "numeric", "short_text"])
+  .enum(["multiple_choice", "numeric", "short_text", "extended"])
   .describe("How a question is answered and marked.");
 
 export type QuestionType = zod.input<typeof QuestionType>;

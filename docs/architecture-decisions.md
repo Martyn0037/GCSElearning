@@ -401,3 +401,42 @@ curriculum content comes only from the exam board's spec, never from model knowl
 **Trade-offs.**
 - Image content is missing from a few statements (e.g. the charges of subatomic particles table). Questions on those points rely on the surrounding text and the verifier.
 - Statements without codes get positional refs (3.1.1a, B4.2.3). A new spec issue that reorders them would retire and re-add statements rather than update them in place.
+
+## ADR-018 — Extended answers, the scoped tutor and learn cards
+
+**Status:** Accepted (2026-11-15). Implemented in Phase 6.
+
+**Decision.**
+- **Extended questions** are a fourth question type, generated with a mark scheme:
+  - marking points (each with its marks and AO1–AO4);
+  - for 6+ marks, level descriptors covering every mark without gaps;
+  - a model answer.
+
+  Validation rejects schemes that don't add up. The verifier judges the scheme instead of comparing a single answer.
+- **Which types a subject gets:**
+  - Maths, the sciences and Computer Science keep numeric-heavy questions, with extended answers at level 5.
+  - English, the humanities and languages use multiple choice and short answers at levels 1–2, and extended answers from level 3.
+- **Marking** is done by Sonnet in three steps:
+  1. Lock the item, record "marking started" and commit.
+  2. Call Claude with no transaction or lock held.
+  3. Lock again and apply the result.
+
+  A second request during step 2 gets 409 `MARKING_IN_PROGRESS`. A marking attempt older than 3 minutes is treated as lost.
+- **Marking rules:**
+  - Claude's marking is accepted only if it fits the scheme: real points, no duplicates, marks within the level and the total.
+  - 70% or more counts as "right" for mastery, the ladder and mistakes.
+  - XP is scaled by the share of marks earned.
+  - Boss battles score written answers by the marks awarded.
+- **If Claude can't mark an answer** (no key, budget, outage), the answer is kept and the mark scheme and model answer are shown. Nothing changes mastery, the ladder, mistakes or XP; only the streak counts the activity.
+- **The tutor** ("Ask about this question") is scoped to the current question and its objective, and Socratic.
+  - Sonnet returns `{reply, on_topic}`. Off-topic replies are replaced by a fixed redirect, so the refusal is deterministic and testable.
+  - Before the question is answered, the tutor is told not to give the answer away.
+  - Limits: 12 student messages per question, 8 a minute and 120 a day per student, all inside the AI budget.
+  - Messages are ordered by an explicit position assigned under a row lock.
+  - No connection is held while Claude replies.
+- **Learn cards** (one explanation and one worked example per objective and tier) are written by Haiku in a background job, cached, and held for admin review in strict mode.
+- **Prompt-injection hygiene** is the same as for explanations: student text (essays up to 4,000 characters, tutor messages up to 500) is stripped of angle brackets and control characters and wrapped in tags the system prompt declares to be data. No personal data is sent.
+
+**Trade-offs.**
+- Marking synchronously keeps the result screen simple, but the student waits up to about a minute (the UI says so). A background job would need polling.
+- A model-judged "on topic" can be fooled. The fixed redirect, the per-question cap and the budget bound the damage, and every tutor message is stored for the admin.

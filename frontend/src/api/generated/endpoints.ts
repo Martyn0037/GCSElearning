@@ -30,6 +30,7 @@ import {
   ChallengeOut,
   DashboardOut,
   GradeBoundariesOut,
+  LearnCardOut,
   MistakeOut,
   MistakePage,
   MistakeTopicGroup,
@@ -39,6 +40,7 @@ import {
   ReviewSummaryOut,
   SessionOut,
   TopicMapOut,
+  TutorThreadOut,
   UserOut,
 } from "./model";
 import type {
@@ -55,6 +57,7 @@ import type {
   SubjectChoices,
   TopicOrderUpdate,
   TopicSettingUpdate,
+  TutorAsk,
 } from "./model";
 
 import * as zod from "zod";
@@ -3784,6 +3787,155 @@ export const useRevealHint = <TError = ErrorType<ErrorResponse>, TContext = unkn
   return useMutation(getRevealHintMutationOptions(options), queryClient);
 };
 
+export const getGetLearnCardUrl = (itemId: string) => {
+  return `/api/v1/practice/items/${itemId}/learn`;
+};
+
+/**
+ * A short explanation and worked example for this question's skill.
+ *
+ * 409 ``LEARN_PREPARING`` while it's being written (try again shortly).
+ * @summary Learn
+ */
+export const getLearnCard = async (
+  itemId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<LearnCardOut> => {
+  return apiFetch<LearnCardOut>(getGetLearnCardUrl(itemId), {
+    ...options,
+    method: "GET",
+
+    schema: LearnCardOut,
+  });
+};
+
+export const getGetLearnCardQueryKey = (itemId: string) => {
+  return [`/api/v1/practice/items/${itemId}/learn`] as const;
+};
+
+export const getGetLearnCardQueryOptions = <
+  TData = Awaited<ReturnType<typeof getLearnCard>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  itemId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getLearnCard>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetLearnCardQueryKey(itemId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getLearnCard>>> = ({ signal }) =>
+    getLearnCard(itemId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: itemId !== null && itemId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getLearnCard>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetLearnCardQueryResult = NonNullable<Awaited<ReturnType<typeof getLearnCard>>>;
+export type GetLearnCardQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * A short explanation and worked example for this question's skill.
+ *
+ * 409 ``LEARN_PREPARING`` while it's being written (try again shortly).
+ * @summary Learn
+ */
+export function useGetLearnCard<
+  TData = Awaited<ReturnType<typeof getLearnCard>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  itemId: string,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getLearnCard>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getLearnCard>>,
+          TError,
+          Awaited<ReturnType<typeof getLearnCard>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * A short explanation and worked example for this question's skill.
+ *
+ * 409 ``LEARN_PREPARING`` while it's being written (try again shortly).
+ * @summary Learn
+ */
+export function useGetLearnCard<
+  TData = Awaited<ReturnType<typeof getLearnCard>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  itemId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getLearnCard>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getLearnCard>>,
+          TError,
+          Awaited<ReturnType<typeof getLearnCard>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * A short explanation and worked example for this question's skill.
+ *
+ * 409 ``LEARN_PREPARING`` while it's being written (try again shortly).
+ * @summary Learn
+ */
+export function useGetLearnCard<
+  TData = Awaited<ReturnType<typeof getLearnCard>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  itemId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getLearnCard>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * A short explanation and worked example for this question's skill.
+ *
+ * 409 ``LEARN_PREPARING`` while it's being written (try again shortly).
+ * @summary Learn
+ */
+export function useGetLearnCard<
+  TData = Awaited<ReturnType<typeof getLearnCard>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  itemId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getLearnCard>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetLearnCardQueryOptions(itemId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
 export const getSimilarPracticeItemUrl = (itemId: string) => {
   return `/api/v1/practice/items/${itemId}/similar`;
 };
@@ -3871,6 +4023,234 @@ export const useSimilarPracticeItem = <TError = ErrorType<ErrorResponse>, TConte
   TContext
 > => {
   return useMutation(getSimilarPracticeItemMutationOptions(options), queryClient);
+};
+
+export const getGetTutorThreadUrl = (itemId: string) => {
+  return `/api/v1/practice/items/${itemId}/tutor`;
+};
+
+/**
+ * The "Ask about this question" conversation so far.
+ * @summary Get Thread
+ */
+export const getTutorThread = async (
+  itemId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<TutorThreadOut> => {
+  return apiFetch<TutorThreadOut>(getGetTutorThreadUrl(itemId), {
+    ...options,
+    method: "GET",
+
+    schema: TutorThreadOut,
+  });
+};
+
+export const getGetTutorThreadQueryKey = (itemId: string) => {
+  return [`/api/v1/practice/items/${itemId}/tutor`] as const;
+};
+
+export const getGetTutorThreadQueryOptions = <
+  TData = Awaited<ReturnType<typeof getTutorThread>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  itemId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTutorThread>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetTutorThreadQueryKey(itemId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getTutorThread>>> = ({ signal }) =>
+    getTutorThread(itemId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: itemId !== null && itemId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getTutorThread>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetTutorThreadQueryResult = NonNullable<Awaited<ReturnType<typeof getTutorThread>>>;
+export type GetTutorThreadQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * The "Ask about this question" conversation so far.
+ * @summary Get Thread
+ */
+export function useGetTutorThread<
+  TData = Awaited<ReturnType<typeof getTutorThread>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  itemId: string,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTutorThread>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTutorThread>>,
+          TError,
+          Awaited<ReturnType<typeof getTutorThread>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The "Ask about this question" conversation so far.
+ * @summary Get Thread
+ */
+export function useGetTutorThread<
+  TData = Awaited<ReturnType<typeof getTutorThread>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  itemId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTutorThread>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTutorThread>>,
+          TError,
+          Awaited<ReturnType<typeof getTutorThread>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The "Ask about this question" conversation so far.
+ * @summary Get Thread
+ */
+export function useGetTutorThread<
+  TData = Awaited<ReturnType<typeof getTutorThread>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  itemId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTutorThread>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * The "Ask about this question" conversation so far.
+ * @summary Get Thread
+ */
+export function useGetTutorThread<
+  TData = Awaited<ReturnType<typeof getTutorThread>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  itemId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getTutorThread>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetTutorThreadQueryOptions(itemId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getAskTutorUrl = (itemId: string) => {
+  return `/api/v1/practice/items/${itemId}/tutor`;
+};
+
+/**
+ * Ask the tutor about this question. Off-topic messages get a polite redirect.
+ * @summary Ask
+ */
+export const askTutor = async (
+  itemId: string,
+  tutorAsk: TutorAsk,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<TutorThreadOut> => {
+  return apiFetch<TutorThreadOut>(getAskTutorUrl(itemId), {
+    ...options,
+    method: "POST",
+    headers: getHeaders({ "Content-Type": "application/json" }, options?.headers),
+    body: JSON.stringify(tutorAsk),
+    schema: TutorThreadOut,
+  });
+};
+
+export const getAskTutorMutationKey = () => ["askTutor"] as const;
+
+export const getAskTutorMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof askTutor>>,
+    TError,
+    AskTutorMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof askTutor>>,
+  TError,
+  AskTutorMutationVariables,
+  TContext
+> => {
+  const mutationKey = getAskTutorMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof askTutor>>,
+    AskTutorMutationVariables
+  > = (props) => {
+    const { itemId, data } = props ?? {};
+
+    return askTutor(itemId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AskTutorMutationResult = NonNullable<Awaited<ReturnType<typeof askTutor>>>;
+export type AskTutorMutationBody = BodyType<TutorAsk>;
+export type AskTutorMutationError = ErrorType<ErrorResponse>;
+export type AskTutorMutationVariables = { itemId: string; data: BodyType<TutorAsk> };
+
+/**
+ * Ask the tutor about this question. Off-topic messages get a polite redirect.
+ * @summary Ask
+ */
+export const useAskTutor = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof askTutor>>,
+      TError,
+      AskTutorMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof askTutor>>,
+  TError,
+  AskTutorMutationVariables,
+  TContext
+> => {
+  return useMutation(getAskTutorMutationOptions(options), queryClient);
 };
 
 export const getNextReviewItemUrl = () => {

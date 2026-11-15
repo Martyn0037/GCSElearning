@@ -43,6 +43,14 @@ def xp_for_answer(difficulty: int, correct: bool, hints_revealed: int) -> int:
     return max(ASSISTED_XP, round(full * (1 - HINT_PENALTY * max(hints_revealed, 0))))
 
 
+def xp_for_marks(difficulty: int, fraction: float, hints_revealed: int) -> int:
+    """XP for a written answer: the full-answer XP scaled by the share of marks earned."""
+    if fraction <= 0:
+        return 0
+    full = xp_for_answer(difficulty, True, hints_revealed)
+    return max(1, round(full * min(fraction, 1.0)))
+
+
 def boss_bonus(percent: float) -> int:
     """Completion bonus for a boss battle: 20 XP for finishing, plus up to 80 for the score."""
     return 20 + round(80 * max(0.0, min(percent, 100.0)) / 100)

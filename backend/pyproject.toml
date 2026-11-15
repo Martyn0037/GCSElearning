@@ -56,6 +56,9 @@ known-third-party = ["alembic"]
 # Prompt text is kept one rule per line for readability.
 "app/questions/prompts.py" = ["E501"]
 "app/practice/explain.py" = ["E501"]
+"app/practice/extended.py" = ["E501"]
+"app/learning/tutor.py" = ["E501"]
+"app/learning/learn.py" = ["E501"]
 # Maths symbols (×, −, π) are the point of these tests.
 "tests/unit/test_answer_forms.py" = ["RUF001", "RUF002"]
 

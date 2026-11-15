@@ -110,6 +110,8 @@ def _keypad(question: Question) -> dict[str, Any]:
     """
     if question.question_type is QuestionType.NUMERIC:
         return {"keypad": True, "symbol_keys": []}
+    if question.question_type is QuestionType.EXTENDED:
+        return {"keypad": False, "symbol_keys": keypad_symbols([])}
     if question.question_type is QuestionType.SHORT_TEXT:
         accepted = [str(a) for a in question.answer.get("accepted", [])]
         maths = bool(accepted) and all(is_maths_answer(a) for a in accepted)

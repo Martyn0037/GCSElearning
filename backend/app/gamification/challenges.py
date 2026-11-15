@@ -55,6 +55,19 @@ from app.questions.marking import mark
 logger = logging.getLogger(__name__)
 
 
+def marks_earned(item: PracticeItem, marks: int) -> int:
+    """Marks an answer earned: Claude's mark for a written answer, else all or nothing.
+
+    An answer given after the full solution earns nothing in a challenge.
+    """
+    if item.answered_at is None or item.assisted:
+        return 0
+    marking = ((item.response or {}).get("result") or {}).get("marking")
+    if marking is not None:
+        return int(marking.get("marks") or 0)
+    return marks if item.correct else 0
+
+
 class ChallengeService:
     """Challenge use cases for one request. Public methods commit."""
 
@@ -492,7 +505,7 @@ class ChallengeService:
             score = sum(1 for item, _ in rows if item.correct)
             max_score = len(rows)
         else:
-            score = sum(marks for item, marks in rows if item.correct and not item.assisted)
+            score = sum(marks_earned(item, marks) for item, marks in rows)
             max_score = sum(marks for _, marks in rows)
         challenge.score = score
         challenge.max_score = max_score
@@ -589,7 +602,7 @@ class ChallengeService:
                     position=item.position or 0,
                     stem=question.stem,
                     marks=question.marks,
-                    marks_earned=question.marks if item.correct and not item.assisted else 0,
+                    marks_earned=marks_earned(item, question.marks),
                     answered=answered,
                     correct=item.correct,
                     your_answer=(item.response or {}).get("answer") if answered else None,
