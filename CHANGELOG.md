@@ -17,7 +17,7 @@ project uses [Semantic Versioning](https://semver.org/).
   - AQA Religious Studies A 8062 (all religions and themes)
   - OCR Computer Science J277
   - AQA French 8652 and Spanish 8692
-  - 1,449 statements in all; ADR-017.
+  - 1,250 statements in all; ADR-017.
 - OCR's "Not required" guidance is imported as out-of-scope notes for question generation.
 
 ### Changed

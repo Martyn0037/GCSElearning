@@ -367,7 +367,7 @@ curriculum content comes only from the exam board's spec, never from model knowl
 
 **Status:** Accepted (2026-11-15).
 
-**Context.** The student picks his own subjects (ADR-012), so every subject in the catalogue needs its spec on the most common board. Copying 1,400+ statements by hand isn't practical, and the content rule forbids writing them from memory.
+**Context.** The student picks his own subjects (ADR-012), so every subject in the catalogue needs its spec on the most common board. Copying 1,250 statements by hand isn't practical, and the content rule forbids writing them from memory.
 
 **Decision.**
 - **Each spec is extracted from the official PDF's text layer** by a short script written for that board's layout, then checked by eye and by the importer's validation.
