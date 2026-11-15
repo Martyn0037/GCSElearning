@@ -1,0 +1,378 @@
+# curriculum/specs/aqa-8692.yaml
+# AQA GCSE Spanish 8692, section 3 "Subject content" (themes, grammar and
+# sound-symbol correspondences), copied word for word from the specification
+# PDF (Version 1.0 8 December 2023).
+#
+# - Themes: one statement per topic.
+# - Grammar: one statement per sub-heading block ("Articles", ...) of each
+#   grammar section, with its notes and bullets. Foundation-tier grammar is
+#   "foundation"; Higher-tier grammar is "higher" only (Higher students need
+#   both, which the app does automatically).
+# - The prescribed vocabulary list (Appendix) is not copied here: it is a
+#   word list for the assessments, not a set of skills.
+
+specification:
+  board: aqa
+  subject: spanish
+  code: "8692"
+  title: AQA GCSE Spanish
+  version: Version 1.0 8 December 2023
+  source_url: "https://filestore.aqa.org.uk/resources/spanish/specifications/AQA-8692-SP-2024.PDF"
+  tiered: true
+
+topics:
+  - ref: "3.1"
+    title: Themes
+    subtopics:
+      - title: "Theme 1: People and lifestyle"
+        objectives:
+          - ref: "3.1.1.1"
+            foundation: >-
+              Topic 1: Identity and relationships with others
+          - ref: "3.1.1.2"
+            foundation: >-
+              Topic 2: Healthy living and lifestyle
+          - ref: "3.1.1.3"
+            foundation: >-
+              Topic 3: Education and work
+      - title: "Theme 2: Popular culture"
+        objectives:
+          - ref: "3.1.2.1"
+            foundation: >-
+              Topic 1: Free-time activities
+          - ref: "3.1.2.2"
+            foundation: >-
+              Topic 2: Customs, festivals and celebrations
+          - ref: "3.1.2.3"
+            foundation: >-
+              Topic 3: Celebrity culture
+      - title: "Theme 3: Communication and the world around us"
+        objectives:
+          - ref: "3.1.3.1"
+            foundation: >-
+              Topic 1: Travel and tourism, including places of interest
+          - ref: "3.1.3.2"
+            foundation: >-
+              Topic 2: Media and technology
+          - ref: "3.1.3.3"
+            foundation: >-
+              Topic 3: The environment and where people live
+  - ref: "3.2.1"
+    title: "Grammar: Foundation tier"
+    subtopics:
+      - title: Noun phrases
+        objectives:
+          - ref: "3.2.1.1.1"
+            foundation: >-
+              Formation of feminine nouns: Irregular feminine nouns and nouns where the different
+              genders have different English equivalents (eg, hijo, son and hija, daughter) are
+              listed as individual items in the vocabulary list. • Nouns ending in -o change to -a
+              (eg, vecino/vecina) • Nouns ending in -or add -a (eg, profesor/profesora) • No
+              change for nouns ending in -ante/-ente and -ista (eg, estudiante, artista) Feminised
+              forms of nouns with biological gender relating to jobs are in flux and will be shown
+              appropriate tolerance, reflecting standard and widespread usage (eg, el jefe, la
+              jefe/jefa).
+          - ref: "3.2.1.1.2"
+            foundation: >-
+              Formation of plural nouns: Highly frequent irregulars are listed in the vocabulary
+              list. • Nouns ending in a vowel add -s • Nouns ending in a consonant add -es • Nouns
+              ending in -z change -z to -c and add -es • Nouns ending in -(i)ón add -es and drop
+              the written accent
+          - ref: "3.2.1.1.3"
+            foundation: >-
+              Infinitive used as a noun: Ie, equivalent of the -ing (gerund) in English.
+              Nominalisation of masculine adjectives for languages (eg, francés ➜ (el) francés)
+              and inflected forms of regular and the highly frequent patterns of nationality
+              adjectives listed in this annex, (eg, (la) inglesa, (los) españoles).
+          - ref: "3.2.1.1.4"
+            foundation: >-
+              Articles: Agreement of articles with noun for gender and number (el, la, los, las
+              and un, una, unos, unas). Functions of definite and indefinite articles, including
+              where their use or omission differs from English (eg, La educación es importante).
+              Contraction of definite article el after prepositions de and a (ie, del, al) are
+              listed in the vocabulary list.
+          - ref: "3.2.1.1.5"
+            foundation: >-
+              Other determiners: Agreement with nouns for gender and number of the following
+              determiners (only the base form will be listed in the vocabulary list, unless
+              otherwise stated. All English equivalents will be listed). Demonstrative adjectives
+              (este, esta, ese, esa), as well as irregular plural forms (estos, esos) and regular
+              plurals (estas, esas). Indefinite adjectives (cada (invariant), mismo, otro, todo,
+              alguno*, ninguno*, as well as irregular forms algún and ningún). *Note, these are
+              listed as determiners, rather than as postnominal adjectives, meaning that these
+              specific forms will not be tested. They are listed only as the base for the other
+              forms with gender and number agreement. Possessive adjectives (mi, tu, su, nuestro,
+              vuestro) as equivalent of English me, you, his/her/ itstheir/your-formal singular
+              and plural, our, your-informal plural.
+          - ref: "3.2.1.1.6"
+            foundation: >-
+              Pronouns: Subject pronouns (yo, tú, él, ella, nosotros, nosotras, vosotros,
+              vosotras, ellos, ellas, usted and ustedes) and invariable pronouns (algo and
+              alguien) are listed in the vocabulary list. Their grammar (agreement, position) is
+              laid out here. Default omission of subject pronouns and contexts where overt use
+              appropriate (ie, change of subject and emphasis). Word order of direct object
+              pronouns (me, te, lo, la, los, las) in one-and two-verb constructions (eg, lo miro,
+              lo puedo mirar, puedo mirarlo, ¡Míralo!), in which only a single pronoun is used.
+              Word order of indirect object pronouns (me, te, le, les) in one-and two-verb
+              constructions (eg, te doy, te quiero dar, quiero darte, ¡Dame!), in which only a
+              single pronoun is used. Word order of singular reflexive pronouns (me, te, se) in
+              one-and two-verb constructions (eg, se lava, se debe lavar, debe lavarse, ¡Lávate!).
+              Interrogative pronouns (cuál, cuánto, quién) and their inflected forms for gender
+              and number. Use of the relative pronoun que in subject relative clauses. Neuter
+              demonstrative pronouns (esto, eso). Use of the pronouns alguno and ninguno,
+              including their inflected forms for gender.
+      - title: Verb phrases
+        objectives:
+          - ref: "3.2.1.2.1"
+            foundation: >-
+              Verbs that do not fit into the grammar detailed here can still be listed in the
+              vocabulary list to be learnt in the infinitive form only.
+          - ref: "3.2.1.2.2"
+            foundation: >-
+              Negation: Word order of verbal negation, with no, (no) nada, (no) nunca, (no) nadie,
+              (no) ninguno.
+          - ref: "3.2.1.2.3"
+            foundation: >-
+              Interrogatives: Interrogatives expressed through: • intonation, including when using
+              a wh-word (qué, quién, cuándo, por qué, cómo, cuál, cuánto, dónde) • wh-word (ie,
+              question words including ‘how’) followed by subject verb word order, including where
+              the overt subject is only sometimes required (eg, ¿Dónde está (Daniel)? and ¿Qué
+              hace (la chica)?)
+          - ref: "3.2.1.2.4"
+            foundation: >-
+              Inflectional morphology: Specific irregular inflected forms (eg, doy, digo), as a
+              minimum those specified below, are listed in the vocabulary list. Some verb forms
+              change the spelling in their stems, usually to preserve pronunciation (eg, present:
+              g → j; preterite: c → qu, g → gu, addition of y to 3rd persons, and z → c). Such
+              spelling changes will not be credit-bearing. Regular (-ar, -er, -ir) in 1st, 2nd,
+              3rd persons in singular and plural for: • Present indicative with both simple (I
+              walk) and ongoing (I am walking) functions. • Including five clusters of high
+              frequency verbs that pattern following one of these ‘anchor’ verbs: encontrar (o →
+              ue), pensar (e → ie), pedir (e → i), conocer (c → zc), poner (add -g to 1st person
+              singular). The infinitives within these clusters are listed in the vocabulary list.
+              • In the pedir cluster, omission of ‘u’ in the first person of verbs like seguir
+              will not be credit-bearing. • Irregular forms of estar, hacer, ir, ser, tener are
+              listed in full in the vocabulary list (including use of tener + noun where the
+              English equivalent is ‘BE + adjective’ eg, + frío, + calor, + año(s), + hambre, +
+              sed, + miedo). • Present continuous (estar + present participle), as equivalent of
+              the English ‘BE + -ing’, including spelling changes for verbs whose stems end in a
+              vowel (eg, leer, construir) and for verbs in the pedir cluster. • Preterite tense
+              (as equivalent of the English simple past (I walked), ie, referring to past events
+              occurring at specified, known times). • Irregular preterite forms of ir, ser, dar
+              are listed in full in the vocabulary list. • Irregular preterite stems (tuve, pude,
+              hice, vine, estuve, puse, quise, dije, traje) and irregular form hizo are listed in
+              the vocabulary list. Preterite forms of verbs with prefixes on stems which are
+              listed in the vocabulary list, eg, mantuve, will not be listed in the vocabulary
+              list, because tuve is already listed). • Stem-changes (o → u, e → i) to 3rd person
+              singular and plural in -IR verbs in the preterite will not be credit-bearing. •
+              Small changes to preterite stems or inflections (eg, vi, vio (no accent), empecé (z
+              → c), dijeron (no ‘i' in inflection) will not be credit-bearing. • Present perfect
+              tense (haber + past participle, -AR stem + ado, -ER/IR stem + ido), as equivalent of
+              the English present perfect (I have walked, he has gone). • Irregular past
+              participles are listed in the vocabulary list. Past participles of verbs with
+              prefixes on stems which are listed on the vocabulary list, eg, descrito, will not be
+              listed in the vocabulary list, if escrito is already listed. • Periphrastic future
+              (ir a + infinitive), as equivalent of the English ‘BE + going to + verb’ and ‘will +
+              verb’. Regular (-ar, -er, -ir) for 1st, 2nd and 3rd persons in singular only for: •
+              Imperfect for habitual (only for equivalent of English ‘used to + verb’) and ongoing
+              (BE + ing) functions. • Three irregular verbs: ser (era, eras), ir (iba, ibas) and
+              ver (veía, veías) are listed in the vocabulary list. • Other English equivalent
+              functions are listed in the vocabulary list as follows: tenía, tenías (to mean
+              ‘had’), había (to mean ‘there was/were’), estaba, estabas (to mean ‘was/were +
+              state/location’) / era, eras (to mean ‘was/were + trait’). • Imperfect continuous
+              (estar + present participle) for ongoing (BE + ing) functions. • Inflectional future
+              • Plus five irregular verbs: tener (tendr-), hacer (har-), poder (podr-), poner
+              (pondr-) of which the 1st person singular stems are listed in the vocabulary list,
+              and habrá (‘there will be’). • Conditional • Plus five irregular verbs: tener
+              (tendr-), hacer (har-), poder (podr-), poner (pondr-) of which the 1st person
+              singular stems are listed in the vocabulary list, and habría (‘there would be’). •
+              Imperative (affirmative, 2nd singular only) and irregular tú commands (sé, ve, ten,
+              ven, haz, di, pon and sal) are listed in the vocabulary list.
+          - ref: "3.2.1.2.5"
+            foundation: >-
+              Syntax of interesar-type verbs: Ie, which tend to occur in Object Verb Subject word
+              order, as listed on the vocabulary list.
+          - ref: "3.2.1.2.6"
+            foundation: >-
+              Modals, for 1st, 2nd and 3rd persons in singular and plural: Use of modals (deber,
+              poder, querer, tener que, saber) + infinitive, including two multi-word complex
+              fixed phrases (quisiera + infinitive and me/te/le gustaría + infinitive).
+          - ref: "3.2.1.2.7"
+            foundation: >-
+              Reflexive use of verbs: Singular only, for 1st, 2nd, 3rd persons. Reflexive verb
+              forms (eg, lavarse) with the same meaning as a listed base verb (eg, lavar) are not
+              listed. Reflexive verb forms with different meanings from a listed base verb (eg,
+              poner, ponerse) are listed on the same line. When reflexive verb forms with
+              different meanings from a listed base verb are not listed, they will not be tested.
+          - ref: "3.2.1.2.8"
+            foundation: >-
+              Impersonal verbs: Use of impersonal verb hay. Use of hay que. Impersonal use of se
+              for generalised ‘you/one’ function with se puede/se necesita. Hace + noun (weather,
+              with the relevant words eg, sol, listed in the vocabulary list).
+          - ref: "3.2.1.2.9"
+            foundation: >-
+              Adjectival phrases: Agreement for gender and number with nouns following regular
+              patterns (of adjectives listed in the vocabulary list): • Gender and number: -o, -a,
+              -os, -as • Number only: • -e, -es • -z, -ces • -ista, -istas • Highly frequent
+              patterns of adjectives for nationality: - ending in consonant (eg, francés, -esa,
+              -es (no accent), -esas (no accent), español, -a, -es, -as). Position of adjectives
+              in relation to the nouns they refer to: mostly after nouns, a defined set of
+              prenominal adjectives (algún, ningún, primer, segundo, tercer, buen, mal, gran) and
+              a set that changes meaning depending on whether prenominal or postnominal (eg,
+              único), as listed in the vocabulary list. Different uses of ser and estar with
+              adjectives as listed in the vocabulary list (including where meanings differ when
+              used with ser and estar, eg, listo/a). Use of regular comparative structure
+              menos…que with irregular forms (mejor and peor) listed in the vocabulary list.
+          - ref: "3.2.1.2.10"
+            foundation: >-
+              Adverbial phrases: Adverbs and adverbial phrases are listed in the vocabulary list.
+              Position of adverbs of time, manner, place. Use of regular comparative structures
+              (más…que/de, menos…que/de, tan…como), with irregular forms (mejor and peor) listed
+              in the vocabulary list.
+          - ref: "3.2.1.2.11"
+            foundation: >-
+              Prepositions: Prepositions are listed in the vocabulary list. Use of the personal a
+              De to indicate possession (eg, la casa de Hugo) Para, sin + infinitive Prepositions
+              as needed in certain verb phrases before an infinitive or noun. These verb +
+              preposition combinations are listed in the vocabulary list alongside the verb entry
+              (eg, dejar ‘to leave’, dejar de + infinitive ‘to stop + verb’, ir ‘to go’, ir de +
+              noun ‘to go (for/on) + noun, to go + - ing’). Where the preposition changes or adds
+              to the meaning of the verb, English translations are listed (eg, llegar ‘to arrive’,
+              llegar a ‘to manage to’).
+          - ref: "3.2.1.2.12"
+            foundation: >-
+              Derivational morphology (Reading only): Derivational morphology listed here
+              indicates that even if only the base form (eg, libro) is listed in the vocabulary
+              list, a derived form that follows one of the patterns listed here (eg, librito) may
+              be included in reading texts. Or, if only the specific affixed form is listed, the
+              base form may be included in reading texts. Note, if derived forms are included in
+              listening material or required for production, they will be listed separately in the
+              vocabulary list.
+          - ref: "3.2.1.2.14"
+            foundation: >-
+              Suffixes: Adding -ito, -ita to nouns, or to nouns with -o / -a removed, only where
+              the English meaning is ‘little’ (eg, librito) or implies endearment (eg, hermanito).
+              Adding -ísimo, -ísima to adjectives, or to adjectives with -o / -a removed, only
+              where the English meaning is ‘very’ (eg, facilísimo).
+          - ref: "3.2.1.2.16"
+            foundation: >-
+              Morphology that changes the part of speech: Suffixes Adverbs created by adding
+              -mente to singular invariable adjectives (eg, alegre-) or the singular feminine form
+              of adjectives ending in -o / -a (eg, absoluta-), only where the English equivalent
+              is ‘- ly’ (eg, normalmente). Nouns created by adding -idad to singular adjectives
+              ending in a consonant (eg, real) or with the final vowel removed (eg, segur-), only
+              where the English equivalent is ‘-(i)ty’ (eg, seguridad). Adjectives created by
+              adding -able to a verb stem, only where the English equivalent is ‘-able’ (eg,
+              evitable).
+  - ref: "3.2.2"
+    title: "Grammar: Higher tier"
+    subtopics:
+      - title: Noun phrases
+        objectives:
+          - ref: "3.2.2.1.1"
+            higher: >-
+              Determiners: Demonstrative adjective aquel, with agreement for gender and number, to
+              mean ‘that’ and ‘those’, with tolerance for using ese etc as alternatives for aquel
+              etc in production.
+          - ref: "3.2.2.1.2"
+            higher: >-
+              Pronouns: Word order of the following direct and indirect object pronouns (nos, os)
+              in one-and two-verb constructions (such as os veo, os puedo ver, puedo veros) and
+              plural reflexive pronouns (nos, os, se). Relative pronouns lo que (invariable) and
+              el que, el cual (and their inflected forms for gender and number) in subject
+              relative clauses. Relative clauses using wh-pronouns (cuando, donde, que).
+              Possessive pronouns, agreement for gender and number, for singular and plural
+              possessors (el mío, el tuyo, el suyo, el nuestro, el vuestro). Neuter demonstrative
+              pronoun (aquello). Use of pronouns after prepositions (mí, ti, él, ella, usted,
+              nosotros, vosotros, ellos, with agreement for gender and number), irregular forms
+              (conmigo, contigo), and emphatic use of pronouns after ‘a’. Reflexive use of plural
+              forms of pronouns (including with reciprocal function) (eg, nos vemos, os entendéis,
+              se besan).
+      - title: Verb phrases
+        objectives:
+          - ref: "3.2.2.2.1"
+            higher: >-
+              Highly irregular specific verb forms are listed in the vocabulary list.
+          - ref: "3.2.2.2.2"
+            higher: >-
+              Negation: Word order of verbal negation with ya no, (no) tampoco, (no)…ni…,
+              including the use of (no) ni… ni… for emphasis.
+          - ref: "3.2.2.2.3"
+            higher: >-
+              Inflectional morphology: Plural forms in 1st, 2nd, 3rd persons for: • Inflectional
+              future • Plus irregular verbs (in singular and plural): saber (sabr-), querer
+              (querr-), venir (vendr-), decir (dir-), salir (saldr-) of which the 1st person
+              singular stems are listed in the vocabulary list. • Conditional • Plus irregular
+              verbs (in singular and plural): saber (sabr-), querer (querr-), venir (vendr-),
+              decir (dir-), salir (saldr-) of which the 1st person singular stems are listed in
+              the vocabulary list. • Imperfect, for habitual (equivalent only of English ‘used to
+              + verb’) and ongoing (‘BE + ing’) functions. This includes the plural forms of the
+              three very high frequency irregular verbs (ir, ser, ver). Some verb forms change the
+              spelling in their stems to preserve pronunciation (eg, present: g → j, preterite: c
+              → qu, z → c, g → gu and addition of y to 3rd persons). Such spelling changes will be
+              credit-bearing. Preterite stem changes (o → u, e → i) in 3rd person singular and
+              plural for -IR verbs, where the verbs are part of an anchor group in the present
+              tense, will be credit-bearing. Stem changes in the present participle form of some
+              –ir verbs ie, o → u (eg, muriendo), e → i (eg, advirtiendo) will not be
+              credit-bearing. (The pedir cluster will be credit-bearing as at Foundation).
+              Imperative for affirmative commands in 2nd person singular and plural only.
+              Subjunctive mood in the present, for singular persons only, with five high frequency
+              verbs: hacer, ser, ir, venir, tener (inflected forms as listed in the vocabulary
+              list), with the following functions and contexts of use: • future after conjunction
+              of time cuando • after verbs of wishing, command, request, and emotion • after
+              conjunction que • to express purpose after para que.
+          - ref: "3.2.2.2.4"
+            higher: >-
+              Multi-verb expressions: • Acabar de + infinitive (as equivalent of ‘HAVE just done +
+              verb’). • Passive voice: ser + past participle + por, se + 3rd person singular or
+              plural. • Use of seguir + present participle and llevar + time period + present
+              participle for ongoing actions in the present. • Present tense with desde hace (as
+              equivalent of ‘have been + ing for x time’).
+          - ref: "3.2.2.2.5"
+            higher: >-
+              Impersonal verbs: Listen in the vocabulary list: (parece, basta, falta, hace falta,
+              vale la pena).
+          - ref: "3.2.2.2.6"
+            higher: >-
+              Adjectival phrases: Adjectives with neuter article lo used as nouns (eg, lo bueno).
+              Possessive adjectives as post-verbal complement for singular and plural possessors
+              (eg, mío/a/ os/as, tuyo, suyo, nuestro, vuestro). Use of regular superlative
+              adjectives (and irregulars (el mejor, el peor) as listed in the vocabulary list).
+          - ref: "3.2.2.2.7"
+            higher: >-
+              Adverbial phrases: Use of regular superlative adverb structures (and irregulars as
+              listed in the vocabulary list).
+          - ref: "3.2.2.2.8"
+            higher: >-
+              Prepositions: Antes de, después de + infinitive Syntax of prepositions in questions
+              (eg, ¿Con quién hablas?)
+  - ref: "3.2.3"
+    title: Spanish sound symbol correspondences
+    subtopics:
+      - title: Spanish sound symbol correspondences
+        objectives:
+          - ref: "3.2.3"
+            foundation: >-
+              This list specifies key differences in sound spelling correspondences between
+              Spanish and English which students will need to learn at GCSE to be able to read out
+              loud and transcribe with sufficient accuracy at this level. It is not an exhaustive
+              list of all the sound-spelling correspondences in the Spanish language. Where a
+              letter or combination of letters is pronounced (or a sound spelt) in approximately
+              the same way in Spanish as in English, it is not listed. • [a] • [o] • [e] • [i] •
+              [u] • [ll] • [ch] • [ca] • [co] • [cu] • [cu] + vowel • [ce] • [ci] • [z] • [que] •
+              [qui] • [ga] • [go] • [gu] • [ge] • [gi] • [gue] • [gui] • [j] • [ñ] • [v] • [-r-]
+              [-r] • [rr] [r-] [-r-]* • silent h * word initial [r-] and [-r-] following
+              consonants n, l or s is the same sound-symbol correspondence (SSC) as [rr].
+      - title: Key stress positions and associated spelling rules
+        objectives:
+          - ref: "3.2.3.1"
+            higher: >-
+              This list specifies key spelling rules determined by the position of stress, which
+              students will need to learn at GCSE. When reading words aloud in Spanish: • stress
+              any vowel that has a written accent • stress the final syllable in a word, except: •
+              stress the penultimate syllable for any word ending in a vowel, ‘n’, or ‘s’ (unless
+              there is a written accent). When transcribing Spanish, only write an accent on the
+              stressed vowel for: • words with stress on a final syllable ending in a vowel, ‘n’,
+              or ‘s’ • words with stress on penultimate (second to last) syllable for a word
+              ending in a consonant (other than ‘n’ or ‘s’). All words with stress on the
+              antepenultimate (third to last) syllable.

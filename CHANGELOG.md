@@ -6,6 +6,23 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added — Every subject's content
+- **Specs on the most common board for every catalogue subject,** copied word for word from the official PDFs:
+  - Maths 1MA1 (all 6 topics)
+  - AQA English Language 8700
+  - AQA English Literature 8702, with its set-text lists
+  - AQA Combined Science: Trilogy 8464, and Biology 8461, Chemistry 8462 and Physics 8463
+  - AQA Geography 8035
+  - Edexcel History 1HI0 (all options)
+  - AQA Religious Studies A 8062 (all religions and themes)
+  - OCR Computer Science J277
+  - AQA French 8652 and Spanish 8692
+  - 1,449 statements in all; ADR-017.
+- OCR's "Not required" guidance is imported as out-of-scope notes for question generation.
+
+### Changed
+- The statement wording limit is raised to 8,000 characters for the longest science units.
+
 ### Added — Phase 5 (Gamification)
 - **XP and levels:**
   - 10 XP per difficulty level for a right answer, less with hints, and 2 XP after the full solution.

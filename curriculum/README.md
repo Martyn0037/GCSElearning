@@ -58,6 +58,33 @@ Students already on the older version stay on it until the admin moves them.
 
 ## Status
 
-| File | Spec | Version | Content |
+Every subject in `catalogue.yaml` has a spec on its most common board. A
+student on another board waits as "being set up" until that board's spec is
+added (ADR-012).
+
+| File | Spec | Version | Statements |
 |---|---|---|---|
-| `specs/pearson-edexcel-1ma1.yaml` | Pearson Edexcel GCSE Maths 1MA1 | Issue 2 – June 2015 | Topic 1 (Number) complete; other topics to add |
+| `specs/pearson-edexcel-1ma1.yaml` | Pearson Edexcel Maths 1MA1 | Issue 2 – June 2015 | 97 (all 6 topics) |
+| `specs/aqa-8700.yaml` | AQA English Language 8700 | Version 1.5 14 October 2021 | 9 |
+| `specs/aqa-8702.yaml` | AQA English Literature 8702 (with set texts) | Version 1.3 28 September 2022 | 11 |
+| `specs/aqa-8464.yaml` | AQA Combined Science: Trilogy 8464 | Version 1.1 04 October 2019 | 216 |
+| `specs/aqa-8461.yaml` | AQA Biology 8461 | Version 1.0 21 April 2016 | 97 |
+| `specs/aqa-8462.yaml` | AQA Chemistry 8462 | Version 1.1 04 October 2019 | 124 |
+| `specs/aqa-8463.yaml` | AQA Physics 8463 | Version 1.1 30 September 2019 | 81 |
+| `specs/aqa-8035.yaml` | AQA Geography 8035 | Version 1.1 12 September 2023 | 56 |
+| `specs/pearson-edexcel-1hi0.yaml` | Pearson Edexcel History 1HI0 | Issue 6 – June 2024 | 213 |
+| `specs/aqa-8062.yaml` | AQA Religious Studies A 8062 | Version 1.2 10 November 2017 | 236 |
+| `specs/ocr-j277.yaml` | OCR Computer Science J277 | Version 3.1 | 26 |
+| `specs/aqa-8652.yaml` | AQA French 8652 | Version 1.0 June 2023 | 43 |
+| `specs/aqa-8692.yaml` | AQA Spanish 8692 | Version 1.0 8 December 2023 | 41 |
+
+How each was copied is described at the top of its file. In short (ADR-017):
+
+- Wording is copied from the PDF text layer by small scripts, then checked by
+  hand; typeset maths is transcribed into LaTeX, scripts into Unicode.
+- Diagrams, structural formulae and tables printed as images are not
+  reproduced (nothing is invented in their place).
+- Where students choose options (History options, RS religions and themes,
+  Geography landscapes), every option is included; the topic map lets the
+  admin mark which are "covered at school".
+- Language vocabulary lists aren't statements; they're not copied.

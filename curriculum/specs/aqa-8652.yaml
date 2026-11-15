@@ -1,0 +1,391 @@
+# curriculum/specs/aqa-8652.yaml
+# AQA GCSE French 8652, section 3 "Subject content" (themes, grammar and
+# sound-symbol correspondences), copied word for word from the specification
+# PDF (Version 1.0 June 2023).
+#
+# - Themes: one statement per topic.
+# - Grammar: one statement per sub-heading block ("Articles", ...) of each
+#   grammar section, with its notes and bullets. Foundation-tier grammar is
+#   "foundation"; Higher-tier grammar is "higher" only (Higher students need
+#   both, which the app does automatically).
+# - The prescribed vocabulary list (Appendix) is not copied here: it is a
+#   word list for the assessments, not a set of skills.
+
+specification:
+  board: aqa
+  subject: french
+  code: "8652"
+  title: AQA GCSE French
+  version: Version 1.0 June 2023
+  source_url: "https://filestore.aqa.org.uk/resources/french/specifications/AQA-8652-SP-2024.pdf"
+  tiered: true
+
+topics:
+  - ref: "3.1"
+    title: Themes
+    subtopics:
+      - title: "Theme 1: People and lifestyle"
+        objectives:
+          - ref: "3.1.1.1"
+            foundation: >-
+              Topic 1: Identity and relationships with others
+          - ref: "3.1.1.2"
+            foundation: >-
+              Topic 2: Healthy living and lifestyle
+          - ref: "3.1.1.3"
+            foundation: >-
+              Topic 3: Education and work
+      - title: "Theme 2: Popular culture"
+        objectives:
+          - ref: "3.1.2.1"
+            foundation: >-
+              Topic 1: Free-time activities
+          - ref: "3.1.2.2"
+            foundation: >-
+              Topic 2: Customs, festivals and celebrations
+          - ref: "3.1.2.3"
+            foundation: >-
+              Topic 3: Celebrity culture
+      - title: "Theme 3: Communication and the world around us"
+        objectives:
+          - ref: "3.1.3.1"
+            foundation: >-
+              Topic 1: Travel and tourism, including places of interest
+          - ref: "3.1.3.2"
+            foundation: >-
+              Topic 2: Media and technology
+          - ref: "3.1.3.3"
+            foundation: >-
+              Topic 3: The environment and where people live
+  - ref: "3.2.1"
+    title: "Grammar: Foundation tier"
+    subtopics:
+      - title: Noun phrases
+        objectives:
+          - ref: "3.2.1.1.1"
+            foundation: >-
+              Formation of feminine person nouns: Highly frequent irregulars are listed in the
+              vocabulary list as separate items (eg, chef/cheffe, héros/ héroïne, Juif/Juive). •
+              Add -e • No change (article changes only) • -eur ➜ -rice and/or -euse depending on
+              which relevant base words (masculine forms) are included in the vocabulary list •
+              -en ➜ -nne
+          - ref: "3.2.1.1.2"
+            foundation: >-
+              Formation of plural nouns: Highly frequent irregulars are listed in the vocabulary
+              list as separate items (eg, madame/ mesdames, monsieur/messieurs, œil/yeux). • Add
+              -s to most nouns • Add -x to masculine nouns ending in -(e)au and -eu • No change
+              for nouns ending in -s, -x
+          - ref: "3.2.1.1.3"
+            foundation: >-
+              Infinitive used as a noun: Ie, equivalent of -ing (gerund) in English.
+          - ref: "3.2.1.1.4"
+            foundation: >-
+              Determiners: Articles: Agreement of articles with noun for gender and number (le,
+              la, les and un, une, des). Contraction of definite article (le/la ➜ l’) before
+              singular nouns that start with a vowel or h muet. Functions of definite and
+              indefinite articles, including where their use or omission differs from English (eg,
+              La santé est importante, le mercredi). Use of definite article before an adjective
+              to form a noun, including uninflected adjectives for languages and addition of a
+              capital letter where the resulting noun is a nationality (eg, seul ➜ le seul,
+              anglais ➜ l’anglais, anglaise ➜ l'Anglaise). Partitive articles when distinguishing
+              between parts and wholes. Eg, after jouer with musical instruments, after faire with
+              sports. Use of de (and omission of article) before nouns following a verb in
+              negative and after expressions of quantity. Contraction of de to d’ before a word
+              beginning with a vowel.
+          - ref: "3.2.1.1.5"
+            foundation: >-
+              Other determiners: Demonstrative adjectives (ce, cet, cette, ces). Possessive
+              adjectives (mon, ma, mes, ton, ta, tes, son, sa, ses, notre, nos, votre, vos, leur,
+              leurs). Interrogative adjectives (quel, quelle, quels, quelles). Agreement patterns
+              for indefinite adjectives (chaque, plusieurs, même(s), autre(s), tout(e)(s), tous,
+              quelque(s)).
+          - ref: "3.2.1.1.6"
+            foundation: >-
+              Pronouns: Subject pronouns (je, tu, il, elle, on, nous, vous – as singular and
+              plural formal ‘you’ – ils and elles are listed in the vocabulary list. Their grammar
+              (agreement, position) is laid out in this grammar list. Preverbal position of
+              singular direct object pronouns (me, te, vous, le, la) (not juxtaposed with indirect
+              object pronouns). Preverbal position of singular indirect object pronouns (me, te,
+              vous, lui) (not juxtaposed with direct object pronouns). Preverbal position of
+              singular reflexive pronouns (me, te, se). Contraction of pronouns (me ➜ m’, te ➜ t’,
+              le/la ➜ l’, se ➜ s’) before a vowel or h muet. Use of emphatic pronouns moi and toi
+              after prepositions (the pronouns and relevant individual prepositions are listed
+              separately in the vocabulary list). Use of relative pronoun qui in subject relative
+              clauses.
+      - title: Verb phrases
+        objectives:
+          - ref: "3.2.1.2.1"
+            foundation: >-
+              Verbs and verb forms that do not fit into the grammar detailed here can still be
+              listed in the vocabulary list.
+          - ref: "3.2.1.2.2"
+            foundation: >-
+              Negation: Syntax of verbal negation with ne…pas, ne…jamais, ne…rien (as equivalent
+              of ‘not verb anything’ and ‘verb nothing’), and ne…personne (as equivalent of ‘not
+              verb anyone/body’ and ‘verb nobody’).
+          - ref: "3.2.1.2.3"
+            foundation: >-
+              Interrogatives: Interrogatives expressed through: • intonation with subject verb
+              (SV) word order, including when followed by a wh-word (qui, quand, quoi, pourquoi,
+              comment, combien, où) • wh-word (qu’, quand, pourquoi, comment, combien, où)
+              followed by est-ce que followed by SV word order • wh-word (que/qu’, quand,
+              pourquoi, comment, combien, où) followed by verb subject (VS) word order.
+          - ref: "3.2.1.2.4"
+            foundation: >-
+              Inflectional morphology: Specific irregular inflected forms (eg, faites, vont), as a
+              minimum those specified below, are listed in the vocabulary list. Some verbs change
+              the spelling in their stems. Eg, accents change (mener, je mène), consonants are
+              doubled (jeter, je jette), softened (manger, nous mangeons and commencer, nous
+              commençons) or dropped (mettre, je mets). Such spelling changes will not be
+              credit-bearing. Regular* and four very high frequency irregular** patterns in 1st,
+              2nd, 3rd persons in singular and plural for: *-er verbs (eg, parler), clusters of
+              high frequency -ir verbs that all pattern following one of these four ‘anchor’
+              verbs: choisir, partir, venir, ouvrir, clusters of high frequency -re verbs that all
+              pattern following one of these three ‘anchor’ verbs: entendre, prendre, traduire.
+              **aller, avoir, être, faire (including use of avoir + noun where the English
+              equivalent is ‘BE + adjective’ eg, + froid, + chaud, + an(s), + faim, + soif, +
+              peur). • Present indicative, as equivalent of the English simple (I walk) and
+              ongoing (I am walking) functions, and (with time adverbs) for expression of the
+              future as equivalent of the English simple (the holidays start tomorrow) and
+              continuous (I am working this evening). • Irregular inflected forms of the four very
+              high frequency irregular verbs (aller, avoir, être, faire) are listed in the
+              vocabulary list. • Perfect tense, as equivalent of the English simple past (I
+              walked, he went) and present perfect (I have walked, he has gone), including past
+              participle formation for -er verbs and the seven verb clusters listed above. •
+              Irregular past participles of three very high frequency irregular verbs (été, eu,
+              fait). • Periphrastic future expression (aller + infinitive), as equivalent of the
+              English ‘will + verb’ and ‘BE + going to + verb’. • Imperative (2nd person singular
+              and plural only, including aller and faire; but not avoir, être; not reflexive).
+              Regular patterns (see * above) and four very high frequency irregular patterns (see
+              ** above) in 1st, 2nd, 3rd persons in singular only (excluding ‘you’ formal) for: •
+              Imperfect for habitual (only for equivalent of English ‘used to + verb’) and ongoing
+              (BE + ing) functions. • Irregular inflected forms of three very high frequency
+              irregular verbs (avais, avait; étais, était; faisais, faisait) are listed in the
+              vocabulary list. • Additional English equivalent functions are listed in the
+              vocabulary list as follows: étais, était (to mean ‘was, were + adjectival
+              complement’), avais, avait (to mean ‘had’).
+          - ref: "3.2.1.2.5"
+            foundation: >-
+              Other irregular inflected forms: Present indicative forms for 1st, 2nd, 3rd persons,
+              in singular only, of nine high frequency verbs (boire, connaître, courir, croire,
+              écrire, recevoir, rire, suivre, voir). Their present indicative, past participle,
+              imperative forms, and the infinitives are listed in the vocabulary list. Any other
+              irregular present indicative forms, their past participles, imperative forms, and
+              the infinitives are listed in the vocabulary list.
+          - ref: "3.2.1.2.6"
+            foundation: >-
+              Impersonal verbs: Il y a to mean ‘there is/are’, il y avait to mean ‘there
+              was/were/used to be’ and il y aura to mean ‘there is going to be/are going to
+              be/will be’ are listed in the vocabulary list as multi-word phrases. Il fait +
+              adjective (eg, il fait beau, il fait froid). Any adjectives that would be used in
+              this construction are listed in the vocabulary list. Il + weather-related
+              expressions (eg, il neige, il y a du soleil) are listed in the vocabulary list, as
+              multi-word phrases where necessary. Il faut + infinitive Il est for telling the time
+          - ref: "3.2.1.2.7"
+            foundation: >-
+              Modal verbs: Present indicative forms for 1st, 2nd, 3rd persons, in singular and
+              plural of modals devoir, pouvoir, savoir, vouloir followed by infinitive. All
+              inflected forms of the modals are listed in the vocabulary list. Conditional forms
+              in 1st, 2nd, 3rd persons, in singular only (excluding ‘you’ formal), of vouloir
+              (voudrais, voudrait), as equivalent of English ‘would like (to) + verb’, are listed
+              in the vocabulary list.
+          - ref: "3.2.1.2.8"
+            foundation: >-
+              Reflexive use of verbs: 1st, 2nd, 3rd persons in singular only. Reflexive verb forms
+              (eg, se laver) with the same meaning as a listed base verb (eg, laver) are not
+              listed. Reflexive verb forms with different meanings from a listed base verb (eg,
+              passer, se passer) will be listed on the same line. When reflexive verb forms with
+              different meanings from a listed base verb are not listed, they will not be tested.
+      - title: Adjectival phrases
+        objectives:
+          - ref: "3.2.1.3.1"
+            foundation: >-
+              Agreement for gender and number with nouns following regular patterns (of adjectives
+              listed in the vocabulary list).
+          - ref: "3.2.1.3.2"
+            foundation: >-
+              Gender: Highly frequent irregulars are listed in the vocabulary list as separate
+              items (eg, net/te, bon/ne, nouveau/nouvelle, pareil/le, travailleur/travailleuse). •
+              Add -e • No change with adjectives ending in mute -e • -x ➜ -se • -el ➜ -lle • -en ➜
+              -nne • -f ➜ -ve • -er ➜ -ère
+          - ref: "3.2.1.3.3"
+            foundation: >-
+              Number: Irregulars beau/x and nouveau/x are listed in the vocabulary list as
+              separate items. • Add -s • No change for masculine forms already ending in -s and -x
+              • -al ➜ -aux for masculine Position of adjectives in relation to the nouns they
+              refer to: mostly after nouns, before nouns only for the defined set in the
+              vocabulary list. Use of regular (plus…que/de, moins…que/de, aussi…que) and irregular
+              comparative structures, with the irregular adjectival forms (meilleur(e)(s) and
+              pire(s)) listed in the vocabulary list.
+      - title: Adverbial phrases
+        objectives:
+          - ref: "3.2.1.4.1"
+            foundation: >-
+              Adverbs and adverbial phrases are listed in the vocabulary list. Position of adverbs
+              of time, manner, frequency, place. Use of regular (plus…que, moins…que, aussi…que)
+              and irregular comparative structures, with the irregular adverbial form (mieux)
+              listed in the vocabulary list.
+      - title: Prepositions
+        objectives:
+          - ref: "3.2.1.5.1"
+            foundation: >-
+              À/de can be needed before a noun or a second verb following some verbs. These verb +
+              preposition combinations are listed in the vocabulary list alongside the verb entry
+              (eg, finir ‘to finish’, finir de + infinitive ‘to finish + verb’ and dépendre ‘to
+              depend’, dépendre de ‘to depend on + noun’). Where the preposition changes or adds
+              to the meaning of the verb, English translations are listed (eg arriver ‘to arrive’,
+              arriver à ‘to manage to’). Appropriate use of en/à with proper nouns for places (eg
+              countries, regions/states, cities). Contraction of definite article when used with à
+              and de to agree with the gender and number (ie, à, à la, au, aux; de, de la, du, des
+              are listed in the vocabulary list). De to indicate possession (eg, le sac de Léa).
+              Prepositions (pour, sans) + infinitive.
+      - title: Derivational morphology (Reading only)
+        objectives:
+          - ref: "3.2.1.6.1"
+            foundation: >-
+              Derivational morphology listed here indicates that even if only the base form (eg,
+              rapide) is listed in the vocabulary list, a derived form that follows one of the
+              patterns listed here (eg, rapidement) may be included in reading texts – or if only
+              the specific affixed form is listed, the base form may be included in reading texts.
+              Note, if derived forms are included in listening material or required for
+              production, they are listed separately in the vocabulary list.
+          - ref: "3.2.1.6.2"
+            foundation: >-
+              Uniformly applicable derivational morphology that changes meaning: Ordinal numbers
+              created by adding -ième (or by dropping -e and adding -ième) to cardinal numbers eg,
+              deux – deuxième, quatre – quatrième. Irregular forms premier and première are listed
+              in the vocabulary list.
+          - ref: "3.2.1.6.4"
+            foundation: >-
+              Morphology that changes meaning: Prefixes: adding in-or im-to adjectives, adverbs
+              and nouns, only where the English equivalent is un-or in-or means ‘opposite of’. Eg,
+              également ➜ inégalement, sécurité ➜ insécurité, possible ➜ impossible.
+          - ref: "3.2.1.6.5"
+            foundation: >-
+              Morphology that changes the part of speech: Suffixes: • Adjectives created by adding
+              -able or -eable to the verb stem, only where the English equivalent is -able or
+              -ible. Eg, porter ➜ portable, changer ➜ changeable. • Nouns created by adding -ion
+              or -ation to the verb stem, only where the English equivalent is -ion or -ation. Eg,
+              progresser ➜ progression, préparer ➜ préparation. • Adverbs ending in -ment, only
+              where the English equivalent is -ly, created by: • adding -ment to the feminine form
+              of adjectives eg, première ➜ premièrement • by dropping -ant(e)/-ent(e) from an
+              adjective and adding -amment/-emment eg, courant ➜ couramment, patient ➜ patiemment.
+  - ref: "3.2.2"
+    title: "Grammar: Higher tier"
+    subtopics:
+      - title: Noun phrases
+        objectives:
+          - ref: "3.2.2.1.1"
+            higher: >-
+              Determiners: Articles: Partitive articles with uncountable nouns Use of article with
+              dans, omission of article with en
+          - ref: "3.2.2.1.2"
+            higher: >-
+              Other determiners: Use of negative adjective determiner aucun(e)
+          - ref: "3.2.2.1.3"
+            higher: >-
+              Pronouns: Preverbal use of pronouns y and en (not juxtaposed with other object
+              pronouns, except in the phrase ‘il y en a', ‘il y en avait’ and ‘il y en aura’).
+              Preverbal position of plural direct object pronouns (nous, vous, les) (not
+              juxtaposed with indirect object pronouns). Preverbal position of plural indirect
+              object pronouns (nous, vous, leur) (not juxtaposed with direct object pronouns). Use
+              of emphatic pronouns (lui, elle, nous, vous, eux, elles) after prepositions.
+              Preverbal position of plural reflexive pronouns (nous, vous, se). Negative subject
+              pronouns personne ne + verb and rien ne + verb (as equivalent of English ‘nobody +
+              verb’ and ‘nothing + verb’). Relative clauses using wh-pronouns (où, quand, and
+              que).
+      - title: Verb phrases
+        objectives:
+          - ref: "3.2.2.2.1"
+            higher: >-
+              Syntax of negation with ne…plus, ne…ni… (ni …), ne… pas encore, ne…que. Passive
+              voice in the present (full form only, ie with par). Impersonal verbs with adjectives
+              + de (eg, il est difficile/facile/interdit de + infinitive). Any adjectives used in
+              impersonal phrases are listed in the vocabulary list. Impersonal verbs in phrases il
+              manque + noun, il vaut mieux + infinitive, il vaut la peine de + infinitive.
+              Periphrastic time expressions être en train de (as equivalent of ‘BE [in the process
+              of] + verb-ing’) and venir de (as equivalent of ‘HAVE just done + verb’). Verbs used
+              with plural reflexive pronouns, with reflexive and reciprocal meanings (eg, nous
+              nous écrivons, vous vous parlez, ils se regardent).
+          - ref: "3.2.2.2.2"
+            higher: >-
+              Inflectional morphology: • Two additional clusters of high frequency verbs that all
+              pattern following the ‘anchor’ verbs connaître and écrire, in the forms as specified
+              at Foundation: Present indicative (in 1st, 2nd, 3rd persons, singular and plural),
+              perfect tense, periphrastic future, imperative (2nd person singular and plural, not
+              reflexive), imperfect (in 1st, 2nd, 3rd persons, singular), plus the additional
+              forms laid out below for the anchor verbs. • Present tense with depuis (as
+              equivalent of ‘have been + ing’ for ‘x time’). • Perfect tense of modals (devoir,
+              pouvoir, savoir, vouloir) (with past participles listed in the vocabulary list). •
+              Inflectional future for regular -er verbs (in 1st, 2nd, 3rd persons in singular and
+              plural) as equivalent of both ‘will + verb’ and ‘BE + going to + verb’. • Singular
+              forms of four high frequency irregular verbs (aurai/auras/aura, ferai/feras/fera,
+              irai/iras/ira, serai/seras/sera) are listed in the vocabulary list. • Conditional of
+              regular -er forms only (1st, 2nd, 3rd persons) in singular and plural. • Singular
+              forms of four high frequency irregular verbs (aurais/aurait, ferais/ferait,
+              irais/irait, serais/serait) are listed in the vocabulary list. • Imperfect for
+              regular (-er and the nine ‘anchor’ verb patterns) verbs 1st, 2nd and 3rd person
+              plural forms for equivalent of English habitual (‘used to + verb’) and ongoing (‘BE
+              -ing’). This includes the 1st, 2nd and 3rd person plural forms of the three very
+              high frequency irregular verbs (avoir to mean ‘had’, être to mean ‘were + adjectival
+              complement’, faire). • Imperative of 2nd person singular and plural of être (sois
+              and soyez, each listed in vocabulary list), and of regular (-er and the nine
+              ‘anchor’ verb patterns) verbs 1st person plural (not reflexive), with the function
+              ‘Let’s + verb!’ • Present participle of regular (-er and the nine ‘anchor’ verb
+              patterns) verbs after en, including adjectival use where relevant. • Irregular
+              present participles of three very high frequency irregular verbs (étant, ayant,
+              faisant) are listed in the vocabulary list.
+      - title: Adjectival phrases
+        objectives:
+          - ref: "3.2.2.3.1"
+            higher: >-
+              Use of regular superlative adjective structures (irregulars le meilleur/la
+              meilleure/les meilleurs/les meilleures, and le pire/la pire/les pires are listed in
+              the vocabulary list).
+      - title: Adverbial phrases
+        objectives:
+          - ref: "3.2.2.4.1"
+            higher: >-
+              Use of regular superlative adverb structures (irregular le mieux is listed in the
+              vocabulary list).
+      - title: Prepositions
+        objectives:
+          - ref: "3.2.2.5.1"
+            higher: >-
+              Preposition (avant de) + infinitive: Preposition (après avoir) + past participle
+      - title: Derivational morphology (Reading only)
+        objectives:
+          - ref: "3.2.2.6.1"
+            higher: >-
+              Derivational morphology listed here indicates that even if only the base form (eg,
+              porter) is listed in the vocabulary list, a derived form that follows one of the
+              patterns listed here (eg, porteur) may be included in reading texts. Or, if only the
+              specific affixed form is listed, the base form may be included in reading texts.
+              Note, if derived forms are included in listening material or required for
+              production, they are listed separately in the vocabulary list.
+          - ref: "3.2.2.6.2"
+            higher: >-
+              Morphology that changes the part of speech: Suffixes: agent nouns created by adding
+              -eur or -ateur to a verb stem, eg, porter ➜ porteur, consommer ➜ consommateur
+  - ref: "3.2.3"
+    title: French sound symbol correspondences
+    subtopics:
+      - title: French sound-symbol correspondences
+        objectives:
+          - ref: "3.2.3"
+            foundation: >-
+              This list specifies key differences in sound-spelling correspondences between French
+              and English which students will need to learn at GCSE to be able to read out loud
+              and transcribe with sufficient accuracy at this level. It is not an exhaustive list
+              of all the sound-spelling correspondences in the French language. Where a letter or
+              combination of letters is pronounced (or a sound spelt) in approximately the same
+              way in French as in English, it is not listed. Students will be expected to
+              pronounce words with stress patterns that allow their speech to be clear and
+              comprehensible. The use of hyphens indicates the position of the letters in a word,
+              when position is relevant to the sound. Eg: xx- (at the beginning of a word), -xx-
+              (in the middle of a word), -xx (at the end of a word). • silent final consonant • a
+              • i/y • eu • e • au/eau/closed o/ô • ou • u • silent final e • é (-er, -ez) •
+              en/an/em/am • on/om • ain/in/aim/im • è/ê/ai • oi/oy • ch • ç (and soft 'c') • qu •
+              j • -tion • -ien • s-liaison • t-liaison • n-liaison • x-liaison • h • un • -gn- • r
+              • open eu/œu • open o • -s- • th • -ill-/-ille • -aill-/ail Please see Appendix 1
+              for examples of French words demonstrating the sound-symbol correspondences.

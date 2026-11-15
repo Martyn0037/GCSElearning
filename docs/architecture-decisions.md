@@ -362,3 +362,42 @@ curriculum content comes only from the exam board's spec, never from model knowl
 - Summing XP events on each request is cheap at this scale (indexed by student); a cached total can be added if needed.
 - A fixed streak freeze is simpler than earned freezes, and it can't become a dark pattern.
 - Boss battles need questions at levels 3–5 in the bank. Without Claude, they can only be started on topics whose bank is already stocked.
+
+## ADR-017 — Importing every subject's specification
+
+**Status:** Accepted (2026-11-15).
+
+**Context.** The student picks his own subjects (ADR-012), so every subject in the catalogue needs its spec on the most common board. Copying 1,400+ statements by hand isn't practical, and the content rule forbids writing them from memory.
+
+**Decision.**
+- **Each spec is extracted from the official PDF's text layer** by a short script written for that board's layout, then checked by eye and by the importer's validation.
+  - Two-column layouts are split by word position (the content column only, or both columns where they pair, as in Geography's key ideas).
+  - Wording stays as printed, including the spec's own typos.
+  - The extraction scripts aren't committed: each spec is a one-off import, and the YAML is the reviewed source of truth.
+- **One statement per natural unit of each spec:**
+  - AQA science content units (4.1.1.1).
+  - Geography key ideas.
+  - History strands.
+  - RS bullets.
+  - OCR sub topics.
+  - Language theme topics and grammar blocks.
+  - English skills bullets.
+- **Tiering:**
+  - Science paragraphs and units marked (HT only) are left out of the Foundation wording.
+  - Language grammar listed under "Higher tier" is Higher only.
+- **Maths and equations:**
+  - Typeset fractions and powers that the text layer loses are transcribed by hand into LaTeX. Every replacement is listed in the extraction script and checked against the PDF layout.
+  - Sub- and superscripts are written as Unicode (CO₂, m/s²).
+- **What's left out, and said so in each file:**
+  - Diagrams, structural formulae and tables printed as images.
+  - The science "skills development" column.
+  - Practical-activity administration notes.
+  - Language vocabulary lists.
+  - Texts whose last exam is before 2028.
+- **OCR's "Not required" guidance** becomes `out_of_scope`, which the question generator already uses to keep questions inside the spec.
+- **Options are all included.** Which ones the student studies is managed through "covered at school" on the topic map, not by leaving content out.
+- **The wording limit is raised to 8,000 characters,** because two AQA physics units are over 4,000. The database columns are unlimited `text`.
+
+**Trade-offs.**
+- Image content is missing from a few statements (e.g. the charges of subatomic particles table). Questions on those points rely on the surrounding text and the verifier.
+- Statements without codes get positional refs (3.1.1a, B4.2.3). A new spec issue that reorders them would retire and re-add statements rather than update them in place.
