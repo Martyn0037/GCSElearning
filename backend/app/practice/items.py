@@ -100,18 +100,18 @@ async def item_out(
 
 
 def _keypad(question: Question) -> dict[str, Any]:
-    """Whether to show the maths keypad, and the symbol keys the answer needs.
+    """How the on-screen keys appear for this question.
 
-    Numbers always get the keypad. Short answers get it when every accepted
-    answer is maths (not words), with every symbol needed to type them.
+    Every typed answer gets keys, so no number or symbol is ever out of reach:
+    numbers get the number keys; every short answer also gets the full symbol
+    set (π, √, powers, °, ...). ``keypad`` is true when the answer is maths,
+    so the keys replace the phone keyboard; for word answers the keyboard
+    stays and the keys sit underneath. Multiple choice needs no typing.
     """
     if question.question_type is QuestionType.NUMERIC:
         return {"keypad": True, "symbol_keys": []}
-    accepted = [str(a) for a in question.answer.get("accepted", [])]
-    if (
-        question.question_type is QuestionType.SHORT_TEXT
-        and accepted
-        and all(is_maths_answer(a) for a in accepted)
-    ):
-        return {"keypad": True, "symbol_keys": keypad_symbols(accepted)}
+    if question.question_type is QuestionType.SHORT_TEXT:
+        accepted = [str(a) for a in question.answer.get("accepted", [])]
+        maths = bool(accepted) and all(is_maths_answer(a) for a in accepted)
+        return {"keypad": maths, "symbol_keys": keypad_symbols(accepted)}
     return {"keypad": False, "symbol_keys": []}

@@ -76,6 +76,7 @@ def canonical(value: str) -> str:
         text = text.replace(sup, plain)
     text = text.replace("\u2212", "-").replace("*", TIMES)
     text = re.sub(r"\bpi\b", PI, text)
+    text = re.sub(r"(?<=\d)\s*(degrees?|deg)\b", "°", text)
     return re.sub(r"\s+", "", text)
 
 
@@ -132,12 +133,14 @@ def display_answer(value: str) -> str:
     return f"${value}$" if "\\" in value and "$" not in value else value
 
 
-# Symbol keys the keypad can offer, in display order. Digits, ".", "/" and "-"
+# Symbol keys offered on every short answer, in display order. Digits, ".", "/" and "-"
 # are always on the keypad.
 KEYPAD_SYMBOLS: tuple[str, ...] = (
     PI,
     ROOT,
     "^",
+    "\u00b2",  # squared
+    "\u00b3",  # cubed
     "(",
     ")",
     ":",
@@ -151,8 +154,6 @@ KEYPAD_SYMBOLS: tuple[str, ...] = (
     "≤",
     "≥",
 )
-# Offered on every maths short answer, so the keys don't give the answer's form away.
-STANDARD_SYMBOLS: frozenset[str] = frozenset({PI, ROOT, "^", "(", ")"})
 _MATHS_CHARS = re.compile(
     r"^[0-9a-z.,/\-+" + "".join(re.escape(s) for s in KEYPAD_SYMBOLS) + r"]+$"
 )
@@ -166,14 +167,15 @@ def is_maths_answer(value: str) -> bool:
 
 
 def keypad_symbols(accepted: list[str]) -> list[str]:
-    """Symbol keys needed to type these answers, plus the standard maths set.
+    """Keys for a short answer: every keypad symbol, plus the letters its maths uses.
 
-    Single letters used as variables ("x", "n") are included as keys too.
+    Every symbol is always offered, in the same order, so a student never has
+    to know how to type one (π, √, ², °...) and the keys never hint at the
+    answer. Single letters used as variables in maths answers ("x", "n") are
+    added at the end; word answers are typed on the keyboard.
     """
-    needed: set[str] = set(STANDARD_SYMBOLS)
     letters: set[str] = set()
     for answer in accepted:
-        text = canonical(answer)
-        needed.update(s for s in KEYPAD_SYMBOLS if s in text)
-        letters.update(re.findall(r"[a-z]", text))
-    return [s for s in KEYPAD_SYMBOLS if s in needed] + sorted(letters)
+        if is_maths_answer(answer):
+            letters.update(re.findall(r"[a-z]", canonical(answer)))
+    return [*KEYPAD_SYMBOLS, *sorted(letters)]

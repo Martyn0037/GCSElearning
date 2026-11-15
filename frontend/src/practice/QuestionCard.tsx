@@ -1,9 +1,11 @@
 // frontend/src/practice/QuestionCard.tsx
 import type { SyntheticEvent } from "react";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 
 import type { PracticeItemOut } from "../api/generated/model";
 import { answerAsLatex } from "./answerPreview";
+import type { Edit } from "./editing";
+import { deleteBack, insertAt } from "./editing";
 import { MathKeypad } from "./MathKeypad";
 import { MathText } from "./MathText";
 
@@ -19,12 +21,25 @@ const inputClass =
 /** One question with the right answer control for its type. */
 export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) {
   const [answer, setAnswer] = useState("");
-  // Phones: the on-screen keys replace the system keyboard unless asked for.
+  // Phones: for maths answers the on-screen keys replace the system keyboard
+  // unless asked for; word answers keep the keyboard, with the keys below.
   const [useKeyboard, setUseKeyboard] = useState(false);
   const ids = { answer: useId(), stem: useId(), hint: useId() };
-  // The server decides: numbers, and short answers that are maths (not words).
-  const showKeys = item.keypad;
-  const preview = showKeys ? answerAsLatex(answer) : null;
+  const input = useRef<HTMLInputElement>(null);
+  const keysOnly = item.keypad && !useKeyboard;
+  const preview = answerAsLatex(answer);
+
+  /** Apply a key press at the caret (or over the selection), then put the caret after it. */
+  function edit(change: (value: string, start: number, end: number) => Edit) {
+    const element = input.current;
+    const start = element?.selectionStart ?? answer.length;
+    const end = element?.selectionEnd ?? start;
+    const next = change(answer, start, end);
+    setAnswer(next.value);
+    requestAnimationFrame(() => {
+      element?.setSelectionRange(next.caret, next.caret);
+    });
+  }
 
   function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -77,6 +92,7 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
           </label>
           <div className="flex items-center gap-2">
             <input
+              ref={input}
               id={ids.answer}
               value={answer}
               onChange={(e) => {
@@ -86,14 +102,8 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
               autoComplete="off"
               autoCapitalize="none"
               spellCheck={false}
-              inputMode={
-                showKeys && !useKeyboard
-                  ? "none"
-                  : item.questionType === "numeric"
-                    ? "decimal"
-                    : "text"
-              }
-              aria-describedby={showKeys ? ids.hint : undefined}
+              inputMode={keysOnly ? "none" : item.questionType === "numeric" ? "decimal" : "text"}
+              aria-describedby={ids.hint}
               className={inputClass}
             />
             {item.unit && <span className="text-lg text-slate-700">{item.unit}</span>}
@@ -103,36 +113,36 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
               Looks like: <MathText text={`$${preview}$`} />
             </p>
           )}
-          {showKeys && (
-            <>
-              <p id={ids.hint} className="mt-1 text-sm text-slate-600">
-                Tap the keys or type. For a fraction, use a/b: 3 a/b 5 gives 3/5.
-                {item.symbolKeys.includes("π") && " For π, use the π key: 1 a/b 2 π gives ½π."}
-              </p>
-              <div className="mt-3">
-                <MathKeypad
-                  symbols={item.symbolKeys}
-                  onInsert={(text) => {
-                    setAnswer((current) => (current + text).slice(0, 200));
-                  }}
-                  onBackspace={() => {
-                    setAnswer((current) => current.slice(0, -1));
-                  }}
-                  onClear={() => {
-                    setAnswer("");
-                  }}
-                />
-              </div>
-              <button
-                type="button"
-                className="mt-2 text-sm font-medium text-brand-700 underline"
-                onClick={() => {
-                  setUseKeyboard((current) => !current);
-                }}
-              >
-                {useKeyboard ? "Use the on-screen keys only" : "Use keyboard instead"}
-              </button>
-            </>
+          <p id={ids.hint} className="mt-1 text-sm text-slate-600">
+            {item.keypad
+              ? "Tap the keys or type. For a fraction, use a/b: 3 a/b 5 gives 3/5."
+              : "Type your answer. Numbers and symbols are on the keys below."}
+            {item.symbolKeys.includes("π") && " For π, use the π key: 1 a/b 2 π gives ½π."}
+          </p>
+          <div className="mt-3">
+            <MathKeypad
+              symbols={item.symbolKeys}
+              onInsert={(text) => {
+                edit((value, start, end) => insertAt(value, text, start, end));
+              }}
+              onBackspace={() => {
+                edit(deleteBack);
+              }}
+              onClear={() => {
+                setAnswer("");
+              }}
+            />
+          </div>
+          {item.keypad && (
+            <button
+              type="button"
+              className="mt-2 min-h-11 text-sm font-medium text-brand-700 underline"
+              onClick={() => {
+                setUseKeyboard((current) => !current);
+              }}
+            >
+              {useKeyboard ? "Use the on-screen keys only" : "Use keyboard instead"}
+            </button>
           )}
         </div>
       )}

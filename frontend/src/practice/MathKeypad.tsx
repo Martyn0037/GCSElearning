@@ -1,9 +1,9 @@
 // frontend/src/practice/MathKeypad.tsx
 /**
  * On-screen keys for typing maths answers without hunting for symbols on a
- * phone keyboard. The number keys are always there; the server adds every
- * symbol the answer needs (π, √, powers, brackets, ratio, letters...), so the
- * student can always type the answer from the screen. Every key produces text
+ * phone keyboard. The number keys are always there; on short answers the
+ * server adds every symbol key (π, √, powers, brackets, °, ratio, letters the
+ * maths uses...), so the student can always type the answer from the screen. Every key produces text
  * the marker understands (e.g. "3/5", "1/2π", "x^2").
  */
 
@@ -30,6 +30,8 @@ const SYMBOL_NAMES: Record<string, string> = {
   π: "Pi",
   "√": "Square root",
   "^": "Power",
+  "²": "Squared",
+  "³": "Cubed",
   "(": "Open bracket",
   ")": "Close bracket",
   ":": "Ratio",

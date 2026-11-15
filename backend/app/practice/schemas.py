@@ -40,9 +40,11 @@ class PracticeItemOut(ApiModel):
     hints: list[str] = Field(description="Hints revealed so far, in order")
     hints_remaining: int
     review: bool = Field(description="True when this is a spaced review of an earlier mistake")
-    keypad: bool = Field(description="Show the on-screen maths keypad for this answer")
+    keypad: bool = Field(
+        description="The answer is maths: the on-screen keys replace the phone keyboard"
+    )
     symbol_keys: list[str] = Field(
-        description="Extra keypad keys needed to type the answer (e.g. π, √, ^, x)"
+        description="Symbol keys to offer with the number keys (every short answer gets all)"
     )
 
 

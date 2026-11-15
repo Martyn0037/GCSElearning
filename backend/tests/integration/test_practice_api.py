@@ -12,8 +12,9 @@ Covers:
   the result without double-counting; a different key -> 409; missing or
   malformed key, empty or over-long answer -> 422
 - ladder: three correct moves up a level; full solution -> assisted, no move
-- keypad: number answers get the keypad; maths short answers get it with the
-  symbols needed (π); word answers and multiple choice don't; a typed π answer
+- keys: number answers get the keypad; every short answer gets every symbol
+  key (maths ones replace the phone keyboard, word ones don't); multiple
+  choice gets none; a typed π answer
   is marked right against a LaTeX key, and the key is shown as maths
 - flag: hides the question from further serving; idempotent
 - access: another student's item -> 404; guardians -> 403; CSRF required
@@ -36,6 +37,7 @@ from app.models.enrolment import StudentSubject, StudentTopicSetting
 from app.models.ops import Job
 from app.models.question import ObjectiveProgress, Question, QuestionStatus
 from app.models.user import Role
+from app.questions.answer_forms import KEYPAD_SYMBOLS
 from app.questions.llm_schemas import GeneratedQuestion, Verification
 from tests.fixtures.factories import (
     CurriculumIds,
@@ -371,8 +373,8 @@ async def test_practice_should_require_csrf(client: httpx.AsyncClient, setup: Se
     ("question_type", "answer", "keypad", "symbols"),
     [
         ("numeric", None, True, []),
-        ("short_text", {"accepted": ["2:3"]}, True, ["π", "√", "^", "(", ")", ":"]),
-        ("short_text", None, False, []),
+        ("short_text", {"accepted": ["2:3"]}, True, list(KEYPAD_SYMBOLS)),
+        ("short_text", None, False, list(KEYPAD_SYMBOLS)),
         ("multiple_choice", None, False, []),
     ],
 )

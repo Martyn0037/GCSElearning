@@ -13,7 +13,9 @@ export const PracticeItemOut = zod
     hints: zod.array(zod.string()).describe("Hints revealed so far, in order"),
     hintsRemaining: zod.int(),
     id: zod.uuid(),
-    keypad: zod.boolean().describe("Show the on-screen maths keypad for this answer"),
+    keypad: zod
+      .boolean()
+      .describe("The answer is maths: the on-screen keys replace the phone keyboard"),
     marks: zod.int(),
     objectiveRef: zod.string(),
     options: zod.array(
@@ -31,7 +33,7 @@ export const PracticeItemOut = zod
     stem: zod.string(),
     symbolKeys: zod
       .array(zod.string())
-      .describe("Extra keypad keys needed to type the answer (e.g. π, √, ^, x)"),
+      .describe("Symbol keys to offer with the number keys (every short answer gets all)"),
     unit: zod.union([zod.string(), zod.null()]),
   })
   .describe("A question as the student sees it. Never includes the answer.");

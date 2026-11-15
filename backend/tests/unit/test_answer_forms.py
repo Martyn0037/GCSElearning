@@ -10,8 +10,9 @@ Covers:
 - same_maths: LaTeX key vs typed answer, π-equivalent forms, equal numbers,
   different answers (including the "n instead of π" slip), empty answers
 - display_answer wraps bare LaTeX only
-- maths vs word answers; keypad symbols include the standard set, needed
-  extras and variable letters, in a stable order
+- maths vs word answers; every short answer gets every symbol key in a fixed
+  order, plus variable letters from maths answers
+- word answers keep their symbols (2π cm is not 2 cm; cm² = cm^2; ° = degrees)
 - marking short answers: LaTeX keys, π forms, words still loose, display
 """
 
@@ -21,6 +22,7 @@ import pytest
 
 from app.models.question import QuestionType
 from app.questions.answer_forms import (
+    KEYPAD_SYMBOLS,
     PI,
     ROOT,
     canonical,
@@ -130,12 +132,35 @@ def test_should_tell_maths_answers_from_words(answer: str, maths: bool) -> None:
     assert is_maths_answer(answer) is maths
 
 
-def test_should_offer_the_standard_keys_plus_what_the_answer_needs() -> None:
+def test_should_offer_every_symbol_plus_the_letters_the_maths_uses() -> None:
     # Act
-    keys = keypad_symbols(["2:3", "y = 2x", r"45^\circ"])
+    keys = keypad_symbols(["2:3", "y = 2x", r"45^\circ", "prime"])
+
+    # Assert: the full set in a fixed order, then variables (not word letters)
+    assert keys == [*KEYPAD_SYMBOLS, "x", "y"]
+    assert {PI, ROOT, "²", "°", "≤"} <= set(keys)
+
+
+def test_should_offer_every_symbol_even_for_word_answers() -> None:
+    assert keypad_symbols(["prime number"]) == list(KEYPAD_SYMBOLS)
+
+
+@pytest.mark.parametrize(
+    ("given", "expected", "same"),
+    [
+        ("2 cm", "2π cm", False),
+        ("2pi cm", "2π cm", True),
+        ("12 cm^2", "12 cm²", True),
+        ("45 degrees", "45°", True),
+        ("3 × 4 cm", "3 times 4 cm", True),
+    ],
+)
+def test_word_answers_should_keep_their_symbols(given: str, expected: str, same: bool) -> None:
+    # Act
+    result = mark(QuestionType.SHORT_TEXT, {"accepted": [expected]}, None, given)
 
     # Assert
-    assert keys == [PI, ROOT, "^", "(", ")", ":", "°", "=", "x", "y"]
+    assert result.correct is same
 
 
 def test_should_mark_a_typed_pi_answer_against_a_latex_key() -> None:

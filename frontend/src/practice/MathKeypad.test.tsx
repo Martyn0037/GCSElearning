@@ -6,7 +6,8 @@
  * - minus and decimal point keys; delete removes the last character; clear empties
  * - symbol keys come from the server (symbolKeys) with spoken names; π typed
  *   from the keys ("1/2π") is submitted, with a tip for π; none when not needed
- * - no keys when the server says the answer is words (keypad false)
+ * - word answers (keypad false) keep the keyboard, still get every key below
+ * - keys insert and delete at the cursor
  * - the keys stop the phone keyboard opening until "Use keyboard instead"
  * - answerAsLatex: fractions, π, roots, powers, ×, ≤, degrees, percent; no preview
  *   for plain numbers, ratios, words, or anything with a backslash
@@ -111,10 +112,43 @@ describe("MathKeypad on a question", () => {
     expect(screen.queryByText(/For π/)).not.toBeInTheDocument();
   });
 
-  it("should not show keys when the server says the answer is words", () => {
-    setup({ ...NUMERIC, questionType: "short_text", keypad: false });
-    expect(screen.queryByRole("group", { name: "Maths keys" })).not.toBeInTheDocument();
-    expect(screen.getByLabelText("Your answer")).toHaveAttribute("inputmode", "text");
+  it("should keep the keyboard for word answers, with every key still below", async () => {
+    // Arrange
+    const { user, input } = setup({
+      ...NUMERIC,
+      questionType: "short_text",
+      keypad: false,
+      symbolKeys: ["π", "²", "°"],
+    });
+
+    // Act
+    await user.type(input as HTMLElement, "12 cm");
+    await user.click(screen.getByRole("button", { name: "Squared" }));
+
+    // Assert
+    expect(input).toHaveAttribute("inputmode", "text");
+    expect(input).toHaveValue("12 cm²");
+    expect(screen.getByRole("group", { name: "Maths keys" })).toBeInTheDocument();
+    expect(screen.getByText(/Numbers and symbols are on the keys below/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Use keyboard instead" })).not.toBeInTheDocument();
+  });
+
+  it("should insert and delete at the cursor, not just the end", async () => {
+    // Arrange
+    const { user, input } = setup({ ...NUMERIC, questionType: "short_text", symbolKeys: ["π"] });
+    const field = input as HTMLInputElement;
+    await user.type(field, "1/2");
+
+    // Act: put the cursor after "1", add π there, then delete it again
+    field.setSelectionRange(1, 1);
+    await user.click(screen.getByRole("button", { name: "Pi" }));
+    const afterInsert = field.value;
+    field.setSelectionRange(2, 2);
+    await user.click(screen.getByRole("button", { name: "Delete" }));
+
+    // Assert
+    expect(afterInsert).toBe("1π/2");
+    expect(field).toHaveValue("1/2");
   });
 
   it("should keep the phone keyboard closed until asked for", async () => {

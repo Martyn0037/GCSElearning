@@ -1843,7 +1843,7 @@
             "type": "string"
           },
           "keypad": {
-            "description": "Show the on-screen maths keypad for this answer",
+            "description": "The answer is maths: the on-screen keys replace the phone keyboard",
             "title": "Keypad",
             "type": "boolean"
           },
@@ -1875,7 +1875,7 @@
             "type": "string"
           },
           "symbolKeys": {
-            "description": "Extra keypad keys needed to type the answer (e.g. \u03c0, \u221a, ^, x)",
+            "description": "Symbol keys to offer with the number keys (every short answer gets all)",
             "items": {
               "type": "string"
             },

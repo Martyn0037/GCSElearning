@@ -24,6 +24,8 @@ project uses [Semantic Versioning](https://semver.org/).
 - **Docs and tests:** ADR-016; migration 0005; an end-to-end test for the home screen, daily challenge, badges and topic map.
 
 ### Changed
+- **Numbers and symbols on every typed answer.** Every number and short answer now gets on-screen keys. Short answers get the full symbol set every time: π, √, ^, ², ³, brackets, ratio, %, °, ×, ÷, =, <, >, ≤, ≥, plus any letters the maths uses. Before, symbol keys appeared only when every accepted answer looked like maths, so a question whose key also listed a form in words got no π key. Word answers keep the phone keyboard, with the keys underneath. Keys insert and delete at the cursor.
+- Word answers keep their symbols when marked (π, ², °, ×, % are spelled out rather than dropped), so "2 cm" no longer matches "2π cm". "2pi" equals "2 pi", and "45 degrees" equals "45°".
 - Practice items share their helpers between topic practice, reviews and challenges (`app/practice/items.py`).
 
 ### Added

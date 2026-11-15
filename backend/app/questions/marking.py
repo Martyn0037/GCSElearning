@@ -55,10 +55,34 @@ def split_number_and_unit(raw: str) -> tuple[Fraction | None, str | None]:
     return parse_number(match.group("num")), unit.strip() if unit else None
 
 
+# Symbols spelled out before accents are dropped, so "2π cm" never matches "2 cm".
+_SYMBOL_WORDS = {
+    "\u03c0": " pi ",
+    "\u221a": " root ",
+    "\u00b2": " ^2 ",
+    "\u00b3": " ^3 ",
+    "^": " pow ",
+    "\u00b0": " degrees ",
+    "\u00d7": " times ",
+    "\u00f7": " divide ",
+    "\u2264": " le ",
+    "\u2265": " ge ",
+    "<": " lt ",
+    ">": " gt ",
+    "%": " percent ",
+}
+
+
 def normalise_text(value: str) -> str:
-    """Case-, accent-, punctuation- and spacing-insensitive form for comparing words."""
+    """Case-, accent-, punctuation- and spacing-insensitive form for comparing words.
+
+    Maths symbols are spelled out rather than dropped, so they still count.
+    """
+    for symbol, word in _SYMBOL_WORDS.items():
+        value = value.replace(symbol, word)
     folded = unicodedata.normalize("NFKD", value).encode("ascii", "ignore").decode().casefold()
-    return " ".join(re.sub(r"[^\w\s]", " ", folded).split())
+    spaced = re.sub(r"(?<=\d)(?=[a-z])|(?<=[a-z])(?=\d)", " ", folded)  # "2pi" = "2 pi"
+    return " ".join(re.sub(r"[^\w\s]", " ", spaced).split())
 
 
 def _unit_matches(given: str | None, expected: str | None) -> bool:
