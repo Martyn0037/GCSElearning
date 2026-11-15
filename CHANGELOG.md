@@ -6,8 +6,12 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added — Student details
+- **Admin → Students → Edit details:** change a student's name and/or username. Progress and sessions are kept. A taken username is refused (409 `USERNAME_TAKEN`, also when two saves race). Changes are audited.
+- **`PATCH /api/v1/admin/students/{id}`** (admin only), with the same rules enforced on both sides: name 1–40 characters with no control characters; username 3–32 lower-case letters, digits, dots, hyphens or underscores, never email-like.
+
 ### Added — Student password reset
-- **Admin → Student passwords:** lists students (with their username, and whether sign-in is locked) and resets a password, with an easy-to-type suggestion. The student is signed out everywhere and any lockout is cleared.
+- **Admin → Students:** lists students (with their username, and whether sign-in is locked) and resets a password, with an easy-to-type suggestion. The student is signed out everywhere and any lockout is cleared.
 - **`GET /api/v1/admin/students`** (admin only, bounded): the students to choose from.
 
 ### Changed — Design refresh (ADR-022)

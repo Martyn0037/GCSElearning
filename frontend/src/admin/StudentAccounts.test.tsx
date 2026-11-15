@@ -1,6 +1,12 @@
-// frontend/src/admin/StudentPasswords.test.tsx
+// frontend/src/admin/StudentAccounts.test.tsx
 /**
  * Covers:
+ * - edit details: name and username prefilled; only changed fields sent;
+ *   username lower-cased; success message says the new username; list
+ *   refreshed; unchanged form just closes; taken username (409) shown with
+ *   the form kept open; invalid name/username explained, nothing sent;
+ *   only one form open at a time
+ * - detailsProblem: every rule, both boundaries
  * - lists students with their username, and marks a locked account
  * - happy path: typed password sent once, form closes, success message,
  *   list refreshed
@@ -27,7 +33,8 @@ import {
   passwordProblem,
   suggestPassword,
 } from "./passwordSuggestion";
-import { StudentPasswords } from "./StudentPasswords";
+import { StudentAccounts } from "./StudentAccounts";
+import { detailsProblem } from "./studentDetails";
 
 const SAM: AdminStudentOut = {
   id: "00000000-0000-4000-8000-0000000000b1",
@@ -44,7 +51,7 @@ async function openForm() {
   return user;
 }
 
-describe("StudentPasswords", () => {
+describe("StudentAccounts: passwords", () => {
   it("should list students with their username and mark a locked account", async () => {
     // Arrange
     installFakeApi({
@@ -61,7 +68,7 @@ describe("StudentPasswords", () => {
     });
 
     // Act
-    renderWithQuery(<StudentPasswords />);
+    renderWithQuery(<StudentAccounts />);
 
     // Assert
     const sam = (await screen.findByText("Sam")).closest("li");
@@ -81,7 +88,7 @@ describe("StudentPasswords", () => {
         return new Response(null, { status: 204 });
       },
     });
-    renderWithQuery(<StudentPasswords />);
+    renderWithQuery(<StudentAccounts />);
     const user = await openForm();
 
     // Act
@@ -102,7 +109,7 @@ describe("StudentPasswords", () => {
   it("should fill both boxes with a visible suggestion", async () => {
     // Arrange
     installFakeApi({ [LIST]: () => json([SAM]) });
-    renderWithQuery(<StudentPasswords />);
+    renderWithQuery(<StudentAccounts />);
     const user = await openForm();
 
     // Act
@@ -120,7 +127,7 @@ describe("StudentPasswords", () => {
   it("should show and hide the password", async () => {
     // Arrange
     installFakeApi({ [LIST]: () => json([SAM]) });
-    renderWithQuery(<StudentPasswords />);
+    renderWithQuery(<StudentAccounts />);
     const user = await openForm();
 
     // Act / Assert
@@ -137,7 +144,7 @@ describe("StudentPasswords", () => {
   ])("should explain a bad password (%s) and send nothing", async (first, second, message) => {
     // Arrange
     const fetchMock = installFakeApi({ [LIST]: () => json([SAM]) });
-    renderWithQuery(<StudentPasswords />);
+    renderWithQuery(<StudentAccounts />);
     const user = await openForm();
 
     // Act
@@ -157,7 +164,7 @@ describe("StudentPasswords", () => {
       [LIST]: () => json([SAM]),
       [RESET]: () => apiError(404, "RESOURCE_NOT_FOUND", "Student not found"),
     });
-    renderWithQuery(<StudentPasswords />);
+    renderWithQuery(<StudentAccounts />);
     const user = await openForm();
 
     // Act
@@ -173,7 +180,7 @@ describe("StudentPasswords", () => {
   it("should close the form on Cancel without sending", async () => {
     // Arrange
     const fetchMock = installFakeApi({ [LIST]: () => json([SAM]) });
-    renderWithQuery(<StudentPasswords />);
+    renderWithQuery(<StudentAccounts />);
     const user = await openForm();
 
     // Act
@@ -186,7 +193,7 @@ describe("StudentPasswords", () => {
 
   it("should show loading, then an empty state when there are no students", async () => {
     installFakeApi({ [LIST]: () => json([]) });
-    renderWithQuery(<StudentPasswords />);
+    renderWithQuery(<StudentAccounts />);
 
     expect(screen.getByRole("status")).toBeInTheDocument();
     expect(await screen.findByText("No student accounts yet.")).toBeInTheDocument();
@@ -194,14 +201,14 @@ describe("StudentPasswords", () => {
 
   it("should say when the students can't be loaded", async () => {
     installFakeApi({ [LIST]: () => apiError(500, "INTERNAL") });
-    renderWithQuery(<StudentPasswords />);
+    renderWithQuery(<StudentAccounts />);
 
     expect(await screen.findByRole("alert")).toHaveTextContent("Couldn't load the students.");
   });
 
   it("should name the form after the student", async () => {
     installFakeApi({ [LIST]: () => json([SAM]) });
-    renderWithQuery(<StudentPasswords />);
+    renderWithQuery(<StudentAccounts />);
     await openForm();
 
     const form = screen.getByRole("form", { name: "Reset Sam's password" });
@@ -251,5 +258,179 @@ describe("password suggestions", () => {
     const longest = "x".repeat(MAX_PASSWORD_LENGTH);
     expect(passwordProblem(shortest, shortest)).toBeNull();
     expect(passwordProblem(longest, longest)).toBeNull();
+  });
+});
+
+const PATCH = `PATCH /api/v1/admin/students/${SAM.id}`;
+
+async function openDetails() {
+  const user = userEvent.setup();
+  await user.click(await screen.findByRole("button", { name: "Edit details" }));
+  return user;
+}
+
+describe("StudentAccounts: details", () => {
+  it("should prefill, send only what changed, and say the new username", async () => {
+    // Arrange
+    const sent: unknown[] = [];
+    const fetchMock = installFakeApi({
+      [LIST]: () => json([SAM]),
+      [PATCH]: (init) => {
+        sent.push(jsonBody(init));
+        return json({ ...SAM, displayName: "Sam", username: "alex10" });
+      },
+    });
+    renderWithQuery(<StudentAccounts />);
+    const user = await openDetails();
+    const username = screen.getByLabelText("Username");
+
+    // Act
+    expect(screen.getByLabelText("Name")).toHaveValue("Sam");
+    expect(username).toHaveValue("sam10");
+    await user.clear(username);
+    await user.type(username, " Alex10 ");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    // Assert
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Saved. Sam now signs in as alex10.",
+    );
+    expect(sent).toEqual([{ username: "alex10" }]);
+    expect(screen.queryByLabelText("Username")).not.toBeInTheDocument();
+    const listCalls = fetchMock.mock.calls.filter(([url]) => url === "/api/v1/admin/students");
+    expect(listCalls).toHaveLength(2);
+  });
+
+  it("should rename without touching the username", async () => {
+    // Arrange
+    const sent: unknown[] = [];
+    installFakeApi({
+      [LIST]: () => json([SAM]),
+      [PATCH]: (init) => {
+        sent.push(jsonBody(init));
+        return json({ ...SAM, displayName: "Alex" });
+      },
+    });
+    renderWithQuery(<StudentAccounts />);
+    const user = await openDetails();
+
+    // Act
+    await user.clear(screen.getByLabelText("Name"));
+    await user.type(screen.getByLabelText("Name"), "  Alex ");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    // Assert
+    expect(await screen.findByRole("status")).toHaveTextContent("The app now calls them Alex.");
+    expect(sent).toEqual([{ displayName: "Alex" }]);
+  });
+
+  it("should just close when nothing changed", async () => {
+    // Arrange
+    const fetchMock = installFakeApi({ [LIST]: () => json([SAM]) });
+    renderWithQuery(<StudentAccounts />);
+    const user = await openDetails();
+
+    // Act
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    // Assert
+    expect(screen.queryByLabelText("Name")).not.toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("should show a taken username and keep the form open", async () => {
+    // Arrange
+    installFakeApi({
+      [LIST]: () => json([SAM]),
+      [PATCH]: () => apiError(409, "USERNAME_TAKEN", "That username is already taken."),
+    });
+    renderWithQuery(<StudentAccounts />);
+    const user = await openDetails();
+
+    // Act
+    await user.clear(screen.getByLabelText("Username"));
+    await user.type(screen.getByLabelText("Username"), "kit10");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    // Assert
+    expect(await screen.findByRole("alert")).toHaveTextContent("That username is already taken.");
+    expect(screen.getByLabelText("Username")).toHaveValue("kit10");
+  });
+
+  it.each([
+    ["Name", "", /Enter a name/],
+    ["Username", "al", /3–32 lower-case letters/],
+  ])("should explain a bad %s and send nothing", async (field, value, message) => {
+    // Arrange
+    const fetchMock = installFakeApi({ [LIST]: () => json([SAM]) });
+    renderWithQuery(<StudentAccounts />);
+    const user = await openDetails();
+
+    // Act
+    await user.clear(screen.getByLabelText(field));
+    if (value) await user.type(screen.getByLabelText(field), value);
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    // Assert
+    expect(screen.getByRole("alert")).toHaveTextContent(message);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("should cancel without sending, and open one form at a time", async () => {
+    // Arrange
+    const fetchMock = installFakeApi({ [LIST]: () => json([SAM]) });
+    renderWithQuery(<StudentAccounts />);
+    const user = await openDetails();
+
+    // Act / Assert: the other actions are hidden while a form is open
+    expect(screen.queryByRole("button", { name: "Reset password" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.queryByLabelText("Name")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reset password" })).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ["the network is down", () => Promise.reject(new TypeError("down")), /Can't reach the server/],
+    [
+      "the reply is malformed",
+      () => json({ unexpected: true }),
+      /Couldn't save the changes|unexpected/i,
+    ],
+  ])("should explain a failed save when %s", async (_case, handler, message) => {
+    // Arrange
+    installFakeApi({ [LIST]: () => json([SAM]), [PATCH]: handler });
+    renderWithQuery(<StudentAccounts />);
+    const user = await openDetails();
+
+    // Act
+    await user.type(screen.getByLabelText("Name"), "x");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    // Assert
+    expect(await screen.findByRole("alert")).toHaveTextContent(message);
+    expect(screen.getByLabelText("Name")).toBeInTheDocument();
+  });
+});
+
+describe("detailsProblem", () => {
+  it.each([
+    ["  ", "sam10", /Enter a name/],
+    ["x".repeat(41), "sam10", /at most 40/],
+    ["Al\u0007ex", "sam10", /can't be used/],
+    ["Alex", "ab", /lower-case/],
+    ["Alex", "x".repeat(33), /lower-case/],
+    ["Alex", "-alex", /lower-case/],
+    ["Alex", "alex@example.com", /lower-case/],
+  ])("should reject name %j / username %j", (name, username, message) => {
+    expect(detailsProblem(name, username)).toMatch(message);
+  });
+
+  it.each([
+    ["A", "abc"],
+    ["x".repeat(40), "x".repeat(32)],
+    [" Alex ", " Alex.K_10 "],
+  ])("should accept name %j / username %j", (name, username) => {
+    expect(detailsProblem(name, username)).toBeNull();
   });
 });

@@ -1,8 +1,8 @@
 // frontend/e2e/04-guardian-admin.spec.ts
 /**
  * End-to-end: the guardian dashboard (weekly summary, export button)
- * and the admin tools (review queue, AI spend, grade boundaries, resetting
- * the student's password), with no
+ * and the admin tools (review queue, AI spend, grade boundaries, renaming
+ * the student and resetting their password), with no
  * console or security-policy errors. Re-runnable.
  */
 import { expect, test } from "@playwright/test";
@@ -50,7 +50,7 @@ test("admin sees the review queue, AI spend and grade boundaries", async ({ page
   expect(problems).toEqual([]);
 });
 
-test("admin resets the student's password and the student signs in with it", async ({
+test("admin renames the student and resets their password; the student sees both", async ({
   browser,
 }) => {
   const admin = await (await browser.newContext()).newPage();
@@ -60,6 +60,14 @@ test("admin resets the student's password and the student signs in with it", asy
 
   // Set it to the same test password, so the other tests are unaffected.
   const row = admin.getByRole("listitem").filter({ hasText: `Signs in as ${student.id}` });
+  const originalName = (await row.locator("p").first().textContent()) ?? "";
+
+  // Rename (set back at the end, so the other tests are unaffected).
+  await row.getByRole("button", { name: "Edit details" }).click();
+  await row.getByLabel("Name", { exact: true }).fill("E2E Renamed");
+  await row.getByRole("button", { name: "Save" }).click();
+  await expect(admin.getByText("Saved. The app now calls them E2E Renamed.")).toBeVisible();
+
   await row.getByRole("button", { name: "Reset password" }).click();
   await row.getByLabel("New password").fill(student.password);
   await row.getByLabel("Type it again").fill(student.password);
@@ -69,6 +77,12 @@ test("admin resets the student's password and the student signs in with it", asy
   const studentPage = await (await browser.newContext()).newPage();
   await signIn(studentPage, student);
   await expect(studentPage.getByRole("navigation", { name: "Main" })).toBeVisible();
+  await expect(studentPage.getByRole("heading", { name: "Hi E2E Renamed!" })).toBeVisible();
+
+  await row.getByRole("button", { name: "Edit details" }).click();
+  await row.getByLabel("Name", { exact: true }).fill(originalName);
+  await row.getByRole("button", { name: "Save" }).click();
+  await expect(admin.getByText(`Saved. The app now calls them ${originalName}.`)).toBeVisible();
 
   expect(problems).toEqual([]);
 });

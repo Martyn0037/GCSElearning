@@ -66,6 +66,7 @@ import type {
   ReviewDecision,
   ReviewQueueParams,
   SetTextUpdate,
+  StudentUpdate,
   StudentWeeklySummaryParams,
   SubjectChoices,
   TopicOrderUpdate,
@@ -1975,6 +1976,95 @@ export function useListStudents<
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+export const getUpdateStudentUrl = (studentId: string) => {
+  return `/api/v1/admin/students/${studentId}`;
+};
+
+/**
+ * Change a student's name and/or username. Their progress and sessions are kept.
+ * @summary Update Student
+ */
+export const updateStudent = async (
+  studentId: string,
+  studentUpdate: StudentUpdate,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<AdminStudentOut> => {
+  return apiFetch<AdminStudentOut>(getUpdateStudentUrl(studentId), {
+    ...options,
+    method: "PATCH",
+    headers: getHeaders({ "Content-Type": "application/json" }, options?.headers),
+    body: JSON.stringify(studentUpdate),
+    schema: AdminStudentOut,
+  });
+};
+
+export const getUpdateStudentMutationKey = () => ["updateStudent"] as const;
+
+export const getUpdateStudentMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateStudent>>,
+    TError,
+    UpdateStudentMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateStudent>>,
+  TError,
+  UpdateStudentMutationVariables,
+  TContext
+> => {
+  const mutationKey = getUpdateStudentMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateStudent>>,
+    UpdateStudentMutationVariables
+  > = (props) => {
+    const { studentId, data } = props ?? {};
+
+    return updateStudent(studentId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateStudentMutationResult = NonNullable<Awaited<ReturnType<typeof updateStudent>>>;
+export type UpdateStudentMutationBody = BodyType<StudentUpdate>;
+export type UpdateStudentMutationError = ErrorType<ErrorResponse>;
+export type UpdateStudentMutationVariables = { studentId: string; data: BodyType<StudentUpdate> };
+
+/**
+ * Change a student's name and/or username. Their progress and sessions are kept.
+ * @summary Update Student
+ */
+export const useUpdateStudent = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateStudent>>,
+      TError,
+      UpdateStudentMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateStudent>>,
+  TError,
+  UpdateStudentMutationVariables,
+  TContext
+> => {
+  return useMutation(getUpdateStudentMutationOptions(options), queryClient);
+};
 
 export const getResetStudentPasswordUrl = (studentId: string) => {
   return `/api/v1/admin/students/${studentId}/password`;

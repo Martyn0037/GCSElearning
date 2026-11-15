@@ -4,12 +4,13 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Response, status
 
 from app.auth.dependencies import NowDep, SessionDep, SettingsDep, require_csrf, require_roles
-from app.auth.schemas import AdminStudentOut, ResetPasswordRequest
+from app.auth.schemas import AdminStudentOut, ResetPasswordRequest, StudentUpdate
 from app.auth.service import AuthService
 from app.core.pagination import DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, Cursor
 from app.core.schemas import API_V1_PREFIX, ERROR_RESPONSES
@@ -46,15 +47,35 @@ async def list_students(
 ) -> list[AdminStudentOut]:
     """Student accounts, by name, with whether sign-in is locked."""
     students = await AuthService(session, settings, now).list_students(limit)
-    return [
-        AdminStudentOut(
-            id=s.id,
-            display_name=s.display_name,
-            username=s.username,
-            locked_until=s.locked_until if s.locked_until and s.locked_until > now else None,
-        )
-        for s in students
-    ]
+    return [_student_out(s, now) for s in students]
+
+
+def _student_out(student: User, now: datetime) -> AdminStudentOut:
+    locked = student.locked_until if student.locked_until and student.locked_until > now else None
+    return AdminStudentOut(
+        id=student.id,
+        display_name=student.display_name,
+        username=student.username,
+        locked_until=locked,
+    )
+
+
+@router.patch(
+    "/students/{student_id}", response_model=AdminStudentOut, operation_id="updateStudent"
+)
+async def update_student(
+    student_id: uuid.UUID,
+    body: StudentUpdate,
+    admin: AdminDep,
+    session: SessionDep,
+    settings: SettingsDep,
+    now: NowDep,
+) -> AdminStudentOut:
+    """Change a student's name and/or username. Their progress and sessions are kept."""
+    student = await AuthService(session, settings, now).admin_update_student(
+        admin, student_id, display_name=body.display_name, username=body.username
+    )
+    return _student_out(student, now)
 
 
 @router.post(

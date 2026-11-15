@@ -116,7 +116,9 @@ Then sign in as the **student** on their phone and choose their subjects. Every 
 
 The **guardian** account shows the weekly summary. The **admin** account only needs a look now and then (see section 10).
 
-**Forgotten password:** sign in as the admin and go to **Student passwords**. Choose **Reset password**, type a new one or tap **Suggest one** (three words and two digits, easy to type on a phone), then **Set new password**. The student is signed out on every device, and a lockout from too many wrong attempts is cleared. Give them the new password. Admin and guardian passwords are changed by running the command above again.
+**Changing his name or username:** sign in as the admin, go to **Students** and choose **Edit details**. The name is what the app calls him; the username is what he types to sign in. His progress is kept and he stays signed in, but tell him the new username for next time. A username already in use is refused.
+
+**Forgotten password:** sign in as the admin and go to **Students**. Choose **Reset password**, type a new one or tap **Suggest one** (three words and two digits, easy to type on a phone), then **Set new password**. The student is signed out on every device, and a lockout from too many wrong attempts is cleared. Give them the new password. Admin and guardian passwords are changed by running the command above again.
 
 ## 7. Off-site backups (recommended)
 

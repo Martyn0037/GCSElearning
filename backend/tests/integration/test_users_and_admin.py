@@ -12,10 +12,16 @@ Covers:
   CSRF required; weak password rejected
 - admin student list: active students only, by name, with username and a
   current lock (an expired lock reads as null); admin only; limit bounded
+- admin student update: name and/or username change, progress and sessions
+  kept, new username signs in and the old one doesn't; audited; username
+  normalised; taken username -> 409 USERNAME_TAKEN (also when two saves
+  race); invalid name/username/empty body/unknown field -> 422; non-student
+  -> 404; non-admin -> 403; CSRF required; saving the same values is a no-op
 """
 
 from __future__ import annotations
 
+import asyncio
 from datetime import timedelta
 
 import httpx
@@ -25,6 +31,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.cookies import ACCESS_COOKIE
 from app.core.config import Settings
+from app.models.audit_log import AuditLog
 from app.models.refresh_token import RefreshToken
 from app.models.user import Role, User
 from tests.fixtures.factories import FakeClock, create_user, link
@@ -306,3 +313,202 @@ async def test_student_list_should_reject_an_out_of_range_limit(
 
     # Assert
     assert response.status_code == 422
+
+
+async def _update(client: httpx.AsyncClient, student_id: object, **body: object) -> httpx.Response:
+    return await client.patch(
+        f"/api/v1/admin/students/{student_id}", json=body, headers=csrf_headers(client)
+    )
+
+
+async def _admin_and_student(client: httpx.AsyncClient, session: AsyncSession) -> tuple[User, User]:
+    admin = await create_user(session, Role.ADMIN, identifier="admin@example.test")
+    student = await create_user(session, Role.STUDENT, identifier="sam10")
+    await login(client, "admin@example.test")
+    return admin, student
+
+
+async def test_admin_should_rename_student_and_change_username_keeping_sessions(
+    client: httpx.AsyncClient, other_client: httpx.AsyncClient, session: AsyncSession
+) -> None:
+    # Arrange: the student is signed in on another device.
+    _, student = await _admin_and_student(client, session)
+    await login(other_client, "sam10")
+
+    # Act
+    response = await _update(client, student.id, displayName="  Alex ", username=" Alex.K-10 ")
+
+    # Assert
+    assert response.status_code == 200
+    assert response.json() == {
+        "id": str(student.id),
+        "displayName": "Alex",
+        "username": "alex.k-10",
+        "lockedUntil": None,
+    }
+    me = await other_client.get("/api/v1/users/me")
+    assert (me.status_code, me.json()["displayName"]) == (200, "Alex")
+    assert (await login(other_client, "sam10")).status_code == 401
+    assert (await login(other_client, "alex.k-10")).status_code == 200
+    events = (
+        await session.scalars(select(AuditLog).where(AuditLog.action == "admin.student_updated"))
+    ).all()
+    assert [e.details for e in events] == [{"fields": ["display_name", "username"]}]
+
+
+async def test_admin_should_change_only_the_name(
+    client: httpx.AsyncClient, session: AsyncSession
+) -> None:
+    # Arrange
+    _, student = await _admin_and_student(client, session)
+
+    # Act
+    response = await _update(client, student.id, displayName="Alex")
+
+    # Assert
+    assert response.status_code == 200
+    assert (response.json()["displayName"], response.json()["username"]) == ("Alex", "sam10")
+
+
+async def test_saving_the_same_values_should_change_nothing(
+    client: httpx.AsyncClient, session: AsyncSession
+) -> None:
+    # Arrange
+    _, student = await _admin_and_student(client, session)
+
+    # Act
+    response = await _update(client, student.id, displayName="Sam", username="sam10")
+
+    # Assert
+    assert response.status_code == 200
+    events = (
+        await session.scalars(select(AuditLog).where(AuditLog.action == "admin.student_updated"))
+    ).all()
+    assert events == []
+
+
+async def test_taken_username_should_conflict(
+    client: httpx.AsyncClient, session: AsyncSession
+) -> None:
+    # Arrange
+    _, student = await _admin_and_student(client, session)
+    await create_user(session, Role.STUDENT, identifier="kit10", display_name="Kit")
+
+    # Act
+    response = await _update(client, student.id, displayName="Alex", username="KIT10")
+
+    # Assert: nothing changed, not even the name
+    assert response.status_code == 409
+    assert error_code(response) == "USERNAME_TAKEN"
+    await session.refresh(student)
+    assert (student.display_name, student.username) == ("Sam", "sam10")
+
+
+async def test_two_saves_racing_for_one_username_should_leave_one_winner(
+    client: httpx.AsyncClient,
+    other_client: httpx.AsyncClient,
+    session: AsyncSession,
+) -> None:
+    # Arrange: two students, two admin sessions, both want "alex10".
+    _, first = await _admin_and_student(client, session)
+    second = await create_user(session, Role.STUDENT, identifier="kit10", display_name="Kit")
+    await login(other_client, "admin@example.test")
+
+    # Act
+    responses = await asyncio.gather(
+        _update(client, first.id, username="alex10"),
+        _update(other_client, second.id, username="alex10"),
+    )
+
+    # Assert
+    assert sorted(r.status_code for r in responses) == [200, 409]
+    loser = next(r for r in responses if r.status_code == 409)
+    assert error_code(loser) == "USERNAME_TAKEN"
+    owners = (await session.scalars(select(User).where(User.username == "alex10"))).all()
+    assert len(owners) == 1
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        {},
+        {"displayName": "   "},
+        {"displayName": "x" * 41},
+        {"displayName": "Al\u0007ex"},
+        {"username": "ab"},
+        {"username": "x" * 33},
+        {"username": "alex@example.com"},
+        {"username": "-alex"},
+        {"username": "al ex"},
+        {"displayName": "Alex", "role": "admin"},
+    ],
+    ids=[
+        "empty",
+        "blank_name",
+        "long_name",
+        "control_char",
+        "short_username",
+        "long_username",
+        "email_like",
+        "leading_hyphen",
+        "space",
+        "unknown_field",
+    ],
+)
+async def test_invalid_update_should_be_rejected(
+    client: httpx.AsyncClient, session: AsyncSession, body: dict[str, object]
+) -> None:
+    # Arrange
+    _, student = await _admin_and_student(client, session)
+
+    # Act
+    response = await _update(client, student.id, **body)
+
+    # Assert
+    assert response.status_code == 422
+
+
+async def test_updating_a_non_student_should_404(
+    client: httpx.AsyncClient, session: AsyncSession
+) -> None:
+    # Arrange
+    await _admin_and_student(client, session)
+    guardian = await create_user(session, Role.GUARDIAN, identifier="parent@example.test")
+
+    # Act
+    response = await _update(client, guardian.id, displayName="Alex")
+
+    # Assert
+    assert response.status_code == 404
+
+
+@pytest.mark.parametrize("role", [Role.STUDENT, Role.GUARDIAN])
+async def test_non_admin_should_be_forbidden_from_updating_students(
+    client: httpx.AsyncClient, session: AsyncSession, role: Role
+) -> None:
+    # Arrange
+    student = await create_user(session, Role.STUDENT, identifier="sam10")
+    if role is Role.GUARDIAN:
+        await create_user(session, role, identifier="parent@example.test")
+    await login(client, "sam10" if role is Role.STUDENT else "parent@example.test")
+
+    # Act
+    response = await _update(client, student.id, displayName="Hacked")
+
+    # Assert
+    assert response.status_code == 403
+
+
+async def test_student_update_should_require_csrf(
+    client: httpx.AsyncClient, session: AsyncSession
+) -> None:
+    # Arrange
+    _, student = await _admin_and_student(client, session)
+
+    # Act
+    response = await client.patch(
+        f"/api/v1/admin/students/{student.id}", json={"displayName": "Alex"}
+    )
+
+    # Assert
+    assert response.status_code == 403

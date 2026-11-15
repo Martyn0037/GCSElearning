@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 from sqlalchemy import select, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth import audit
@@ -20,7 +21,12 @@ from app.auth.tokens import (
     new_opaque_token,
 )
 from app.core.config import Settings
-from app.core.errors import AuthenticationError, NotFoundError, PermissionDeniedError
+from app.core.errors import (
+    AuthenticationError,
+    ConflictError,
+    NotFoundError,
+    PermissionDeniedError,
+)
 from app.core.metrics import LOGIN_ATTEMPTS
 from app.models.refresh_token import RefreshToken
 from app.models.user import Role, User
@@ -246,6 +252,70 @@ class AuthService:
                 )
             ).all()
         )
+
+    async def admin_update_student(
+        self,
+        admin: User,
+        student_id: uuid.UUID,
+        *,
+        display_name: str | None,
+        username: str | None,
+    ) -> User:
+        """Change a student's display name and/or username (already validated).
+
+        Sessions stay valid: they're tied to the account, not the username.
+
+        Args:
+            admin: The acting admin.
+            student_id: The student to change.
+            display_name: New name, or ``None`` to keep it.
+            username: New username (normalised), or ``None`` to keep it.
+
+        Returns:
+            The updated student.
+
+        Raises:
+            PermissionDeniedError: If ``admin`` isn't an admin.
+            NotFoundError: If the target doesn't exist or isn't a student.
+            ConflictError: ``USERNAME_TAKEN`` if another account has that username.
+        """
+        if admin.role is not Role.ADMIN:
+            raise PermissionDeniedError()
+        student = await self._session.get(User, student_id, with_for_update=True)
+        if student is None or student.role is not Role.STUDENT:
+            raise NotFoundError("Student not found")
+        changed: list[str] = []
+        if display_name is not None and display_name != student.display_name:
+            student.display_name = display_name
+            changed.append("display_name")
+        if username is not None and username != student.username:
+            taken = await self._session.scalar(
+                select(User.id).where(User.username == username, User.id != student.id)
+            )
+            if taken is not None:
+                await self._session.rollback()
+                raise ConflictError("That username is already taken.", code="USERNAME_TAKEN")
+            student.username = username
+            changed.append("username")
+        if not changed:
+            await self._session.commit()
+            return student
+        audit.record(
+            self._session,
+            action="admin.student_updated",
+            now=self._now,
+            actor_user_id=admin.id,
+            target_user_id=student.id,
+            details={"fields": changed},
+        )
+        try:
+            await self._session.commit()
+        except IntegrityError as error:
+            # Two saves raced for the same username; the unique index decided.
+            await self._session.rollback()
+            raise ConflictError("That username is already taken.", code="USERNAME_TAKEN") from error
+        await self._session.refresh(student)
+        return student
 
     async def admin_reset_password(
         self, admin: User, target_user_id: uuid.UUID, new_password: str
