@@ -45,8 +45,12 @@ class PracticeItemOut(ApiModel):
     keypad: bool = Field(
         description="The answer is maths: the on-screen keys replace the phone keyboard"
     )
+    number_keys: bool = Field(description="Show the on-screen number pad (maths and sciences)")
     symbol_keys: list[str] = Field(
-        description="Symbol keys to offer with the number keys (every short answer gets all)"
+        description=(
+            "Extra keys, in order: maths symbols for maths and sciences, accented "
+            "letters for languages, none for other subjects"
+        )
     )
 
 

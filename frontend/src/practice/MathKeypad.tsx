@@ -1,10 +1,10 @@
 // frontend/src/practice/MathKeypad.tsx
 /**
- * On-screen keys for typing maths answers without hunting for symbols on a
- * phone keyboard. The number keys are always there; on short answers the
- * server adds every symbol key (π, √, powers, brackets, °, ratio, letters the
- * maths uses...), so the student can always type the answer from the screen. Every key produces text
- * the marker understands (e.g. "3/5", "1/2π", "x^2").
+ * On-screen keys, so nothing has to be hunted for on a phone keyboard.
+ * Maths and sciences get the number pad plus every maths symbol (π, √,
+ * powers, brackets, °, ratio, letters the maths uses...); every key produces
+ * text the marker understands (e.g. "3/5", "1/2π", "x^2"). Languages get just
+ * their accented letters and punctuation (á, ñ, ¿, ç...) with no number pad.
  */
 
 interface MathKeypadProps {
@@ -12,8 +12,11 @@ interface MathKeypadProps {
   onInsert: (text: string) => void;
   onBackspace: () => void;
   onClear: () => void;
-  /** Extra symbol keys for this question, from the server (`symbolKeys`). */
+  /** Extra keys for this question, from the server (`symbolKeys`): maths
+   * symbols, or a language's accented letters. */
   symbols: readonly string[];
+  /** Show the number pad (`numberKeys`): maths and sciences only. */
+  numberKeys?: boolean;
 }
 
 interface Key {
@@ -46,6 +49,14 @@ const SYMBOL_NAMES: Record<string, string> = {
   "≥": "Greater than or equal to",
 };
 
+/**
+ * Stop a key press taking focus from the answer box, so the cursor stays put
+ * and a phone keyboard doesn't close between keys.
+ */
+function keepFocus(event: { preventDefault: () => void }) {
+  event.preventDefault();
+}
+
 const insert = (value: string, name?: string): Key => ({
   label: value,
   value,
@@ -75,7 +86,13 @@ const keyClass =
   "min-h-12 rounded-xl text-xl font-medium shadow-card ring-1 ring-slate-200 transition select-none active:scale-95 focus-visible:outline-2 focus-visible:outline-brand-600";
 
 /** Number keys in a 4-column grid, then this question's symbol keys. Keys never submit. */
-export function MathKeypad({ onInsert, onBackspace, onClear, symbols }: MathKeypadProps) {
+export function MathKeypad({
+  onInsert,
+  onBackspace,
+  onClear,
+  symbols,
+  numberKeys = true,
+}: MathKeypadProps) {
   function press(key: Key) {
     if (key.action === "backspace") onBackspace();
     else if (key.action === "clear") onClear();
@@ -84,13 +101,18 @@ export function MathKeypad({ onInsert, onBackspace, onClear, symbols }: MathKeyp
   const symbolKeys = symbols.map((symbol) => insert(symbol, SYMBOL_NAMES[symbol]));
 
   return (
-    <div role="group" aria-label="Maths keys" className="space-y-2">
+    <div
+      role="group"
+      aria-label={numberKeys ? "Maths keys" : "Accented letters"}
+      className="space-y-2"
+    >
       {symbolKeys.length > 0 && (
         <div className="grid grid-cols-5 gap-2">
           {symbolKeys.map((key) => (
             <button
               key={key.label}
               type="button"
+              onMouseDown={keepFocus}
               aria-label={key.name}
               className={`${keyClass} bg-brand-50 text-brand-ink hover:bg-brand-100`}
               onClick={() => {
@@ -102,21 +124,24 @@ export function MathKeypad({ onInsert, onBackspace, onClear, symbols }: MathKeyp
           ))}
         </div>
       )}
-      <div className="grid grid-cols-4 gap-2">
-        {NUMBER_KEYS.map((key) => (
-          <button
-            key={key.name ?? key.label}
-            type="button"
-            aria-label={key.name}
-            className={`${keyClass} bg-surface text-slate-900 hover:bg-slate-50 active:bg-brand-50 ${key.wide ? "col-span-2" : ""}`}
-            onClick={() => {
-              press(key);
-            }}
-          >
-            {key.label}
-          </button>
-        ))}
-      </div>
+      {numberKeys && (
+        <div className="grid grid-cols-4 gap-2">
+          {NUMBER_KEYS.map((key) => (
+            <button
+              key={key.name ?? key.label}
+              type="button"
+              onMouseDown={keepFocus}
+              aria-label={key.name}
+              className={`${keyClass} bg-surface text-slate-900 hover:bg-slate-50 active:bg-brand-50 ${key.wide ? "col-span-2" : ""}`}
+              onClick={() => {
+                press(key);
+              }}
+            >
+              {key.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -16,7 +16,8 @@ Covers:
   the result without double-counting; a different key -> 409; missing or
   malformed key, empty or over-long answer -> 422
 - ladder: three correct moves up a level; full solution -> assisted, no move
-- keys: number answers get the keypad; every short answer gets every symbol
+- keys: number answers get the keypad; every maths short answer gets every symbol;
+  word subjects (English Literature) get no keys
   key (maths ones replace the phone keyboard, word ones don't); multiple
   choice gets none; a typed π answer
   is marked right against a LaTeX key, and the key is shown as maths
@@ -451,12 +452,12 @@ async def test_practice_should_require_csrf(client: httpx.AsyncClient, setup: Se
 
 
 @pytest.mark.parametrize(
-    ("question_type", "answer", "keypad", "symbols"),
+    ("question_type", "answer", "keypad", "numbers", "symbols"),
     [
-        ("numeric", None, True, []),
-        ("short_text", {"accepted": ["2:3"]}, True, list(KEYPAD_SYMBOLS)),
-        ("short_text", None, False, list(KEYPAD_SYMBOLS)),
-        ("multiple_choice", None, False, []),
+        ("numeric", None, True, True, []),
+        ("short_text", {"accepted": ["2:3"]}, True, True, list(KEYPAD_SYMBOLS)),
+        ("short_text", None, False, True, list(KEYPAD_SYMBOLS)),
+        ("multiple_choice", None, False, False, []),
     ],
 )
 async def test_should_offer_the_keys_the_answer_needs(
@@ -466,6 +467,7 @@ async def test_should_offer_the_keys_the_answer_needs(
     question_type: str,
     answer: dict[str, object] | None,
     keypad: bool,
+    numbers: bool,
     symbols: list[str],
 ) -> None:
     # Arrange
@@ -477,7 +479,41 @@ async def test_should_offer_the_keys_the_answer_needs(
     body = (await _next(client, setup)).json()
 
     # Assert
-    assert (body["keypad"], body["symbolKeys"]) == (keypad, symbols)
+    assert (body["keypad"], body["numberKeys"], body["symbolKeys"]) == (keypad, numbers, symbols)
+
+
+async def test_word_subjects_should_get_no_maths_keys(
+    client: httpx.AsyncClient, session: AsyncSession, setup: Setup
+) -> None:
+    # Arrange: the same student also takes English Literature.
+    english = StudentSubject(
+        id=uuid.uuid4(),
+        student_id=setup.student_id,
+        subject_id=setup.ids.subjects["english-literature"],
+        board_id=setup.ids.boards["board-b"],
+        board_confirmed=True,
+        tier=None,
+        tier_confirmed=True,
+        specification_id=setup.ids.specs["L1"],
+        position=1,
+    )
+    session.add(english)
+    await session.commit()
+    objective = await _objective_id(session, "L1.1")
+    await create_question(
+        session, objective, question_type="short_text", answer={"accepted": ["Macbeth"]}
+    )
+
+    # Act
+    response = await client.post(
+        f"/api/v1/practice/enrolments/{english.id}/topics/{setup.ids.topics['L1:1']}/next",
+        headers=csrf_headers(client),
+    )
+
+    # Assert
+    body = response.json()
+    assert response.status_code == 200
+    assert (body["keypad"], body["numberKeys"], body["symbolKeys"]) == (False, False, [])
 
 
 async def test_should_mark_a_typed_pi_answer_against_a_latex_key(

@@ -44,6 +44,7 @@ const ESSAY_ITEM: PracticeItemOut = {
   hintsRemaining: 4,
   review: false,
   keypad: false,
+  numberKeys: true,
   symbolKeys: ["π", "√"],
 };
 

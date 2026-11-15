@@ -6,6 +6,14 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed — Keys that fit the subject
+- **Spanish and French** get their own accented letters and punctuation (á é í ó ú ü ñ ¿ ¡; é è ê ë à â ç î ï ô ù û œ « »), not the calculator, and keep the phone keyboard.
+- **English, history, geography and RS** get no on-screen keys; maths and the sciences keep the number pad and symbols.
+- New `numberKeys` field on practice items; the maths preview and tips only show where maths can be typed.
+
+### Fixed
+- Tapping an on-screen key took focus from the answer box, so typing afterwards could land in the wrong place and a phone keyboard closed between keys. The box now keeps focus, with the cursor after the inserted key.
+
 ### Changed — Faster "Next question" (ADR-023)
 - A ready question for a nearby skill at the same level is served instead of waiting for one to be written.
 - Serving a question starts writing the next two skills straight away, ahead of routine work.

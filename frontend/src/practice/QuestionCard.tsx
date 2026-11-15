@@ -33,7 +33,8 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
   const essay = item.questionType === "extended";
   const maxLength = essay ? ESSAY_MAX_LENGTH : MAX_LENGTH;
   const keysOnly = item.keypad && !useKeyboard;
-  const preview = essay ? null : answerAsLatex(answer);
+  // The maths preview only makes sense where maths can be typed.
+  const preview = essay || !item.numberKeys ? null : answerAsLatex(answer);
   const words = answer.trim() ? answer.trim().split(/\s+/).length : 0;
 
   /** Apply a key press at the caret (or over the selection), then put the caret after it. */
@@ -44,6 +45,9 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
     const next = change(answer, start, end);
     setAnswer(next.value);
     requestAnimationFrame(() => {
+      // Keep typing where the key left off (and, on a phone, keep the keyboard
+      // open for word answers). Maths answers suppress the keyboard via inputMode.
+      element?.focus();
       element?.setSelectionRange(next.caret, next.caret);
     });
   }
@@ -167,23 +171,30 @@ export function QuestionCard({ item, submitting, onSubmit }: QuestionCardProps) 
               ? `Write your answer in full sentences. It's marked out of ${String(item.marks)} against the mark scheme.`
               : item.keypad
                 ? "Tap the keys or type. For a fraction, use a/b: 3 a/b 5 gives 3/5."
-                : "Type your answer. Numbers and symbols are on the keys below."}
+                : item.numberKeys
+                  ? "Type your answer. Numbers and symbols are on the keys below."
+                  : item.symbolKeys.length > 0
+                    ? "Type your answer. Accented letters are on the keys below."
+                    : "Type your answer."}
             {item.symbolKeys.includes("π") && " For π, use the π key: 1 a/b 2 π gives ½π."}
           </p>
-          <div className="mt-3">
-            <MathKeypad
-              symbols={item.symbolKeys}
-              onInsert={(text) => {
-                edit((value, start, end) => insertAt(value, text, start, end, maxLength));
-              }}
-              onBackspace={() => {
-                edit(deleteBack);
-              }}
-              onClear={() => {
-                setAnswer("");
-              }}
-            />
-          </div>
+          {(item.numberKeys || item.symbolKeys.length > 0) && (
+            <div className="mt-3">
+              <MathKeypad
+                numberKeys={item.numberKeys}
+                symbols={item.symbolKeys}
+                onInsert={(text) => {
+                  edit((value, start, end) => insertAt(value, text, start, end, maxLength));
+                }}
+                onBackspace={() => {
+                  edit(deleteBack);
+                }}
+                onClear={() => {
+                  setAnswer("");
+                }}
+              />
+            </div>
+          )}
           {item.keypad && (
             <Button
               variant="ghost"

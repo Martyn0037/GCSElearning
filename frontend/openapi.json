@@ -2329,6 +2329,11 @@
             "title": "Marks",
             "type": "integer"
           },
+          "numberKeys": {
+            "description": "Show the on-screen number pad (maths and sciences)",
+            "title": "Numberkeys",
+            "type": "boolean"
+          },
           "objectiveRef": {
             "title": "Objectiveref",
             "type": "string"
@@ -2353,7 +2358,7 @@
             "type": "string"
           },
           "symbolKeys": {
-            "description": "Symbol keys to offer with the number keys (every short answer gets all)",
+            "description": "Extra keys, in order: maths symbols for maths and sciences, accented letters for languages, none for other subjects",
             "items": {
               "type": "string"
             },
@@ -2386,6 +2391,7 @@
           "hintsRemaining",
           "review",
           "keypad",
+          "numberKeys",
           "symbolKeys"
         ],
         "title": "PracticeItemOut",

@@ -7,17 +7,16 @@ Used by topic practice, reviews and challenges alike.
 from __future__ import annotations
 
 import uuid
-from typing import Any
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ConflictError, NotFoundError
-from app.models.curriculum import LearningObjective, Topic
+from app.models.curriculum import LearningObjective, Specification, Subject, Topic
 from app.models.enrolment import StudentSubject
-from app.models.question import Hint, PracticeItem, Question, QuestionType
+from app.models.question import Hint, PracticeItem, Question
 from app.practice.schemas import OptionOut, PracticeItemOut
-from app.questions.answer_forms import is_maths_answer, keypad_symbols
+from app.questions.keyboards import keys_for
 
 MAX_HINT_LEVEL = 4
 
@@ -65,9 +64,16 @@ async def item_out(
     """A practice item as the student sees it: never includes the answer."""
     question = question or await session.get(Question, item.question_id)
     assert question is not None  # noqa: S101 - FK guarantees it
-    objective_ref = await session.scalar(
-        select(LearningObjective.ref).where(LearningObjective.id == question.objective_id)
-    )
+    row = (
+        await session.execute(
+            select(LearningObjective.ref, Subject.slug)
+            .join(Specification, Specification.id == LearningObjective.specification_id)
+            .join(Subject, Subject.id == Specification.subject_id)
+            .where(LearningObjective.id == question.objective_id)
+        )
+    ).first()
+    objective_ref, subject_slug = row if row else ("", None)
+    keys = keys_for(question, subject_slug)
     hints = (
         await session.scalars(
             select(Hint.text)
@@ -88,25 +94,7 @@ async def item_out(
         hints=list(hints),
         hints_remaining=MAX_HINT_LEVEL - item.hints_revealed,
         review=item.mistake_id is not None,
-        **_keypad(question),
+        keypad=keys.keypad,
+        number_keys=keys.number_keys,
+        symbol_keys=keys.symbol_keys,
     )
-
-
-def _keypad(question: Question) -> dict[str, Any]:
-    """How the on-screen keys appear for this question.
-
-    Every typed answer gets keys, so no number or symbol is ever out of reach:
-    numbers get the number keys; every short answer also gets the full symbol
-    set (π, √, powers, °, ...). ``keypad`` is true when the answer is maths,
-    so the keys replace the phone keyboard; for word answers the keyboard
-    stays and the keys sit underneath. Multiple choice needs no typing.
-    """
-    if question.question_type is QuestionType.NUMERIC:
-        return {"keypad": True, "symbol_keys": []}
-    if question.question_type is QuestionType.EXTENDED:
-        return {"keypad": False, "symbol_keys": keypad_symbols([])}
-    if question.question_type is QuestionType.SHORT_TEXT:
-        accepted = [str(a) for a in question.answer.get("accepted", [])]
-        maths = bool(accepted) and all(is_maths_answer(a) for a in accepted)
-        return {"keypad": maths, "symbol_keys": keypad_symbols(accepted)}
-    return {"keypad": False, "symbol_keys": []}

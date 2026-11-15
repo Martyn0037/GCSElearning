@@ -49,6 +49,7 @@ const MCQ: PracticeItemOut = {
   hintsRemaining: 4,
   review: false,
   keypad: false,
+  numberKeys: false,
   symbolKeys: [],
 };
 
@@ -60,6 +61,7 @@ const NUMERIC: PracticeItemOut = {
   options: [],
   unit: "cm",
   keypad: true,
+  numberKeys: true,
 };
 
 function result(overrides: Partial<AnswerResultOut> = {}): AnswerResultOut {

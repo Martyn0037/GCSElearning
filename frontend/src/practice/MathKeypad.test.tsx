@@ -7,6 +7,10 @@
  * - symbol keys come from the server (symbolKeys) with spoken names; π typed
  *   from the keys ("1/2π") is submitted, with a tip for π; none when not needed
  * - word answers (keypad false) keep the keyboard, still get every key below
+ * - languages: only their accented letters, no number pad or maths tips;
+ *   tapping ñ types it and keeps the box focused with the cursor after it
+ *   (typing carries on in place); the phone keyboard stays; no maths preview
+ * - other word subjects: no on-screen keys at all
  * - keys insert and delete at the cursor
  * - the keys stop the phone keyboard opening until "Use keyboard instead"
  * - answerAsLatex: fractions, π, roots, powers, ×, ≤, degrees, percent; no preview
@@ -34,6 +38,7 @@ const NUMERIC: PracticeItemOut = {
   hintsRemaining: 4,
   review: false,
   keypad: true,
+  numberKeys: true,
   symbolKeys: [],
 };
 
@@ -123,6 +128,7 @@ describe("MathKeypad on a question", () => {
       ...NUMERIC,
       questionType: "short_text",
       keypad: false,
+      numberKeys: true,
       symbolKeys: ["π", "²", "°"],
     });
 
@@ -168,6 +174,51 @@ describe("MathKeypad on a question", () => {
     expect(input).toHaveAttribute("inputmode", "decimal");
     await user.click(screen.getByRole("button", { name: "Use the on-screen keys only" }));
     expect(input).toHaveAttribute("inputmode", "none");
+  });
+});
+
+describe("keys by subject", () => {
+  const SPANISH: PracticeItemOut = {
+    ...NUMERIC,
+    questionType: "short_text",
+    stem: "Translate: the boy",
+    keypad: false,
+    numberKeys: false,
+    symbolKeys: ["á", "é", "í", "ó", "ú", "ü", "ñ", "¿", "¡"],
+  };
+
+  it("should give a language its accented letters and nothing else", async () => {
+    // Arrange
+    const { onSubmit, user, input } = setup(SPANISH);
+
+    // Act
+    await user.type(input as HTMLElement, "el ni");
+    await user.click(screen.getByRole("button", { name: "ñ" }));
+    // Carry on typing without touching the box: focus and cursor stay put.
+    await vi.waitFor(() => {
+      expect(input).toHaveFocus();
+    });
+    await user.keyboard("o");
+    await user.click(screen.getByRole("button", { name: "Check answer" }));
+
+    // Assert
+    expect(onSubmit).toHaveBeenCalledWith("el niño");
+    expect(screen.getByRole("group", { name: "Accented letters" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "7" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Pi" })).not.toBeInTheDocument();
+    expect(screen.getByText(/Accented letters are on the keys below/)).toBeInTheDocument();
+    expect(screen.queryByText(/For π/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Looks like/)).not.toBeInTheDocument();
+    expect(input).not.toHaveAttribute("inputmode", "none");
+  });
+
+  it("should show no keys for other word subjects", () => {
+    // Arrange / Act
+    setup({ ...SPANISH, symbolKeys: [] });
+
+    // Assert
+    expect(screen.queryByRole("group")).not.toBeInTheDocument();
+    expect(screen.getByText("Type your answer.")).toBeInTheDocument();
   });
 });
 

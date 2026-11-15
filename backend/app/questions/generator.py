@@ -37,6 +37,7 @@ from app.models.curriculum import (
     Topic,
 )
 from app.models.question import Hint, Question, QuestionStatus, QuestionType
+from app.questions.keyboards import QUANTITATIVE_SUBJECTS
 from app.questions.llm_schemas import GeneratedQuestion, Verification
 from app.questions.marking import normalise_text, parse_number
 from app.questions.prompts import (
@@ -67,9 +68,6 @@ ESSAY_TYPES_BY_LEVEL: dict[int, tuple[QuestionType, ...]] = {
     4: (QuestionType.EXTENDED, QuestionType.SHORT_TEXT),
     5: (QuestionType.EXTENDED,),
 }
-QUANTITATIVE_SUBJECTS = frozenset(
-    {"maths", "combined-science", "biology", "chemistry", "physics", "computer-science"}
-)
 
 
 def types_for(subject_slug: str, difficulty: int) -> tuple[QuestionType, ...]:

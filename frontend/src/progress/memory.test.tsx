@@ -51,6 +51,7 @@ const ITEM_OUT: PracticeItemOut = {
   hintsRemaining: 4,
   review: false,
   keypad: false,
+  numberKeys: false,
   symbolKeys: [],
 };
 

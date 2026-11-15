@@ -17,6 +17,7 @@ export const PracticeItemOut = zod
       .boolean()
       .describe("The answer is maths: the on-screen keys replace the phone keyboard"),
     marks: zod.int(),
+    numberKeys: zod.boolean().describe("Show the on-screen number pad (maths and sciences)"),
     objectiveRef: zod.string(),
     options: zod.array(
       zod
@@ -33,7 +34,9 @@ export const PracticeItemOut = zod
     stem: zod.string(),
     symbolKeys: zod
       .array(zod.string())
-      .describe("Symbol keys to offer with the number keys (every short answer gets all)"),
+      .describe(
+        "Extra keys, in order: maths symbols for maths and sciences, accented letters for languages, none for other subjects",
+      ),
     unit: zod.union([zod.string(), zod.null()]),
   })
   .describe("A question as the student sees it. Never includes the answer.");
