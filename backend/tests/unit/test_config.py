@@ -57,7 +57,9 @@ def test_blank_anthropic_key_should_mean_not_configured(value: str) -> None:
 )
 def test_production_should_refuse_weak_settings(overrides: dict[str, object], problem: str) -> None:
     with pytest.raises(ValidationError, match=problem):
-        make_settings(environment="production", **overrides)
+        make_settings(
+            "postgresql+asyncpg://u:p@localhost/db", environment="production", **overrides
+        )
 
 
 def test_development_should_allow_them() -> None:
