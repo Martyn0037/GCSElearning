@@ -14,6 +14,7 @@ import { describe, expect, it } from "vitest";
 import type { EnrolmentOut, TopicMapOut } from "../api/generated/model";
 import { apiError, installFakeApi, json, STUDENT } from "../test/fakeApi";
 import { renderApp } from "../test/renderApp";
+import { NO_STANDING } from "../test/fixtures";
 
 const MATHS: EnrolmentOut = {
   id: "00000000-0000-4000-8000-000000000008",
@@ -61,6 +62,7 @@ const MAP: TopicMapOut = {
       title: "Number",
       taughtAtSchool: true,
       unlocked: true,
+      standing: NO_STANDING,
       subtopics: [
         {
           id: "00000000-0000-4000-8000-000000000014",
@@ -75,6 +77,7 @@ const MAP: TopicMapOut = {
       title: "Algebra",
       taughtAtSchool: false,
       unlocked: false,
+      standing: NO_STANDING,
       subtopics: [
         { id: "00000000-0000-4000-8000-000000000015", title: "Notation", objectiveCount: 1 },
       ],

@@ -9,6 +9,25 @@ import * as zod from "zod";
 export const AnswerResultOut = zod
   .object({
     assisted: zod.boolean(),
+    challenge: zod
+      .union([
+        zod
+          .object({
+            answered: zod.int(),
+            challengeId: zod.uuid(),
+            completed: zod.boolean(),
+            kind: zod
+              .enum(["daily", "boss"])
+              .describe(
+                "Daily challenge (5 mixed questions) or boss battle (timed topic mini mock).",
+              ),
+            total: zod.int(),
+          })
+          .describe("Where an answered question's challenge is up to."),
+        zod.null(),
+      ])
+      .optional()
+      .describe("Set when the question is part of a challenge"),
     correct: zod.boolean(),
     correctAnswer: zod.string(),
     itemId: zod.uuid(),
@@ -19,6 +38,36 @@ export const AnswerResultOut = zod
       .describe("Set when this answer opened (or is reviewing) a mistake"),
     mistakeResolved: zod.boolean().describe("A review answered right twice in a row"),
     review: zod.boolean(),
+    rewards: zod
+      .union([
+        zod
+          .object({
+            bonusXp: zod.int().describe("Challenge completion bonus earned with this answer"),
+            level: zod.int(),
+            levelUp: zod.boolean(),
+            newBadges: zod.array(
+              zod
+                .object({
+                  code: zod.string(),
+                  description: zod.string(),
+                  earnedAt: zod.union([zod.iso.datetime({ offset: true }), zod.null()]),
+                  name: zod.string(),
+                })
+                .describe("A badge, and when it was earned (null if not yet)."),
+            ),
+            streakDays: zod.int(),
+            streakExtended: zod.boolean().describe("First answer of a new day"),
+            totalXp: zod.int(),
+            usedFreeze: zod.boolean().describe("This week's freeze covered a missed day"),
+            xpForLevel: zod.int().describe("XP from this level to the next (0 at the top)"),
+            xpGained: zod.int().describe("XP for this answer"),
+            xpIntoLevel: zod.int(),
+          })
+          .describe("What an answer earned."),
+        zod.null(),
+      ])
+      .optional()
+      .describe("XP, streak and badges"),
     workedSolution: zod.string(),
   })
   .describe("The marked answer.");

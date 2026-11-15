@@ -7,7 +7,14 @@ import { GuardianHomePage } from "../pages/HomePages";
 import { LoginPage } from "../pages/LoginPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 import { LazyPracticePage } from "../practice/LazyPracticePage";
-import { LazyMistakesPage, LazyProgressPage, LazyReviewPage } from "../progress/LazyPages";
+import { BadgesPage } from "../game/BadgesPage";
+import {
+  LazyBossBattlePage,
+  LazyDailyChallengePage,
+  LazyMistakesPage,
+  LazyProgressPage,
+  LazyReviewPage,
+} from "../progress/LazyPages";
 import { SetupPage } from "../setup/SetupPage";
 import { StudentHomePage } from "../subjects/StudentHomePage";
 import { TopicMapPage } from "../subjects/TopicMapPage";
@@ -42,6 +49,24 @@ export const routes: RouteObject[] = [
     element: (
       <RequireRole roles={["student"]}>{(user) => <LazyReviewPage user={user} />}</RequireRole>
     ),
+  },
+  {
+    path: "/daily",
+    element: (
+      <RequireRole roles={["student"]}>
+        {(user) => <LazyDailyChallengePage user={user} />}
+      </RequireRole>
+    ),
+  },
+  {
+    path: "/boss/:enrolmentId/:topicId",
+    element: (
+      <RequireRole roles={["student"]}>{(user) => <LazyBossBattlePage user={user} />}</RequireRole>
+    ),
+  },
+  {
+    path: "/badges",
+    element: <RequireRole roles={["student"]}>{(user) => <BadgesPage user={user} />}</RequireRole>,
   },
   {
     path: "/mistakes",

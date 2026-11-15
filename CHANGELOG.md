@@ -6,6 +6,26 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added — Phase 5 (Gamification)
+- **XP and levels:**
+  - 10 XP per difficulty level for a right answer, less with hints, and 2 XP after the full solution.
+  - Bonuses for the daily challenge and boss battles.
+  - XP is recorded as events and can never be paid twice.
+- **Daily streak** in London days, with one automatic freeze a week. There's no guilt messaging.
+- **Mastery rings** per topic: bronze, silver, gold and exam ready. They show on the topic map and progress page.
+- **Daily challenge:** 5 mixed questions: due reviews first, then weak spots across unlocked topics, with a summary and +50 XP.
+- **Boss battles:**
+  - An end-of-topic timed mini mock, with no hints and marks only at the end.
+  - Results show the score, an estimated grade band (clearly labelled), the personal best and every question with its solution.
+- **Badges** for meaningful achievements (10 to start), and a badges page.
+- **Home screen:** a big Continue button, plus level, XP bar, streak, today's challenge, weekly XP, badges and a sounds toggle (muted by default).
+- **Results** show "+XP", streak, level up, new badges and challenge progress.
+- **Grade boundaries API** (admin): percentages per grade, per spec and tier, used for boss battle estimates.
+- **Docs and tests:** ADR-016; migration 0005; an end-to-end test for the home screen, daily challenge, badges and topic map.
+
+### Changed
+- Practice items share their helpers between topic practice, reviews and challenges (`app/practice/items.py`).
+
 ### Added
 - **Maths keypad:** number answers, and short answers on maths questions, get on-screen keys (digits, decimal point, minus, a/b fraction bar, ratio, percent, delete, clear). A typed fraction is previewed stacked. On phones the keys replace the system keyboard until "Use keyboard instead" is tapped.
 

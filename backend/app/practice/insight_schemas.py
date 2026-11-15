@@ -9,6 +9,7 @@ from datetime import date, datetime
 from pydantic import Field
 
 from app.core.schemas import ApiModel
+from app.gamification.rings import Ring
 from app.models.question import ExplanationStatus
 from app.practice.schemas import OptionOut
 
@@ -82,6 +83,7 @@ class TopicProgress(ApiModel):
     objectives_practised: int
     attempts: int
     accuracy: float | None = Field(description="Share answered correctly, or null if none yet")
+    ring: Ring = Field(default=Ring.NONE, description="Mastery ring (ADR-016)")
 
 
 class DailyActivity(ApiModel):

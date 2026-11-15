@@ -6,6 +6,7 @@
  */
 import * as zod from "zod";
 
+export const progressOutTopicsItemRingDefault = `none`;
 export const ProgressOut = zod
   .object({
     daily: zod.array(
@@ -40,6 +41,10 @@ export const ProgressOut = zod
           objectivesPractised: zod.int(),
           objectivesTotal: zod.int(),
           ref: zod.string(),
+          ring: zod
+            .enum(["none", "bronze", "silver", "gold", "exam_ready"])
+            .default(progressOutTopicsItemRingDefault)
+            .describe("Mastery ring (ADR-016)"),
           title: zod.string(),
           topicId: zod.uuid(),
         })

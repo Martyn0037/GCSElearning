@@ -10,6 +10,7 @@ from typing import Annotated, Self
 from pydantic import Field, StringConstraints, model_validator
 
 from app.core.schemas import ApiModel
+from app.gamification.schemas import TopicStandingOut
 from app.models.curriculum import Tier
 
 Name = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=80)]
@@ -247,6 +248,7 @@ class TopicOut(ApiModel):
     taught_at_school: bool
     unlocked: bool
     subtopics: list[SubtopicOut]
+    standing: TopicStandingOut = Field(description="Mastery ring and boss battle status")
 
 
 class TopicMapOut(ApiModel):

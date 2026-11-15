@@ -16,6 +16,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import NotFoundError
 from app.core.pagination import Cursor
+from app.gamification.rings import ring_for
+from app.gamification.standings import boss_bests
 from app.models.curriculum import LearningObjective, Subject, Subtopic, Topic
 from app.models.enrolment import StudentSubject
 from app.models.question import Mistake, ObjectiveProgress, PracticeItem, Question
@@ -306,8 +308,10 @@ async def progress(
         if topic_id in topics:
             topics[topic_id].attempts = attempts
             topics[topic_id].accuracy = round(int(correct or 0) / attempts, 3)
+    bests = await boss_bests(session, student_id, list(topics))
     for topic_id, entry in topics.items():
         entry.mastery = round(mastery_sums[topic_id] / entry.objectives_total, 3)
+        entry.ring = ring_for(entry.mastery, bests.get(topic_id))
 
     since = london_today(now) - timedelta(days=HISTORY_DAYS - 1)
     local_day = cast(func.timezone(LONDON.key, PracticeItem.answered_at), Date)

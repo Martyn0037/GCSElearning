@@ -6,6 +6,7 @@ import type { ObjectiveStat, TopicProgress, UserOut } from "../api/generated/mod
 import { AppShell } from "../components/AppShell";
 import { MathText } from "../practice/MathText";
 import { ActivityChart } from "./ActivityChart";
+import { MasteryRing } from "../game/Ring";
 
 function percent(value: number): string {
   return `${Math.round(value * 100)}%`;
@@ -74,6 +75,7 @@ function TopicBar({ topic }: { topic: TopicProgress }) {
         </span>
         <span className="font-semibold">{percent(topic.mastery)}</span>
       </div>
+      {topic.ring && topic.ring !== "none" && <MasteryRing ring={topic.ring} />}
       <div
         role="progressbar"
         aria-label={`${topic.title} mastery`}

@@ -25,7 +25,11 @@ import {
   AdminEnrolmentPage,
   AdminSpecificationOut,
   AnswerResultOut,
+  BadgeOut,
   CatalogueOut,
+  ChallengeOut,
+  DashboardOut,
+  GradeBoundariesOut,
   MistakeOut,
   MistakePage,
   MistakeTopicGroup,
@@ -42,6 +46,7 @@ import type {
   EnrolmentUpdate,
   ErrorResponse,
   FlagRequest,
+  GradeBoundariesIn,
   ListEnrolmentsParams,
   ListMyMistakesParams,
   LoginRequest,
@@ -979,6 +984,251 @@ export function useListSpecifications<
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+export const getListGradeBoundariesUrl = (specificationId: string) => {
+  return `/api/v1/admin/specifications/${specificationId}/grade-boundaries`;
+};
+
+/**
+ * Grade boundaries for a spec, by tier.
+ * @summary List Grade Boundaries
+ */
+export const listGradeBoundaries = async (
+  specificationId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<GradeBoundariesOut[]> => {
+  return apiFetch<GradeBoundariesOut[]>(getListGradeBoundariesUrl(specificationId), {
+    ...options,
+    method: "GET",
+
+    schema: zod.array(GradeBoundariesOut),
+  });
+};
+
+export const getListGradeBoundariesQueryKey = (specificationId: string) => {
+  return [`/api/v1/admin/specifications/${specificationId}/grade-boundaries`] as const;
+};
+
+export const getListGradeBoundariesQueryOptions = <
+  TData = Awaited<ReturnType<typeof listGradeBoundaries>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  specificationId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listGradeBoundaries>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListGradeBoundariesQueryKey(specificationId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listGradeBoundaries>>> = ({ signal }) =>
+    listGradeBoundaries(specificationId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: specificationId !== null && specificationId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof listGradeBoundaries>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type ListGradeBoundariesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listGradeBoundaries>>
+>;
+export type ListGradeBoundariesQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * Grade boundaries for a spec, by tier.
+ * @summary List Grade Boundaries
+ */
+export function useListGradeBoundaries<
+  TData = Awaited<ReturnType<typeof listGradeBoundaries>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  specificationId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listGradeBoundaries>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listGradeBoundaries>>,
+          TError,
+          Awaited<ReturnType<typeof listGradeBoundaries>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Grade boundaries for a spec, by tier.
+ * @summary List Grade Boundaries
+ */
+export function useListGradeBoundaries<
+  TData = Awaited<ReturnType<typeof listGradeBoundaries>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  specificationId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listGradeBoundaries>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listGradeBoundaries>>,
+          TError,
+          Awaited<ReturnType<typeof listGradeBoundaries>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Grade boundaries for a spec, by tier.
+ * @summary List Grade Boundaries
+ */
+export function useListGradeBoundaries<
+  TData = Awaited<ReturnType<typeof listGradeBoundaries>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  specificationId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listGradeBoundaries>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Grade boundaries for a spec, by tier.
+ * @summary List Grade Boundaries
+ */
+export function useListGradeBoundaries<
+  TData = Awaited<ReturnType<typeof listGradeBoundaries>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  specificationId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof listGradeBoundaries>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getListGradeBoundariesQueryOptions(specificationId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getReplaceGradeBoundariesUrl = (specificationId: string) => {
+  return `/api/v1/admin/specifications/${specificationId}/grade-boundaries`;
+};
+
+/**
+ * Replace one tier's boundaries; an empty list clears them.
+ * @summary Replace Grade Boundaries
+ */
+export const replaceGradeBoundaries = async (
+  specificationId: string,
+  gradeBoundariesIn: GradeBoundariesIn,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<GradeBoundariesOut> => {
+  return apiFetch<GradeBoundariesOut>(getReplaceGradeBoundariesUrl(specificationId), {
+    ...options,
+    method: "PUT",
+    headers: getHeaders({ "Content-Type": "application/json" }, options?.headers),
+    body: JSON.stringify(gradeBoundariesIn),
+    schema: GradeBoundariesOut,
+  });
+};
+
+export const getReplaceGradeBoundariesMutationKey = () => ["replaceGradeBoundaries"] as const;
+
+export const getReplaceGradeBoundariesMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof replaceGradeBoundaries>>,
+    TError,
+    ReplaceGradeBoundariesMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof replaceGradeBoundaries>>,
+  TError,
+  ReplaceGradeBoundariesMutationVariables,
+  TContext
+> => {
+  const mutationKey = getReplaceGradeBoundariesMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof replaceGradeBoundaries>>,
+    ReplaceGradeBoundariesMutationVariables
+  > = (props) => {
+    const { specificationId, data } = props ?? {};
+
+    return replaceGradeBoundaries(specificationId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ReplaceGradeBoundariesMutationResult = NonNullable<
+  Awaited<ReturnType<typeof replaceGradeBoundaries>>
+>;
+export type ReplaceGradeBoundariesMutationBody = BodyType<GradeBoundariesIn>;
+export type ReplaceGradeBoundariesMutationError = ErrorType<ErrorResponse>;
+export type ReplaceGradeBoundariesMutationVariables = {
+  specificationId: string;
+  data: BodyType<GradeBoundariesIn>;
+};
+
+/**
+ * Replace one tier's boundaries; an empty list clears them.
+ * @summary Replace Grade Boundaries
+ */
+export const useReplaceGradeBoundaries = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof replaceGradeBoundaries>>,
+      TError,
+      ReplaceGradeBoundariesMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof replaceGradeBoundaries>>,
+  TError,
+  ReplaceGradeBoundariesMutationVariables,
+  TContext
+> => {
+  return useMutation(getReplaceGradeBoundariesMutationOptions(options), queryClient);
+};
+
 export const getResetStudentPasswordUrl = (studentId: string) => {
   return `/api/v1/admin/students/${studentId}/password`;
 };
@@ -1406,6 +1656,260 @@ export function useGetCatalogue<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
   const queryOptions = getGetCatalogueQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getMyBadgesUrl = () => {
+  return `/api/v1/me/badges`;
+};
+
+/**
+ * Every badge, with when it was earned (bounded: the catalogue is small).
+ * @summary Get Badges
+ */
+export const myBadges = async (options?: Parameters<typeof apiFetch>[1]): Promise<BadgeOut[]> => {
+  return apiFetch<BadgeOut[]>(getMyBadgesUrl(), {
+    ...options,
+    method: "GET",
+
+    schema: zod.array(BadgeOut),
+  });
+};
+
+export const getMyBadgesQueryKey = () => {
+  return [`/api/v1/me/badges`] as const;
+};
+
+export const getMyBadgesQueryOptions = <
+  TData = Awaited<ReturnType<typeof myBadges>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myBadges>>, TError, TData>>;
+  request?: SecondParameter<typeof apiFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getMyBadgesQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof myBadges>>> = ({ signal }) =>
+    myBadges({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof myBadges>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type MyBadgesQueryResult = NonNullable<Awaited<ReturnType<typeof myBadges>>>;
+export type MyBadgesQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * Every badge, with when it was earned (bounded: the catalogue is small).
+ * @summary Get Badges
+ */
+export function useMyBadges<
+  TData = Awaited<ReturnType<typeof myBadges>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof myBadges>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof myBadges>>,
+          TError,
+          Awaited<ReturnType<typeof myBadges>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Every badge, with when it was earned (bounded: the catalogue is small).
+ * @summary Get Badges
+ */
+export function useMyBadges<
+  TData = Awaited<ReturnType<typeof myBadges>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myBadges>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof myBadges>>,
+          TError,
+          Awaited<ReturnType<typeof myBadges>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Every badge, with when it was earned (bounded: the catalogue is small).
+ * @summary Get Badges
+ */
+export function useMyBadges<
+  TData = Awaited<ReturnType<typeof myBadges>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myBadges>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Every badge, with when it was earned (bounded: the catalogue is small).
+ * @summary Get Badges
+ */
+export function useMyBadges<
+  TData = Awaited<ReturnType<typeof myBadges>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myBadges>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getMyBadgesQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getMyDashboardUrl = () => {
+  return `/api/v1/me/dashboard`;
+};
+
+/**
+ * Level, streak, today's challenge, reviews due and where "Continue" goes.
+ * @summary Get Dashboard
+ */
+export const myDashboard = async (
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<DashboardOut> => {
+  return apiFetch<DashboardOut>(getMyDashboardUrl(), {
+    ...options,
+    method: "GET",
+
+    schema: DashboardOut,
+  });
+};
+
+export const getMyDashboardQueryKey = () => {
+  return [`/api/v1/me/dashboard`] as const;
+};
+
+export const getMyDashboardQueryOptions = <
+  TData = Awaited<ReturnType<typeof myDashboard>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myDashboard>>, TError, TData>>;
+  request?: SecondParameter<typeof apiFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getMyDashboardQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof myDashboard>>> = ({ signal }) =>
+    myDashboard({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof myDashboard>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type MyDashboardQueryResult = NonNullable<Awaited<ReturnType<typeof myDashboard>>>;
+export type MyDashboardQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * Level, streak, today's challenge, reviews due and where "Continue" goes.
+ * @summary Get Dashboard
+ */
+export function useMyDashboard<
+  TData = Awaited<ReturnType<typeof myDashboard>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof myDashboard>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof myDashboard>>,
+          TError,
+          Awaited<ReturnType<typeof myDashboard>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Level, streak, today's challenge, reviews due and where "Continue" goes.
+ * @summary Get Dashboard
+ */
+export function useMyDashboard<
+  TData = Awaited<ReturnType<typeof myDashboard>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myDashboard>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof myDashboard>>,
+          TError,
+          Awaited<ReturnType<typeof myDashboard>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Level, streak, today's challenge, reviews due and where "Continue" goes.
+ * @summary Get Dashboard
+ */
+export function useMyDashboard<
+  TData = Awaited<ReturnType<typeof myDashboard>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myDashboard>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Level, streak, today's challenge, reviews due and where "Continue" goes.
+ * @summary Get Dashboard
+ */
+export function useMyDashboard<
+  TData = Awaited<ReturnType<typeof myDashboard>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myDashboard>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getMyDashboardQueryOptions(options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
     queryKey: DataTag<QueryKey, TData, TError>;
@@ -2454,6 +2958,473 @@ export function useGetMyTopicMap<
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+export const getStartDailyUrl = () => {
+  return `/api/v1/practice/challenges/daily`;
+};
+
+/**
+ * Today's daily challenge (created on first request). Safe to repeat.
+ * @summary Start Daily
+ */
+export const startDaily = async (
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ChallengeOut> => {
+  return apiFetch<ChallengeOut>(getStartDailyUrl(), {
+    ...options,
+    method: "POST",
+
+    schema: ChallengeOut,
+  });
+};
+
+export const getStartDailyMutationKey = () => ["startDaily"] as const;
+
+export const getStartDailyMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<Awaited<ReturnType<typeof startDaily>>, TError, void, TContext>;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<Awaited<ReturnType<typeof startDaily>>, TError, void, TContext> => {
+  const mutationKey = getStartDailyMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof startDaily>>, void> = () => {
+    return startDaily(requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type StartDailyMutationResult = NonNullable<Awaited<ReturnType<typeof startDaily>>>;
+
+export type StartDailyMutationError = ErrorType<ErrorResponse>;
+
+/**
+ * Today's daily challenge (created on first request). Safe to repeat.
+ * @summary Start Daily
+ */
+export const useStartDaily = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<Awaited<ReturnType<typeof startDaily>>, TError, void, TContext>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<Awaited<ReturnType<typeof startDaily>>, TError, void, TContext> => {
+  return useMutation(getStartDailyMutationOptions(options), queryClient);
+};
+
+export const getGetChallengeUrl = (challengeId: string) => {
+  return `/api/v1/practice/challenges/${challengeId}`;
+};
+
+/**
+ * A challenge's progress, or its results once finished.
+ * @summary Get Challenge
+ */
+export const getChallenge = async (
+  challengeId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ChallengeOut> => {
+  return apiFetch<ChallengeOut>(getGetChallengeUrl(challengeId), {
+    ...options,
+    method: "GET",
+
+    schema: ChallengeOut,
+  });
+};
+
+export const getGetChallengeQueryKey = (challengeId: string) => {
+  return [`/api/v1/practice/challenges/${challengeId}`] as const;
+};
+
+export const getGetChallengeQueryOptions = <
+  TData = Awaited<ReturnType<typeof getChallenge>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  challengeId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getChallenge>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetChallengeQueryKey(challengeId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getChallenge>>> = ({ signal }) =>
+    getChallenge(challengeId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: challengeId !== null && challengeId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof getChallenge>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type GetChallengeQueryResult = NonNullable<Awaited<ReturnType<typeof getChallenge>>>;
+export type GetChallengeQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * A challenge's progress, or its results once finished.
+ * @summary Get Challenge
+ */
+export function useGetChallenge<
+  TData = Awaited<ReturnType<typeof getChallenge>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  challengeId: string,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof getChallenge>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getChallenge>>,
+          TError,
+          Awaited<ReturnType<typeof getChallenge>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * A challenge's progress, or its results once finished.
+ * @summary Get Challenge
+ */
+export function useGetChallenge<
+  TData = Awaited<ReturnType<typeof getChallenge>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  challengeId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getChallenge>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getChallenge>>,
+          TError,
+          Awaited<ReturnType<typeof getChallenge>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * A challenge's progress, or its results once finished.
+ * @summary Get Challenge
+ */
+export function useGetChallenge<
+  TData = Awaited<ReturnType<typeof getChallenge>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  challengeId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getChallenge>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * A challenge's progress, or its results once finished.
+ * @summary Get Challenge
+ */
+export function useGetChallenge<
+  TData = Awaited<ReturnType<typeof getChallenge>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  challengeId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof getChallenge>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getGetChallengeQueryOptions(challengeId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getFinishChallengeUrl = (challengeId: string) => {
+  return `/api/v1/practice/challenges/${challengeId}/finish`;
+};
+
+/**
+ * End a boss battle now and see the results. Safe to repeat.
+ * @summary Finish Challenge
+ */
+export const finishChallenge = async (
+  challengeId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ChallengeOut> => {
+  return apiFetch<ChallengeOut>(getFinishChallengeUrl(challengeId), {
+    ...options,
+    method: "POST",
+
+    schema: ChallengeOut,
+  });
+};
+
+export const getFinishChallengeMutationKey = () => ["finishChallenge"] as const;
+
+export const getFinishChallengeMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof finishChallenge>>,
+    TError,
+    FinishChallengeMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof finishChallenge>>,
+  TError,
+  FinishChallengeMutationVariables,
+  TContext
+> => {
+  const mutationKey = getFinishChallengeMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof finishChallenge>>,
+    FinishChallengeMutationVariables
+  > = (props) => {
+    const { challengeId } = props ?? {};
+
+    return finishChallenge(challengeId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type FinishChallengeMutationResult = NonNullable<
+  Awaited<ReturnType<typeof finishChallenge>>
+>;
+
+export type FinishChallengeMutationError = ErrorType<ErrorResponse>;
+export type FinishChallengeMutationVariables = { challengeId: string };
+
+/**
+ * End a boss battle now and see the results. Safe to repeat.
+ * @summary Finish Challenge
+ */
+export const useFinishChallenge = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof finishChallenge>>,
+      TError,
+      FinishChallengeMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof finishChallenge>>,
+  TError,
+  FinishChallengeMutationVariables,
+  TContext
+> => {
+  return useMutation(getFinishChallengeMutationOptions(options), queryClient);
+};
+
+export const getNextChallengeItemUrl = (challengeId: string) => {
+  return `/api/v1/practice/challenges/${challengeId}/next`;
+};
+
+/**
+ * The next unanswered question. 409 ``CHALLENGE_FINISHED`` or ``TIME_UP`` when done.
+ * @summary Next Challenge Item
+ */
+export const nextChallengeItem = async (
+  challengeId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<PracticeItemOut> => {
+  return apiFetch<PracticeItemOut>(getNextChallengeItemUrl(challengeId), {
+    ...options,
+    method: "POST",
+
+    schema: PracticeItemOut,
+  });
+};
+
+export const getNextChallengeItemMutationKey = () => ["nextChallengeItem"] as const;
+
+export const getNextChallengeItemMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof nextChallengeItem>>,
+    TError,
+    NextChallengeItemMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof nextChallengeItem>>,
+  TError,
+  NextChallengeItemMutationVariables,
+  TContext
+> => {
+  const mutationKey = getNextChallengeItemMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof nextChallengeItem>>,
+    NextChallengeItemMutationVariables
+  > = (props) => {
+    const { challengeId } = props ?? {};
+
+    return nextChallengeItem(challengeId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type NextChallengeItemMutationResult = NonNullable<
+  Awaited<ReturnType<typeof nextChallengeItem>>
+>;
+
+export type NextChallengeItemMutationError = ErrorType<ErrorResponse>;
+export type NextChallengeItemMutationVariables = { challengeId: string };
+
+/**
+ * The next unanswered question. 409 ``CHALLENGE_FINISHED`` or ``TIME_UP`` when done.
+ * @summary Next Challenge Item
+ */
+export const useNextChallengeItem = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof nextChallengeItem>>,
+      TError,
+      NextChallengeItemMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof nextChallengeItem>>,
+  TError,
+  NextChallengeItemMutationVariables,
+  TContext
+> => {
+  return useMutation(getNextChallengeItemMutationOptions(options), queryClient);
+};
+
+export const getStartBossBattleUrl = (enrolmentId: string, topicId: string) => {
+  return `/api/v1/practice/enrolments/${enrolmentId}/topics/${topicId}/boss`;
+};
+
+/**
+ * Start a topic's timed boss battle, or return the one in progress.
+ * @summary Start Boss
+ */
+export const startBossBattle = async (
+  enrolmentId: string,
+  topicId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ChallengeOut> => {
+  return apiFetch<ChallengeOut>(getStartBossBattleUrl(enrolmentId, topicId), {
+    ...options,
+    method: "POST",
+
+    schema: ChallengeOut,
+  });
+};
+
+export const getStartBossBattleMutationKey = () => ["startBossBattle"] as const;
+
+export const getStartBossBattleMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof startBossBattle>>,
+    TError,
+    StartBossBattleMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof startBossBattle>>,
+  TError,
+  StartBossBattleMutationVariables,
+  TContext
+> => {
+  const mutationKey = getStartBossBattleMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof startBossBattle>>,
+    StartBossBattleMutationVariables
+  > = (props) => {
+    const { enrolmentId, topicId } = props ?? {};
+
+    return startBossBattle(enrolmentId, topicId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type StartBossBattleMutationResult = NonNullable<
+  Awaited<ReturnType<typeof startBossBattle>>
+>;
+
+export type StartBossBattleMutationError = ErrorType<ErrorResponse>;
+export type StartBossBattleMutationVariables = { enrolmentId: string; topicId: string };
+
+/**
+ * Start a topic's timed boss battle, or return the one in progress.
+ * @summary Start Boss
+ */
+export const useStartBossBattle = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof startBossBattle>>,
+      TError,
+      StartBossBattleMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof startBossBattle>>,
+  TError,
+  StartBossBattleMutationVariables,
+  TContext
+> => {
+  return useMutation(getStartBossBattleMutationOptions(options), queryClient);
+};
 
 export const getNextPracticeItemUrl = (enrolmentId: string, topicId: string) => {
   return `/api/v1/practice/enrolments/${enrolmentId}/topics/${topicId}/next`;

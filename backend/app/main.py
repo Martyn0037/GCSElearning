@@ -20,6 +20,9 @@ from app.core.logging import configure_logging
 from app.core.middleware import RequestContextMiddleware, SecurityHeadersMiddleware
 from app.db.session import create_engine, create_session_factory
 from app.enrolment.router import router as enrolment_router
+from app.gamification.router import admin_router as boundaries_router
+from app.gamification.router import challenge_router
+from app.gamification.router import me_router as gamification_me_router
 from app.health.router import router as health_router
 from app.practice.me_router import router as me_router
 from app.practice.router import router as practice_router
@@ -85,8 +88,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         users_router,
         enrolment_router,
         practice_router,
+        challenge_router,
         me_router,
+        gamification_me_router,
         admin_router,
+        boundaries_router,
     ):
         app.include_router(router)
     app.include_router(health_router)

@@ -4,7 +4,7 @@
  * - wrong answer: "Where it went wrong" appears once the explanation is ready
  *   (polling while pending); nothing extra when unavailable
  * - "Try a similar one" loads another question; its error is shown
- * - reviews: home shows "Review N mistakes"; review page shows the review
+ * - reviews: the review page shows the review
  *   badge, the "fixed" message, and "All caught up" when nothing is due
  * - My mistakes: topic/misconception summary, open list with answers,
  *   explanation and next review date, "Show more" paging, Fixed tab
@@ -160,19 +160,6 @@ describe("after a wrong answer", () => {
 });
 
 describe("reviews", () => {
-  it("should offer due reviews on the home page", async () => {
-    api({
-      "GET /api/v1/me/subjects": () => json({ setupCompleted: true, subjects: [] }),
-      "GET /api/v1/me/reviews/summary": () => json({ dueToday: 2, nextDueOn: null }),
-    });
-    renderApp("/");
-
-    expect(await screen.findByRole("link", { name: /Review 2 mistakes/ })).toHaveAttribute(
-      "href",
-      "/review",
-    );
-  });
-
   it("should mark review questions and celebrate a fix", async () => {
     api({
       "POST /api/v1/practice/reviews/next": () => json({ ...ITEM_OUT, review: true }),

@@ -31,6 +31,17 @@ export const TopicMapOut = zod
         .object({
           id: zod.uuid(),
           ref: zod.string(),
+          standing: zod
+            .object({
+              bossBest: zod.union([zod.number(), zod.null()]),
+              bossUnlocked: zod.boolean(),
+              ring: zod
+                .enum(["none", "bronze", "silver", "gold", "exam_ready"])
+                .describe("A topic's mastery ring."),
+              ringProgress: zod.number().describe("0-1 towards the next ring"),
+              skillsToUnlockBoss: zod.int(),
+            })
+            .describe("Mastery ring and boss battle status"),
           subtopics: zod.array(
             zod
               .object({

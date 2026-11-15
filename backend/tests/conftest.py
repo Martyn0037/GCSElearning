@@ -60,11 +60,20 @@ async def migrated_engine(database_url: str) -> AsyncIterator[AsyncEngine]:
     await engine.dispose()
 
 
+# Tables whose rows come from migrations, not from tests.
+REFERENCE_TABLES = frozenset({"badges"})
+
+
 @pytest.fixture
 async def db_engine(migrated_engine: AsyncEngine) -> AsyncIterator[AsyncEngine]:
-    """The migrated engine, with every table emptied after each test."""
+    """The migrated engine, with every table emptied after each test.
+
+    Reference data inserted by migrations (the badge catalogue) is kept.
+    """
     yield migrated_engine
-    tables = ", ".join(t.name for t in Base.metadata.sorted_tables)
+    tables = ", ".join(
+        t.name for t in Base.metadata.sorted_tables if t.name not in REFERENCE_TABLES
+    )
     async with migrated_engine.begin() as conn:
         await conn.execute(text(f"TRUNCATE {tables} RESTART IDENTITY CASCADE"))
 

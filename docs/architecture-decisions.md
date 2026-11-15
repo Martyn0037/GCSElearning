@@ -319,3 +319,46 @@ curriculum content comes only from the exam board's spec, never from model knowl
   - Topic mastery is shown as accessible HTML progress bars.
   - Daily activity is stacked columns (right / not right) in palette slots 1 and 2. The pair is validated for colour-blind separation, normal-vision separation and contrast. There's one y-axis, a legend, a hover tooltip, a table view, and no animation.
   - Recharts loads only on the progress page.
+
+## ADR-016 — Gamification: XP, streaks, rings, badges, challenges and boss battles
+
+**Status:** Accepted (2026-11-15). Implemented in Phase 5.
+
+**Decision.**
+- **XP** is stored as events (`xp_events`), never as a running total, so nothing is lost and totals are a simple sum.
+  - `(user, source, ref)` is unique: a retried answer or a repeated "finish" can never pay twice. This backs up the answer idempotency key.
+  - A correct answer earns 10 × difficulty, minus a quarter per hint (hints 1–3). After the full solution it earns 2 XP. Wrong answers earn nothing and never lose XP.
+  - Bonuses: 50 XP for completing the daily challenge; 20 + up to 80 for a boss battle, by score.
+- **Levels** come from total XP. Each level costs 50 XP more than the one before: level 2 at 100 XP, 3 at 300, 5 at 1,000, 10 at 4,500.
+- **Streaks** count London calendar days with at least one answer (`streaks`, one row per student).
+  - One missed day a week is covered automatically by that week's freeze (weeks start Monday). There's nothing to buy back and no guilt messaging.
+  - Missing two or more days restarts the streak from 1.
+  - The streak shown is worked out when read, so a broken streak shows 0 without a background job.
+  - Tested across BST/GMT changes and midnight.
+- **Mastery rings** use the topic's average BKT mastery on the student's tier, with unpractised skills at the 0.2 prior: bronze from 0.4, silver from 0.6, gold from 0.8.
+  - "Exam ready" also needs a boss battle score of 70% or more, so it's proven under exam conditions.
+- **Badges** reward behaviour that matters: fixing mistakes, streaks, a level-5 question with no hints, daily challenges, boss battles and exam-ready topics. Never logging in.
+  - The catalogue is in code. Migration 0005 inserts the same rows into `badges` (a test checks they match), and the test suite keeps that reference table between tests.
+  - `user_badges` is unique per badge, so a badge is granted once.
+- **Challenges** (`challenges`) are made of ordinary practice items (`challenge_id`, `position`). Marking, mistakes, reviews, mastery, idempotency and XP therefore work unchanged.
+  - **Daily:** one per London day (partial unique index), up to 5 questions.
+    - Up to 2 due reviews first.
+    - Then weak skills across every unlocked topic: practised but below gold, weakest first; then new skills; then strong ones.
+    - At most 2 from one topic before repeating a topic, so it's mixed.
+  - **Boss battle:** opens once half a topic's skills have been practised.
+    - Up to 6 questions spread through the topic, one level above the student's own and at least level 3.
+    - Timed at 1.5 minutes a mark, with at least 5 minutes and a 30-second grace for slow networks.
+    - No hints, and results only at the end.
+    - Answers don't move the difficulty ladder. They do update mastery and record mistakes.
+    - Time up is enforced by the server: late answers get 409 `TIME_UP` and the battle is scored.
+    - The best earlier score is shown as a personal best. There's no leaderboard.
+- **Grade estimates** come from admin-entered boundaries (`grade_boundaries`: percentage per grade, per spec and tier). Entry is through the API now; the admin screen comes in Phase 7.
+  - They're always shown as a two-grade band ("around 5–6") labelled as an estimate from one short test.
+  - Without boundaries, only the percentage and "secure / developing / not yet" are shown.
+- **Home** loads one `/me/dashboard` request: Continue (today's unfinished challenge, then due reviews, then the last topic practised, then the first unlocked topic), level, streak, today's challenge, XP this week and last week, and badges. It's refetched every time home opens.
+- **Sounds** are generated with Web Audio (no files), muted by default, and the setting is kept on the device. The "+XP" animation is skipped for users who ask for reduced motion.
+
+**Trade-offs.**
+- Summing XP events on each request is cheap at this scale (indexed by student); a cached total can be added if needed.
+- A fixed streak freeze is simpler than earned freezes, and it can't become a dark pattern.
+- Boss battles need questions at levels 3–5 in the bank. Without Claude, they can only be started on topics whose bank is already stocked.

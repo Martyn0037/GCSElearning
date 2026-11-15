@@ -6,6 +6,7 @@
  */
 import * as zod from "zod";
 
+export const topicProgressRingDefault = `none`;
 export const TopicProgress = zod
   .object({
     accuracy: zod
@@ -16,6 +17,10 @@ export const TopicProgress = zod
     objectivesPractised: zod.int(),
     objectivesTotal: zod.int(),
     ref: zod.string(),
+    ring: zod
+      .enum(["none", "bronze", "silver", "gold", "exam_ready"])
+      .default(topicProgressRingDefault)
+      .describe("Mastery ring (ADR-016)"),
     title: zod.string(),
     topicId: zod.uuid(),
   })

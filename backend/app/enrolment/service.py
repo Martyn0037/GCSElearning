@@ -46,6 +46,9 @@ from app.enrolment.schemas import (
     TopicMapOut,
     TopicOut,
 )
+from app.gamification.rings import Ring
+from app.gamification.schemas import TopicStandingOut
+from app.gamification.standings import TopicStanding, topic_standings
 from app.models.curriculum import (
     ExamBoard,
     LearningObjective,
@@ -58,6 +61,25 @@ from app.models.curriculum import (
 )
 from app.models.enrolment import StudentSetText, StudentSubject, StudentTopicSetting
 from app.models.user import User
+
+
+def _standing_out(standing: TopicStanding | None) -> TopicStandingOut:
+    """A topic's ring and boss status (a topic with no skills on the tier has none)."""
+    if standing is None:
+        return TopicStandingOut(
+            ring=Ring.NONE,
+            ring_progress=0.0,
+            boss_unlocked=False,
+            skills_to_unlock_boss=0,
+            boss_best=None,
+        )
+    return TopicStandingOut(
+        ring=standing.ring,
+        ring_progress=standing.ring_progress,
+        boss_unlocked=standing.boss_unlocked,
+        skills_to_unlock_boss=standing.skills_to_unlock_boss,
+        boss_best=standing.boss_best,
+    )
 
 
 def _spec_out(spec: Specification) -> SpecificationOut:
@@ -343,6 +365,7 @@ class EnrolmentService:
             override = setting.sort_order if setting and setting.sort_order is not None else None
             return (override if override is not None else topic.position, topic.position)
 
+        standings = await topic_standings(self._session, enrolment)
         topic_outs = []
         for topic in sorted(topics, key=order_key):
             taught = bool(settings.get(topic.id) and settings[topic.id].taught_at_school)
@@ -354,6 +377,7 @@ class EnrolmentService:
                     taught_at_school=taught,
                     unlocked=taught,
                     subtopics=subtopics_by_topic[topic.id],
+                    standing=_standing_out(standings.get(topic.id)),
                 )
             )
         subject_name = await self._subject_name(enrolment)

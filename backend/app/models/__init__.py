@@ -14,6 +14,17 @@ from app.models.curriculum import (
     Topic,
 )
 from app.models.enrolment import StudentSetText, StudentSubject, StudentTopicSetting
+from app.models.gamification import (
+    Badge,
+    Challenge,
+    ChallengeKind,
+    ChallengeStatus,
+    GradeBoundary,
+    Streak,
+    UserBadge,
+    XpEvent,
+    XpSource,
+)
 from app.models.ops import AiUsage, Job, JobStatus, UsageStatus
 from app.models.question import (
     Difficulty,
@@ -34,10 +45,15 @@ from app.models.user import GuardianLink, Role, User
 __all__ = [
     "AiUsage",
     "AuditLog",
+    "Badge",
+    "Challenge",
+    "ChallengeKind",
+    "ChallengeStatus",
     "Consent",
     "Difficulty",
     "ExamBoard",
     "ExplanationStatus",
+    "GradeBoundary",
     "GuardianLink",
     "Hint",
     "Job",
@@ -55,6 +71,7 @@ __all__ = [
     "Role",
     "SetTextOption",
     "Specification",
+    "Streak",
     "StudentSetText",
     "StudentSubject",
     "StudentTopicSetting",
@@ -64,4 +81,7 @@ __all__ = [
     "Topic",
     "UsageStatus",
     "User",
+    "UserBadge",
+    "XpEvent",
+    "XpSource",
 ]

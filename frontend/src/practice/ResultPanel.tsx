@@ -2,6 +2,7 @@
 import { getMyMistake, getGetMyMistakeQueryKey } from "../api/generated/endpoints";
 import type { AnswerResultOut, MistakeOut } from "../api/generated/model";
 import { useQuery } from "@tanstack/react-query";
+import { RewardsPanel } from "../game/RewardsPanel";
 import { MathText } from "./MathText";
 
 /** How often, and how many times, to check for the explanation. */
@@ -39,6 +40,8 @@ export function ResultPanel({
           </span>
         )}
       </p>
+
+      {result.rewards && <RewardsPanel rewards={result.rewards} challenge={result.challenge} />}
 
       {result.review && result.mistakeResolved && (
         <p className="font-semibold text-green-800">
@@ -98,7 +101,7 @@ export function ResultPanel({
         onClick={onNext}
         className="min-h-12 w-full rounded-lg bg-brand-700 text-lg font-semibold text-white hover:bg-brand-800"
       >
-        Next question
+        {result.challenge?.completed ? "See results" : "Next question"}
       </button>
     </div>
   );

@@ -18,6 +18,7 @@ import { CATALOGUE } from "../test/catalogue";
 import type { Handler } from "../test/fakeApi";
 import { installFakeApi, json, jsonBody } from "../test/fakeApi";
 import { renderApp } from "../test/renderApp";
+import { NO_STANDING } from "../test/fixtures";
 
 const ADMIN = {
   id: "00000000-0000-4000-8000-000000000017",
@@ -113,6 +114,7 @@ const TOPICS: TopicMapOut = {
       title: "Number",
       taughtAtSchool: false,
       unlocked: false,
+      standing: NO_STANDING,
       subtopics: [],
     },
     {
@@ -121,6 +123,7 @@ const TOPICS: TopicMapOut = {
       title: "Algebra",
       taughtAtSchool: false,
       unlocked: false,
+      standing: NO_STANDING,
       subtopics: [],
     },
   ],

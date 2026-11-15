@@ -14,7 +14,6 @@ import asyncio
 import logging
 import uuid
 from datetime import datetime
-from typing import Any
 
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -22,26 +21,34 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.ai.gateway import AiUnavailableError
 from app.core.config import Settings
 from app.core.errors import ConflictError, NotFoundError
+from app.gamification.challenges import ChallengeService
+from app.gamification.rewards import Rewards
+from app.gamification.schemas import RewardsOut
+from app.gamification.xp import level_for, xp_for_answer
 from app.jobs.queue import enqueue
-from app.models.curriculum import LearningObjective, Subtopic, Topic
-from app.models.enrolment import StudentSubject, StudentTopicSetting
+from app.models.curriculum import LearningObjective, Subtopic
+from app.models.enrolment import StudentSubject
+from app.models.gamification import Challenge, ChallengeKind, XpSource
 from app.models.question import (
     ExplanationStatus,
-    Hint,
     Mistake,
     ObjectiveProgress,
     PracticeItem,
     Question,
     QuestionFlag,
     QuestionStatus,
-    QuestionType,
 )
 from app.models.user import User
 from app.practice import mastery
+from app.practice.items import (
+    MAX_HINT_LEVEL,
+    item_out,
+    load_enrolment,
+    require_unlocked_topic,
+)
 from app.practice.ladder import LadderState, Outcome, advance
 from app.practice.review import FixedIntervalScheduler, ReviewScheduler, ReviewState, london_today
-from app.practice.schemas import AnswerResultOut, OptionOut, PracticeItemOut
-from app.questions.answer_forms import is_maths_answer, keypad_symbols
+from app.practice.schemas import AnswerResultOut, PracticeItemOut
 from app.questions.bank import pick_question, request_generation
 from app.questions.generator import ObjectiveNotAvailableError, QuestionGenerator
 from app.questions.marking import MarkResult, mark
@@ -51,7 +58,6 @@ logger = logging.getLogger(__name__)
 # How long a student waits for an on-the-spot question before we give up and
 # let the worker finish it in the background.
 SYNC_GENERATION_TIMEOUT_SECONDS = 25.0
-MAX_HINT_LEVEL = 4
 EXPLAIN_JOB = "explain_mistake"
 
 
@@ -95,8 +101,8 @@ class PracticeService:
         """
         # Lock the subject row so simultaneous "next" requests serialise and
         # the second one finds the item the first created.
-        enrolment = await self._enrolment(student_id, enrolment_id, lock=True)
-        await self._require_unlocked_topic(enrolment, topic_id)
+        enrolment = await load_enrolment(self._session, student_id, enrolment_id, lock=True)
+        await require_unlocked_topic(self._session, enrolment, topic_id)
 
         open_item = await self._session.scalar(
             select(PracticeItem)
@@ -108,6 +114,7 @@ class PracticeService:
                 PracticeItem.enrolment_id == enrolment.id,
                 PracticeItem.answered_at.is_(None),
                 PracticeItem.mistake_id.is_(None),  # reviews resume separately
+                PracticeItem.challenge_id.is_(None),  # so do challenges
                 Subtopic.topic_id == topic_id,
                 Question.status == QuestionStatus.ACTIVE,
             )
@@ -115,7 +122,7 @@ class PracticeService:
             .limit(1)
         )
         if open_item is not None:
-            return await self._item_out(open_item)
+            return await item_out(self._session, open_item)
 
         candidates = await self._objectives_by_priority(enrolment, topic_id)
         if not candidates:
@@ -205,7 +212,7 @@ class PracticeService:
             self._session, question.objective_id, question.tier, min(level + 1, 5), self._now
         )
         await self._session.commit()
-        return await self._item_out(item, question)
+        return await item_out(self._session, item, question)
 
     # ------------------------------------------------------------------ hints
 
@@ -214,16 +221,21 @@ class PracticeService:
 
         Raises:
             NotFoundError: Unknown or someone else's item.
-            ConflictError: Already answered, or every hint is shown.
+            ConflictError: Already answered, every hint is shown, or
+                ``HINTS_OFF`` in a boss battle (exam conditions).
         """
         item = await self._item(student_id, item_id, lock=True)
         if item.answered_at is not None:
             raise ConflictError("This question has already been answered.", code="ALREADY_ANSWERED")
+        if item.challenge_id is not None:
+            challenge = await self._session.get(Challenge, item.challenge_id)
+            if challenge is not None and challenge.kind is ChallengeKind.BOSS:
+                raise ConflictError("No hints in a boss battle.", code="HINTS_OFF")
         if item.hints_revealed >= MAX_HINT_LEVEL:
             raise ConflictError("All hints are already showing.", code="NO_MORE_HINTS")
         item.hints_revealed += 1
         await self._session.commit()
-        return await self._item_out(item)
+        return await item_out(self._session, item)
 
     # ------------------------------------------------------------------ answer
 
@@ -236,16 +248,27 @@ class PracticeService:
           (they reschedule the mistake instead).
         - A wrong or full-solution answer opens (or re-opens) a mistake,
           scheduled for review and queued for an explanation.
+        - XP, the streak and badges are updated (ADR-016); answering the last
+          question of a challenge completes it and adds its bonus.
+        - Boss battle answers don't move the ladder (they're set above it).
 
         Raises:
             NotFoundError: Unknown or someone else's item.
-            ConflictError: ``ALREADY_ANSWERED`` with a different idempotency key.
+            ConflictError: ``ALREADY_ANSWERED`` with a different idempotency key;
+                ``CHALLENGE_FINISHED`` or ``TIME_UP`` for a closed challenge.
         """
         item = await self._item(student_id, item_id, lock=True)
         if item.answered_at is not None:
             if item.idempotency_key == idempotency_key and item.response:
                 return AnswerResultOut.model_validate(item.response["result"])
             raise ConflictError("This question has already been answered.", code="ALREADY_ANSWERED")
+
+        challenges = ChallengeService(self._session, self._now)
+        challenge: Challenge | None = None
+        if item.challenge_id is not None:
+            challenge = await self._session.get(Challenge, item.challenge_id, with_for_update=True)
+            assert challenge is not None  # noqa: S101 - FK guarantees it
+            await challenges.ensure_answerable(challenge)
 
         question = await self._session.get(Question, item.question_id)
         assert question is not None  # noqa: S101 - FK guarantees it
@@ -259,10 +282,11 @@ class PracticeService:
             else Outcome.INCORRECT
         )
         is_review = item.mistake_id is not None
+        is_boss = challenge is not None and challenge.kind is ChallengeKind.BOSS
 
         progress = await self._progress(student_id, question.objective_id)
         before = progress.level
-        if not is_review:
+        if not is_review and not is_boss:
             new_state = advance(
                 LadderState(progress.level, tuple(Outcome(o) for o in progress.recent)), outcome
             )
@@ -285,6 +309,13 @@ class PracticeService:
                 item, question, answer, result.correct_answer_display, assisted
             )
 
+        item.answered_at = self._now
+        item.correct = result.correct
+        item.assisted = assisted
+        await self._session.flush()
+        progress_out, bonus = await challenges.after_answer(challenge) if challenge else (None, 0)
+        rewards = await self._rewards(item, question, result.correct, challenges, bonus)
+
         out = AnswerResultOut(
             item_id=item.id,
             correct=result.correct,
@@ -296,14 +327,60 @@ class PracticeService:
             mistake_id=mistake_id,
             review=is_review,
             mistake_resolved=resolved,
+            rewards=rewards,
+            challenge=progress_out,
         )
-        item.answered_at = self._now
         item.idempotency_key = idempotency_key
-        item.correct = result.correct
-        item.assisted = assisted
         item.response = {"answer": answer, "result": out.model_dump(mode="json")}
         await self._session.commit()
         return out
+
+    async def _rewards(
+        self,
+        item: PracticeItem,
+        question: Question,
+        correct: bool,
+        challenges: ChallengeService,
+        bonus: int,
+    ) -> RewardsOut:
+        """XP for this answer (plus any challenge bonus), the streak, and new badges."""
+        rewards = Rewards(self._session, self._now)
+        total_after = await rewards.total_xp(item.user_id)  # includes any bonus just added
+        gained = await rewards.award(
+            item.user_id,
+            XpSource.ANSWER,
+            item.id,
+            xp_for_answer(question.difficulty, correct, item.hints_revealed),
+        )
+        total_after += gained
+        level_before = level_for(total_after - gained - bonus).level
+        streak = await rewards.record_activity(item.user_id)
+        enrolment = await self._session.get(StudentSubject, item.enrolment_id)
+        topic_id = await self._session.scalar(
+            select(Subtopic.topic_id)
+            .join(LearningObjective, LearningObjective.subtopic_id == Subtopic.id)
+            .where(LearningObjective.id == question.objective_id)
+        )
+        exam_ready = (
+            enrolment is not None
+            and topic_id is not None
+            and await challenges.exam_ready_reached(enrolment, topic_id)
+        )
+        badges = await rewards.grant_badges(item.user_id, exam_ready_topic=exam_ready)
+        level = level_for(total_after)
+        return RewardsOut(
+            xp_gained=gained,
+            bonus_xp=bonus,
+            total_xp=total_after,
+            level=level.level,
+            level_up=level.level > level_before,
+            xp_into_level=level.xp_into_level,
+            xp_for_level=level.xp_for_level,
+            streak_days=streak.state.current,
+            streak_extended=streak.extended,
+            used_freeze=streak.used_freeze,
+            new_badges=badges,
+        )
 
     async def _progress(self, student_id: uuid.UUID, objective_id: uuid.UUID) -> ObjectiveProgress:
         progress = await self._session.get(
@@ -408,7 +485,7 @@ class PracticeService:
             ConflictError: ``QUESTIONS_PREPARING`` if none is available yet.
         """
         source = await self._item(student_id, item_id, lock=False)
-        enrolment = await self._enrolment(student_id, source.enrolment_id, lock=True)
+        enrolment = await load_enrolment(self._session, student_id, source.enrolment_id, lock=True)
         question = await self._session.get(Question, source.question_id)
         assert question is not None  # noqa: S101 - FK guarantees it
         progress = await self._session.get(ObjectiveProgress, (student_id, question.objective_id))
@@ -446,12 +523,13 @@ class PracticeService:
             .where(
                 PracticeItem.user_id == student_id,
                 PracticeItem.mistake_id.is_not(None),
+                PracticeItem.challenge_id.is_(None),
                 PracticeItem.answered_at.is_(None),
             )
             .limit(1)
         )
         if open_review is not None:
-            return await self._item_out(open_review)
+            return await item_out(self._session, open_review)
         due = await self._session.scalar(
             select(Mistake)
             .join(Question, Question.id == Mistake.question_id)
@@ -480,7 +558,7 @@ class PracticeService:
         )
         self._session.add(item)
         await self._session.commit()
-        return await self._item_out(item, question)
+        return await item_out(self._session, item, question)
 
     # ------------------------------------------------------------------ flag
 
@@ -511,86 +589,8 @@ class PracticeService:
 
     # ------------------------------------------------------------------ helpers
 
-    async def _enrolment(
-        self, student_id: uuid.UUID, enrolment_id: uuid.UUID, *, lock: bool = False
-    ) -> StudentSubject:
-        enrolment = await self._session.get(StudentSubject, enrolment_id, with_for_update=lock)
-        if enrolment is None or enrolment.student_id != student_id:
-            raise NotFoundError("Subject not found")
-        if enrolment.specification_id is None:
-            raise ConflictError("This subject is still being set up.", code="SUBJECT_NOT_READY")
-        return enrolment
-
-    async def _require_unlocked_topic(self, enrolment: StudentSubject, topic_id: uuid.UUID) -> None:
-        topic = await self._session.get(Topic, topic_id)
-        if (
-            topic is None
-            or topic.specification_id != enrolment.specification_id
-            or topic.retired_at
-        ):
-            raise NotFoundError("Topic not found")
-        taught = await self._session.scalar(
-            select(StudentTopicSetting.taught_at_school).where(
-                StudentTopicSetting.student_id == enrolment.student_id,
-                StudentTopicSetting.topic_id == topic_id,
-            )
-        )
-        if not taught:
-            raise ConflictError(
-                "This topic hasn't been covered at school yet.", code="TOPIC_LOCKED"
-            )
-
     async def _item(self, student_id: uuid.UUID, item_id: uuid.UUID, *, lock: bool) -> PracticeItem:
         item = await self._session.get(PracticeItem, item_id, with_for_update=lock)
         if item is None or item.user_id != student_id:
             raise NotFoundError("Question not found")
         return item
-
-    async def _item_out(
-        self, item: PracticeItem, question: Question | None = None
-    ) -> PracticeItemOut:
-        question = question or await self._session.get(Question, item.question_id)
-        assert question is not None  # noqa: S101 - FK guarantees it
-        objective_ref = await self._session.scalar(
-            select(LearningObjective.ref).where(LearningObjective.id == question.objective_id)
-        )
-        hints = (
-            await self._session.scalars(
-                select(Hint.text)
-                .where(Hint.question_id == question.id, Hint.level <= item.hints_revealed)
-                .order_by(Hint.level)
-            )
-        ).all()
-        return PracticeItemOut(
-            id=item.id,
-            question_type=question.question_type,
-            command_word=question.command_word,
-            stem=question.stem,
-            options=[OptionOut(**o) for o in question.options or []],
-            unit=question.answer.get("unit") if question.question_type.value == "numeric" else None,
-            marks=question.marks,
-            difficulty=item.difficulty,
-            objective_ref=objective_ref or "",
-            hints=list(hints),
-            hints_remaining=MAX_HINT_LEVEL - item.hints_revealed,
-            review=item.mistake_id is not None,
-            **_keypad(question),
-        )
-
-
-def _keypad(question: Question) -> dict[str, Any]:
-    """Whether to show the maths keypad, and the symbol keys the answer needs.
-
-    Numbers always get the keypad. Short answers get it when every accepted
-    answer is maths (not words), with every symbol needed to type them.
-    """
-    if question.question_type is QuestionType.NUMERIC:
-        return {"keypad": True, "symbol_keys": []}
-    accepted = [str(a) for a in question.answer.get("accepted", [])]
-    if (
-        question.question_type is QuestionType.SHORT_TEXT
-        and accepted
-        and all(is_maths_answer(a) for a in accepted)
-    ):
-        return {"keypad": True, "symbol_keys": keypad_symbols(accepted)}
-    return {"keypad": False, "symbol_keys": []}

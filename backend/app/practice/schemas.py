@@ -9,6 +9,7 @@ from typing import Annotated
 from pydantic import Field, StringConstraints
 
 from app.core.schemas import ApiModel
+from app.gamification.schemas import ChallengeProgressOut, RewardsOut
 from app.models.question import QuestionType
 from app.questions.marking import MAX_ANSWER_LENGTH
 
@@ -72,3 +73,8 @@ class AnswerResultOut(ApiModel):
     )
     review: bool
     mistake_resolved: bool = Field(description="A review answered right twice in a row")
+    # Optional so answers stored before Phase 5 still replay.
+    rewards: RewardsOut | None = Field(default=None, description="XP, streak and badges")
+    challenge: ChallengeProgressOut | None = Field(
+        default=None, description="Set when the question is part of a challenge"
+    )

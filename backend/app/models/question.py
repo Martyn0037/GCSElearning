@@ -170,6 +170,11 @@ class PracticeItem(Base):
         ForeignKey("mistakes.id", ondelete="SET NULL", use_alter=True),
         index=True,
     )
+    # Set when this item is a question in a daily challenge or boss battle.
+    challenge_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("challenges.id", ondelete="CASCADE"), index=True
+    )
+    position: Mapped[int | None] = mapped_column(SmallInteger)
 
 
 class ObjectiveProgress(Base):

@@ -17,6 +17,8 @@ src/
   practice/           question screen (topic practice and reviews), hints, results with
                       "where it went wrong"; maths via KaTeX (MathML), lazy-loaded
   progress/           My mistakes, progress page and chart (Recharts), lazy-loaded
+  game/               home dashboard, rewards, daily challenge, boss battle, badges,
+                      rings, sounds (muted by default)
   pages/              login, guardian placeholder, not found
   test/               test setup, fake API, render helpers
 ```

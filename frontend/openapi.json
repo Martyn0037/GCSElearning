@@ -255,6 +255,17 @@
             "title": "Assisted",
             "type": "boolean"
           },
+          "challenge": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChallengeProgressOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set when the question is part of a challenge"
+          },
           "correct": {
             "title": "Correct",
             "type": "boolean"
@@ -298,6 +309,17 @@
             "title": "Review",
             "type": "boolean"
           },
+          "rewards": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RewardsOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "XP, streak and badges"
+          },
           "workedSolution": {
             "title": "Workedsolution",
             "type": "string"
@@ -328,6 +350,44 @@
         ],
         "title": "AttentionReason",
         "type": "string"
+      },
+      "BadgeOut": {
+        "additionalProperties": false,
+        "description": "A badge, and when it was earned (null if not yet).",
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "earnedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Earnedat"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "description",
+          "earnedAt"
+        ],
+        "title": "BadgeOut",
+        "type": "object"
       },
       "BoardOut": {
         "additionalProperties": false,
@@ -492,6 +552,381 @@
         "title": "CatalogueSubjectOut",
         "type": "object"
       },
+      "ChallengeItemResultOut": {
+        "additionalProperties": false,
+        "description": "One question of a finished challenge, for going through afterwards.",
+        "properties": {
+          "answered": {
+            "title": "Answered",
+            "type": "boolean"
+          },
+          "correct": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correct"
+          },
+          "correctAnswer": {
+            "title": "Correctanswer",
+            "type": "string"
+          },
+          "marks": {
+            "title": "Marks",
+            "type": "integer"
+          },
+          "marksEarned": {
+            "title": "Marksearned",
+            "type": "integer"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "stem": {
+            "title": "Stem",
+            "type": "string"
+          },
+          "workedSolution": {
+            "title": "Workedsolution",
+            "type": "string"
+          },
+          "yourAnswer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Youranswer"
+          }
+        },
+        "required": [
+          "position",
+          "stem",
+          "marks",
+          "marksEarned",
+          "answered",
+          "correct",
+          "yourAnswer",
+          "correctAnswer",
+          "workedSolution"
+        ],
+        "title": "ChallengeItemResultOut",
+        "type": "object"
+      },
+      "ChallengeKind": {
+        "description": "Daily challenge (5 mixed questions) or boss battle (timed topic mini mock).",
+        "enum": [
+          "daily",
+          "boss"
+        ],
+        "title": "ChallengeKind",
+        "type": "string"
+      },
+      "ChallengeOut": {
+        "additionalProperties": false,
+        "description": "A daily challenge or boss battle.",
+        "properties": {
+          "answered": {
+            "title": "Answered",
+            "type": "integer"
+          },
+          "bonusXp": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bonusxp"
+          },
+          "deadlineAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deadlineat"
+          },
+          "enrolmentId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enrolmentid"
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/GradeEstimateOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Boss battles, once finished"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ChallengeKind"
+          },
+          "londonDate": {
+            "format": "date",
+            "title": "Londondate",
+            "type": "string"
+          },
+          "maxScore": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Maxscore"
+          },
+          "percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Percent"
+          },
+          "personalBest": {
+            "title": "Personalbest",
+            "type": "boolean"
+          },
+          "previousBest": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Boss battles: best earlier score, %",
+            "title": "Previousbest"
+          },
+          "results": {
+            "description": "Once finished",
+            "items": {
+              "$ref": "#/components/schemas/ChallengeItemResultOut"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "score": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Score"
+          },
+          "secondsLeft": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Boss battles: time left now",
+            "title": "Secondsleft"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ChallengeStatus"
+          },
+          "topicId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topicid"
+          },
+          "topicTitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topictitle"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "status",
+          "londonDate",
+          "total",
+          "answered",
+          "enrolmentId",
+          "topicId",
+          "topicTitle",
+          "deadlineAt",
+          "secondsLeft",
+          "score",
+          "maxScore",
+          "percent",
+          "bonusXp",
+          "grade",
+          "previousBest",
+          "personalBest",
+          "results"
+        ],
+        "title": "ChallengeOut",
+        "type": "object"
+      },
+      "ChallengeProgressOut": {
+        "additionalProperties": false,
+        "description": "Where an answered question's challenge is up to.",
+        "properties": {
+          "answered": {
+            "title": "Answered",
+            "type": "integer"
+          },
+          "challengeId": {
+            "format": "uuid",
+            "title": "Challengeid",
+            "type": "string"
+          },
+          "completed": {
+            "title": "Completed",
+            "type": "boolean"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ChallengeKind"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "challengeId",
+          "kind",
+          "answered",
+          "total",
+          "completed"
+        ],
+        "title": "ChallengeProgressOut",
+        "type": "object"
+      },
+      "ChallengeStatus": {
+        "description": "A challenge is active until every question is answered or time runs out.",
+        "enum": [
+          "active",
+          "completed"
+        ],
+        "title": "ChallengeStatus",
+        "type": "string"
+      },
+      "ContinueOut": {
+        "additionalProperties": false,
+        "description": "Where \"Continue\" goes: the next best thing to do.",
+        "properties": {
+          "challengeId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Challengeid"
+          },
+          "enrolmentId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Enrolmentid"
+          },
+          "kind": {
+            "enum": [
+              "daily",
+              "review",
+              "topic",
+              "none"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "topicId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topicid"
+          }
+        },
+        "required": [
+          "kind",
+          "label"
+        ],
+        "title": "ContinueOut",
+        "type": "object"
+      },
       "DailyActivity": {
         "additionalProperties": false,
         "description": "Answers on one London calendar day.",
@@ -516,6 +951,108 @@
           "correct"
         ],
         "title": "DailyActivity",
+        "type": "object"
+      },
+      "DailyStatusOut": {
+        "additionalProperties": false,
+        "description": "Today's daily challenge.",
+        "properties": {
+          "answered": {
+            "title": "Answered",
+            "type": "integer"
+          },
+          "challengeId": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Challengeid"
+          },
+          "status": {
+            "enum": [
+              "not_started",
+              "active",
+              "completed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "challengeId",
+          "status",
+          "answered",
+          "total"
+        ],
+        "title": "DailyStatusOut",
+        "type": "object"
+      },
+      "DashboardOut": {
+        "additionalProperties": false,
+        "description": "Everything the student's home screen shows, in one request.",
+        "properties": {
+          "badgesEarned": {
+            "title": "Badgesearned",
+            "type": "integer"
+          },
+          "badgesTotal": {
+            "title": "Badgestotal",
+            "type": "integer"
+          },
+          "continueTo": {
+            "$ref": "#/components/schemas/ContinueOut"
+          },
+          "daily": {
+            "$ref": "#/components/schemas/DailyStatusOut"
+          },
+          "level": {
+            "$ref": "#/components/schemas/LevelOut"
+          },
+          "recentBadges": {
+            "items": {
+              "$ref": "#/components/schemas/BadgeOut"
+            },
+            "title": "Recentbadges",
+            "type": "array"
+          },
+          "reviewsDue": {
+            "title": "Reviewsdue",
+            "type": "integer"
+          },
+          "streak": {
+            "$ref": "#/components/schemas/StreakOut"
+          },
+          "xpLastWeek": {
+            "title": "Xplastweek",
+            "type": "integer"
+          },
+          "xpThisWeek": {
+            "title": "Xpthisweek",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "level",
+          "streak",
+          "xpThisWeek",
+          "xpLastWeek",
+          "daily",
+          "reviewsDue",
+          "continueTo",
+          "badgesEarned",
+          "badgesTotal",
+          "recentBadges"
+        ],
+        "title": "DashboardOut",
         "type": "object"
       },
       "EnrolmentOut": {
@@ -751,6 +1288,191 @@
           }
         },
         "title": "FlagRequest",
+        "type": "object"
+      },
+      "GradeBoundariesIn": {
+        "additionalProperties": false,
+        "description": "Admin: the full set of boundaries for one spec and tier (replaces any existing).",
+        "properties": {
+          "boundaries": {
+            "items": {
+              "$ref": "#/components/schemas/GradeBoundaryIn"
+            },
+            "maxItems": 9,
+            "title": "Boundaries",
+            "type": "array"
+          },
+          "tier": {
+            "anyOf": [
+              {
+                "enum": [
+                  "foundation",
+                  "higher"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tier"
+          }
+        },
+        "required": [
+          "tier",
+          "boundaries"
+        ],
+        "title": "GradeBoundariesIn",
+        "type": "object"
+      },
+      "GradeBoundariesOut": {
+        "additionalProperties": false,
+        "description": "Boundaries for one spec, by tier (\"untiered\" for specs without tiers).",
+        "properties": {
+          "boundaries": {
+            "items": {
+              "$ref": "#/components/schemas/GradeBoundaryIn"
+            },
+            "title": "Boundaries",
+            "type": "array"
+          },
+          "specificationId": {
+            "format": "uuid",
+            "title": "Specificationid",
+            "type": "string"
+          },
+          "tier": {
+            "anyOf": [
+              {
+                "enum": [
+                  "foundation",
+                  "higher"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tier"
+          }
+        },
+        "required": [
+          "specificationId",
+          "tier",
+          "boundaries"
+        ],
+        "title": "GradeBoundariesOut",
+        "type": "object"
+      },
+      "GradeBoundaryIn": {
+        "additionalProperties": false,
+        "description": "One grade's minimum percentage.",
+        "properties": {
+          "grade": {
+            "maximum": 9.0,
+            "minimum": 1.0,
+            "title": "Grade",
+            "type": "integer"
+          },
+          "minPercent": {
+            "exclusiveMinimum": 0.0,
+            "maximum": 100.0,
+            "title": "Minpercent",
+            "type": "number"
+          }
+        },
+        "required": [
+          "grade",
+          "minPercent"
+        ],
+        "title": "GradeBoundaryIn",
+        "type": "object"
+      },
+      "GradeEstimateOut": {
+        "additionalProperties": false,
+        "description": "An ESTIMATE from one short topic test, never a predicted grade.\n\nWith grade boundaries: a two-grade band, e.g. 5-6. Without: only the\npercentage and how secure it is.",
+        "properties": {
+          "bandHigh": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bandhigh"
+          },
+          "bandLow": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bandlow"
+          },
+          "belowLowestGrade": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Set when under every boundary",
+            "title": "Belowlowestgrade"
+          },
+          "percent": {
+            "title": "Percent",
+            "type": "number"
+          },
+          "standing": {
+            "$ref": "#/components/schemas/Standing"
+          }
+        },
+        "required": [
+          "percent",
+          "standing",
+          "bandLow",
+          "bandHigh",
+          "belowLowestGrade"
+        ],
+        "title": "GradeEstimateOut",
+        "type": "object"
+      },
+      "LevelOut": {
+        "additionalProperties": false,
+        "description": "Overall level and XP.",
+        "properties": {
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          },
+          "totalXp": {
+            "title": "Totalxp",
+            "type": "integer"
+          },
+          "xpForLevel": {
+            "title": "Xpforlevel",
+            "type": "integer"
+          },
+          "xpIntoLevel": {
+            "title": "Xpintolevel",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "level",
+          "totalXp",
+          "xpIntoLevel",
+          "xpForLevel"
+        ],
+        "title": "LevelOut",
         "type": "object"
       },
       "LoginRequest": {
@@ -1299,6 +2021,91 @@
         "title": "ReviewSummaryOut",
         "type": "object"
       },
+      "RewardsOut": {
+        "additionalProperties": false,
+        "description": "What an answer earned.",
+        "properties": {
+          "bonusXp": {
+            "description": "Challenge completion bonus earned with this answer",
+            "title": "Bonusxp",
+            "type": "integer"
+          },
+          "level": {
+            "title": "Level",
+            "type": "integer"
+          },
+          "levelUp": {
+            "title": "Levelup",
+            "type": "boolean"
+          },
+          "newBadges": {
+            "items": {
+              "$ref": "#/components/schemas/BadgeOut"
+            },
+            "title": "Newbadges",
+            "type": "array"
+          },
+          "streakDays": {
+            "title": "Streakdays",
+            "type": "integer"
+          },
+          "streakExtended": {
+            "description": "First answer of a new day",
+            "title": "Streakextended",
+            "type": "boolean"
+          },
+          "totalXp": {
+            "title": "Totalxp",
+            "type": "integer"
+          },
+          "usedFreeze": {
+            "description": "This week's freeze covered a missed day",
+            "title": "Usedfreeze",
+            "type": "boolean"
+          },
+          "xpForLevel": {
+            "description": "XP from this level to the next (0 at the top)",
+            "title": "Xpforlevel",
+            "type": "integer"
+          },
+          "xpGained": {
+            "description": "XP for this answer",
+            "title": "Xpgained",
+            "type": "integer"
+          },
+          "xpIntoLevel": {
+            "title": "Xpintolevel",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "xpGained",
+          "bonusXp",
+          "totalXp",
+          "level",
+          "levelUp",
+          "xpIntoLevel",
+          "xpForLevel",
+          "streakDays",
+          "streakExtended",
+          "usedFreeze",
+          "newBadges"
+        ],
+        "title": "RewardsOut",
+        "type": "object"
+      },
+      "Ring": {
+        "description": "A topic's mastery ring.",
+        "enum": [
+          "none",
+          "bronze",
+          "silver",
+          "gold",
+          "exam_ready"
+        ],
+        "title": "Ring",
+        "type": "string"
+      },
       "Role": {
         "description": "What a user is allowed to do.",
         "enum": [
@@ -1478,6 +2285,47 @@
           "tiered"
         ],
         "title": "SpecificationOut",
+        "type": "object"
+      },
+      "Standing": {
+        "description": "Plain-language description of a score.",
+        "enum": [
+          "secure",
+          "developing",
+          "not_yet"
+        ],
+        "title": "Standing",
+        "type": "string"
+      },
+      "StreakOut": {
+        "additionalProperties": false,
+        "description": "The daily streak as of today.",
+        "properties": {
+          "activeToday": {
+            "title": "Activetoday",
+            "type": "boolean"
+          },
+          "currentDays": {
+            "title": "Currentdays",
+            "type": "integer"
+          },
+          "freezeAvailable": {
+            "description": "This week's free missed day is unused",
+            "title": "Freezeavailable",
+            "type": "boolean"
+          },
+          "longestDays": {
+            "title": "Longestdays",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "currentDays",
+          "longestDays",
+          "activeToday",
+          "freezeAvailable"
+        ],
+        "title": "StreakOut",
         "type": "object"
       },
       "StudentSetTextOut": {
@@ -1732,6 +2580,10 @@
             "title": "Ref",
             "type": "string"
           },
+          "standing": {
+            "$ref": "#/components/schemas/TopicStandingOut",
+            "description": "Mastery ring and boss battle status"
+          },
           "subtopics": {
             "items": {
               "$ref": "#/components/schemas/SubtopicOut"
@@ -1758,7 +2610,8 @@
           "title",
           "taughtAtSchool",
           "unlocked",
-          "subtopics"
+          "subtopics",
+          "standing"
         ],
         "title": "TopicOut",
         "type": "object"
@@ -1800,6 +2653,11 @@
             "title": "Ref",
             "type": "string"
           },
+          "ring": {
+            "$ref": "#/components/schemas/Ring",
+            "default": "none",
+            "description": "Mastery ring (ADR-016)"
+          },
           "title": {
             "title": "Title",
             "type": "string"
@@ -1836,6 +2694,48 @@
           "taughtAtSchool"
         ],
         "title": "TopicSettingUpdate",
+        "type": "object"
+      },
+      "TopicStandingOut": {
+        "additionalProperties": false,
+        "description": "A topic's ring and boss battle status.",
+        "properties": {
+          "bossBest": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bossbest"
+          },
+          "bossUnlocked": {
+            "title": "Bossunlocked",
+            "type": "boolean"
+          },
+          "ring": {
+            "$ref": "#/components/schemas/Ring"
+          },
+          "ringProgress": {
+            "description": "0-1 towards the next ring",
+            "title": "Ringprogress",
+            "type": "number"
+          },
+          "skillsToUnlockBoss": {
+            "title": "Skillstounlockboss",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ring",
+          "ringProgress",
+          "bossUnlocked",
+          "skillsToUnlockBoss",
+          "bossBest"
+        ],
+        "title": "TopicStandingOut",
         "type": "object"
       },
       "UserOut": {
@@ -2796,6 +3696,226 @@
         ]
       }
     },
+    "/api/v1/admin/specifications/{specification_id}/grade-boundaries": {
+      "get": {
+        "description": "Grade boundaries for a spec, by tier.",
+        "operationId": "listGradeBoundaries",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "specification_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Specification Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/GradeBoundariesOut"
+                  },
+                  "title": "Response Listgradeboundaries",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "List Grade Boundaries",
+        "tags": [
+          "admin"
+        ]
+      },
+      "put": {
+        "description": "Replace one tier's boundaries; an empty list clears them.",
+        "operationId": "replaceGradeBoundaries",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "specification_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Specification Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GradeBoundariesIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GradeBoundariesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Replace Grade Boundaries",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/api/v1/admin/students/{student_id}/password": {
       "post": {
         "description": "Set a student's password and sign them out of every device.",
@@ -3307,6 +4427,194 @@
         "summary": "Get Catalogue",
         "tags": [
           "subjects"
+        ]
+      }
+    },
+    "/api/v1/me/badges": {
+      "get": {
+        "description": "Every badge, with when it was earned (bounded: the catalogue is small).",
+        "operationId": "myBadges",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BadgeOut"
+                  },
+                  "title": "Response Mybadges",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get Badges",
+        "tags": [
+          "progress"
+        ]
+      }
+    },
+    "/api/v1/me/dashboard": {
+      "get": {
+        "description": "Level, streak, today's challenge, reviews due and where \"Continue\" goes.",
+        "operationId": "myDashboard",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get Dashboard",
+        "tags": [
+          "progress"
         ]
       }
     },
@@ -4134,6 +5442,524 @@
         "summary": "Get My Topic Map",
         "tags": [
           "subjects"
+        ]
+      }
+    },
+    "/api/v1/practice/challenges/daily": {
+      "post": {
+        "description": "Today's daily challenge (created on first request). Safe to repeat.",
+        "operationId": "startDaily",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChallengeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Start Daily",
+        "tags": [
+          "challenges"
+        ]
+      }
+    },
+    "/api/v1/practice/challenges/{challenge_id}": {
+      "get": {
+        "description": "A challenge's progress, or its results once finished.",
+        "operationId": "getChallenge",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "challenge_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Challenge Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChallengeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Get Challenge",
+        "tags": [
+          "challenges"
+        ]
+      }
+    },
+    "/api/v1/practice/challenges/{challenge_id}/finish": {
+      "post": {
+        "description": "End a boss battle now and see the results. Safe to repeat.",
+        "operationId": "finishChallenge",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "challenge_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Challenge Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChallengeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Finish Challenge",
+        "tags": [
+          "challenges"
+        ]
+      }
+    },
+    "/api/v1/practice/challenges/{challenge_id}/next": {
+      "post": {
+        "description": "The next unanswered question. 409 ``CHALLENGE_FINISHED`` or ``TIME_UP`` when done.",
+        "operationId": "nextChallengeItem",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "challenge_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Challenge Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PracticeItemOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Next Challenge Item",
+        "tags": [
+          "challenges"
+        ]
+      }
+    },
+    "/api/v1/practice/enrolments/{enrolment_id}/topics/{topic_id}/boss": {
+      "post": {
+        "description": "Start a topic's timed boss battle, or return the one in progress.",
+        "operationId": "startBossBattle",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "enrolment_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Enrolment Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "topic_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Topic Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChallengeOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Start Boss",
+        "tags": [
+          "challenges"
         ]
       }
     },

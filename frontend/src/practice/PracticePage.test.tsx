@@ -19,6 +19,7 @@ import type { AnswerResultOut, PracticeItemOut, TopicMapOut } from "../api/gener
 import type { Handler } from "../test/fakeApi";
 import { apiError, installFakeApi, json, jsonBody, STUDENT } from "../test/fakeApi";
 import { renderApp } from "../test/renderApp";
+import { NO_STANDING } from "../test/fixtures";
 
 const ENROLMENT = "00000000-0000-4000-8000-0000000000e1";
 const TOPIC = "00000000-0000-4000-8000-0000000000a1";
@@ -234,6 +235,7 @@ describe("topic map practise links", () => {
           title: "Number",
           taughtAtSchool: true,
           unlocked: true,
+          standing: NO_STANDING,
           subtopics: [],
         },
         {
@@ -242,6 +244,7 @@ describe("topic map practise links", () => {
           title: "Algebra",
           taughtAtSchool: false,
           unlocked: false,
+          standing: NO_STANDING,
           subtopics: [],
         },
       ],
