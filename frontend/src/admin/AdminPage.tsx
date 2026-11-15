@@ -6,6 +6,10 @@ import type { UserOut } from "../api/generated/model";
 import { AppShell } from "../components/AppShell";
 import { AttentionList } from "./AttentionList";
 import { TopicsCovered } from "./TopicsCovered";
+import { Costs } from "./Costs";
+import { GradeBoundaries } from "./GradeBoundaries";
+import { LearnCardQueue } from "./LearnCardQueue";
+import { ReviewQueue } from "./ReviewQueue";
 
 /** Admin home: things to confirm, topics covered at school, imported specs. */
 export function AdminPage({ user }: { user: UserOut }) {
@@ -17,6 +21,18 @@ export function AdminPage({ user }: { user: UserOut }) {
       </Section>
       <Section title="Topics covered at school">
         <TopicsCovered />
+      </Section>
+      <Section title="Review queue">
+        <ReviewQueue />
+      </Section>
+      <Section title="Learn cards to review">
+        <LearnCardQueue />
+      </Section>
+      <Section title="AI spend">
+        <Costs />
+      </Section>
+      <Section title="Grade boundaries">
+        <GradeBoundaries />
       </Section>
       <Section title="Imported specifications">
         <SpecificationTable />

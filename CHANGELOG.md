@@ -6,6 +6,21 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added — Phase 7 (Guardian and admin tools)
+- **Guardian dashboard:**
+  - A weekly summary: questions, accuracy, time, active days, XP, streak, mistakes fixed, badges and boss battles.
+  - Topics to work on per subject.
+  - Week navigation.
+  - A choice of student when more than one is linked.
+- **Consent** to a versioned, plain-language **privacy notice** (also public at `/privacy`); withdrawable; audited.
+- **Data rights for guardians:** download all of a student's data as JSON, and permanently delete the account (needs their password and "DELETE").
+- **Admin:**
+  - A review queue for new (strict-mode) and flagged questions, with approve, reject and retire.
+  - Learn-card review.
+  - An AI spend dashboard against the caps.
+  - Grade-boundary forms.
+- **Docs and tests:** ADR-019; an end-to-end test for the guardian and admin screens.
+
 ### Added — Phase 6 (Extended answers and tutor chat)
 - **Written (extended) questions,** marked by Claude against a mark scheme:
   - The mark scheme has marking points with their AOs, level descriptors and a model answer.

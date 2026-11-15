@@ -21,7 +21,7 @@ Chromium window.
 4. Give the tests the seeded credentials. These are read from the environment and never committed:
 
    ```bash
-   export E2E_STUDENT_USERNAME=sam10 E2E_STUDENT_PASSWORD='…' E2E_ADMIN_EMAIL=you+admin@example.com E2E_ADMIN_PASSWORD='…'
+   export E2E_STUDENT_USERNAME=sam10 E2E_STUDENT_PASSWORD='…' E2E_ADMIN_EMAIL=you+admin@example.com E2E_ADMIN_PASSWORD='…' E2E_GUARDIAN_EMAIL=guardian@example.com E2E_GUARDIAN_PASSWORD='…'
    ```
 
 5. Run them:

@@ -28,23 +28,31 @@ import {
   BadgeOut,
   CatalogueOut,
   ChallengeOut,
+  ConsentOut,
+  CostsOut,
   DashboardOut,
   GradeBoundariesOut,
   LearnCardOut,
+  LinkedStudentOut,
   MistakeOut,
   MistakePage,
   MistakeTopicGroup,
   MySubjectsOut,
   PracticeItemOut,
   ProgressOut,
+  ReviewLearnCardOut,
+  ReviewQuestionPage,
   ReviewSummaryOut,
   SessionOut,
   TopicMapOut,
   TutorThreadOut,
   UserOut,
+  WeeklySummaryOut,
 } from "./model";
 import type {
   AnswerRequest,
+  ConsentIn,
+  DeleteStudentIn,
   EnrolmentUpdate,
   ErrorResponse,
   FlagRequest,
@@ -53,7 +61,10 @@ import type {
   ListMyMistakesParams,
   LoginRequest,
   ResetPasswordRequest,
+  ReviewDecision,
+  ReviewQueueParams,
   SetTextUpdate,
+  StudentWeeklySummaryParams,
   SubjectChoices,
   TopicOrderUpdate,
   TopicSettingUpdate,
@@ -109,6 +120,132 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getAiCostsUrl = () => {
+  return `/api/v1/admin/costs`;
+};
+
+/**
+ * Claude spend today and this month against the caps, by purpose and by day.
+ * @summary Costs
+ */
+export const aiCosts = async (options?: Parameters<typeof apiFetch>[1]): Promise<CostsOut> => {
+  return apiFetch<CostsOut>(getAiCostsUrl(), {
+    ...options,
+    method: "GET",
+
+    schema: CostsOut,
+  });
+};
+
+export const getAiCostsQueryKey = () => {
+  return [`/api/v1/admin/costs`] as const;
+};
+
+export const getAiCostsQueryOptions = <
+  TData = Awaited<ReturnType<typeof aiCosts>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof aiCosts>>, TError, TData>>;
+  request?: SecondParameter<typeof apiFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getAiCostsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof aiCosts>>> = ({ signal }) =>
+    aiCosts({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof aiCosts>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type AiCostsQueryResult = NonNullable<Awaited<ReturnType<typeof aiCosts>>>;
+export type AiCostsQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * Claude spend today and this month against the caps, by purpose and by day.
+ * @summary Costs
+ */
+export function useAiCosts<
+  TData = Awaited<ReturnType<typeof aiCosts>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof aiCosts>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof aiCosts>>,
+          TError,
+          Awaited<ReturnType<typeof aiCosts>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Claude spend today and this month against the caps, by purpose and by day.
+ * @summary Costs
+ */
+export function useAiCosts<
+  TData = Awaited<ReturnType<typeof aiCosts>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof aiCosts>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof aiCosts>>,
+          TError,
+          Awaited<ReturnType<typeof aiCosts>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Claude spend today and this month against the caps, by purpose and by day.
+ * @summary Costs
+ */
+export function useAiCosts<
+  TData = Awaited<ReturnType<typeof aiCosts>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof aiCosts>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Claude spend today and this month against the caps, by purpose and by day.
+ * @summary Costs
+ */
+export function useAiCosts<
+  TData = Awaited<ReturnType<typeof aiCosts>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof aiCosts>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getAiCostsQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
 
 export const getListEnrolmentsUrl = (params?: ListEnrolmentsParams) => {
   const normalizedParams = new URLSearchParams();
@@ -679,6 +816,463 @@ export const useSetTopicTaught = <TError = ErrorType<ErrorResponse>, TContext = 
   TContext
 > => {
   return useMutation(getSetTopicTaughtMutationOptions(options), queryClient);
+};
+
+export const getLearnCardQueueUrl = () => {
+  return `/api/v1/admin/review/learn-cards`;
+};
+
+/**
+ * Learn cards waiting for review (strict mode).
+ * @summary Learn Card Queue
+ */
+export const learnCardQueue = async (
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ReviewLearnCardOut[]> => {
+  return apiFetch<ReviewLearnCardOut[]>(getLearnCardQueueUrl(), {
+    ...options,
+    method: "GET",
+
+    schema: zod.array(ReviewLearnCardOut),
+  });
+};
+
+export const getLearnCardQueueQueryKey = () => {
+  return [`/api/v1/admin/review/learn-cards`] as const;
+};
+
+export const getLearnCardQueueQueryOptions = <
+  TData = Awaited<ReturnType<typeof learnCardQueue>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof learnCardQueue>>, TError, TData>>;
+  request?: SecondParameter<typeof apiFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getLearnCardQueueQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof learnCardQueue>>> = ({ signal }) =>
+    learnCardQueue({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof learnCardQueue>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type LearnCardQueueQueryResult = NonNullable<Awaited<ReturnType<typeof learnCardQueue>>>;
+export type LearnCardQueueQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * Learn cards waiting for review (strict mode).
+ * @summary Learn Card Queue
+ */
+export function useLearnCardQueue<
+  TData = Awaited<ReturnType<typeof learnCardQueue>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof learnCardQueue>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof learnCardQueue>>,
+          TError,
+          Awaited<ReturnType<typeof learnCardQueue>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Learn cards waiting for review (strict mode).
+ * @summary Learn Card Queue
+ */
+export function useLearnCardQueue<
+  TData = Awaited<ReturnType<typeof learnCardQueue>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof learnCardQueue>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof learnCardQueue>>,
+          TError,
+          Awaited<ReturnType<typeof learnCardQueue>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Learn cards waiting for review (strict mode).
+ * @summary Learn Card Queue
+ */
+export function useLearnCardQueue<
+  TData = Awaited<ReturnType<typeof learnCardQueue>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof learnCardQueue>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Learn cards waiting for review (strict mode).
+ * @summary Learn Card Queue
+ */
+export function useLearnCardQueue<
+  TData = Awaited<ReturnType<typeof learnCardQueue>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof learnCardQueue>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getLearnCardQueueQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getDecideLearnCardUrl = (cardId: string) => {
+  return `/api/v1/admin/review/learn-cards/${cardId}`;
+};
+
+/**
+ * Approve or reject a learn card (rejecting lets a new one be written).
+ * @summary Decide Learn Card
+ */
+export const decideLearnCard = async (
+  cardId: string,
+  reviewDecision: ReviewDecision,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<void> => {
+  return apiFetch<void>(getDecideLearnCardUrl(cardId), {
+    ...options,
+    method: "POST",
+    headers: getHeaders({ "Content-Type": "application/json" }, options?.headers),
+    body: JSON.stringify(reviewDecision),
+  });
+};
+
+export const getDecideLearnCardMutationKey = () => ["decideLearnCard"] as const;
+
+export const getDecideLearnCardMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof decideLearnCard>>,
+    TError,
+    DecideLearnCardMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof decideLearnCard>>,
+  TError,
+  DecideLearnCardMutationVariables,
+  TContext
+> => {
+  const mutationKey = getDecideLearnCardMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof decideLearnCard>>,
+    DecideLearnCardMutationVariables
+  > = (props) => {
+    const { cardId, data } = props ?? {};
+
+    return decideLearnCard(cardId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DecideLearnCardMutationResult = NonNullable<
+  Awaited<ReturnType<typeof decideLearnCard>>
+>;
+export type DecideLearnCardMutationBody = BodyType<ReviewDecision>;
+export type DecideLearnCardMutationError = ErrorType<ErrorResponse>;
+export type DecideLearnCardMutationVariables = { cardId: string; data: BodyType<ReviewDecision> };
+
+/**
+ * Approve or reject a learn card (rejecting lets a new one be written).
+ * @summary Decide Learn Card
+ */
+export const useDecideLearnCard = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof decideLearnCard>>,
+      TError,
+      DecideLearnCardMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof decideLearnCard>>,
+  TError,
+  DecideLearnCardMutationVariables,
+  TContext
+> => {
+  return useMutation(getDecideLearnCardMutationOptions(options), queryClient);
+};
+
+export const getReviewQueueUrl = (params?: ReviewQueueParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/admin/review/questions?${stringifiedParams}`
+    : `/api/v1/admin/review/questions`;
+};
+
+/**
+ * Questions waiting for review: new ones (strict mode) and ones the student flagged.
+ * @summary Review Queue
+ */
+export const reviewQueue = async (
+  params?: ReviewQueueParams,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ReviewQuestionPage> => {
+  return apiFetch<ReviewQuestionPage>(getReviewQueueUrl(params), {
+    ...options,
+    method: "GET",
+
+    schema: ReviewQuestionPage,
+  });
+};
+
+export const getReviewQueueQueryKey = (params?: ReviewQueueParams) => {
+  return [`/api/v1/admin/review/questions`, ...(params ? [params] : [])] as const;
+};
+
+export const getReviewQueueQueryOptions = <
+  TData = Awaited<ReturnType<typeof reviewQueue>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params?: ReviewQueueParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof reviewQueue>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getReviewQueueQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof reviewQueue>>> = ({ signal }) =>
+    reviewQueue(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof reviewQueue>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type ReviewQueueQueryResult = NonNullable<Awaited<ReturnType<typeof reviewQueue>>>;
+export type ReviewQueueQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * Questions waiting for review: new ones (strict mode) and ones the student flagged.
+ * @summary Review Queue
+ */
+export function useReviewQueue<
+  TData = Awaited<ReturnType<typeof reviewQueue>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: undefined | ReviewQueueParams,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof reviewQueue>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof reviewQueue>>,
+          TError,
+          Awaited<ReturnType<typeof reviewQueue>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Questions waiting for review: new ones (strict mode) and ones the student flagged.
+ * @summary Review Queue
+ */
+export function useReviewQueue<
+  TData = Awaited<ReturnType<typeof reviewQueue>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params?: ReviewQueueParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof reviewQueue>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof reviewQueue>>,
+          TError,
+          Awaited<ReturnType<typeof reviewQueue>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Questions waiting for review: new ones (strict mode) and ones the student flagged.
+ * @summary Review Queue
+ */
+export function useReviewQueue<
+  TData = Awaited<ReturnType<typeof reviewQueue>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params?: ReviewQueueParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof reviewQueue>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Questions waiting for review: new ones (strict mode) and ones the student flagged.
+ * @summary Review Queue
+ */
+export function useReviewQueue<
+  TData = Awaited<ReturnType<typeof reviewQueue>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params?: ReviewQueueParams,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof reviewQueue>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getReviewQueueQueryOptions(params, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getDecideQuestionUrl = (questionId: string) => {
+  return `/api/v1/admin/review/questions/${questionId}`;
+};
+
+/**
+ * Approve (serve it), reject or retire a question; its flags are resolved.
+ * @summary Decide Question
+ */
+export const decideQuestion = async (
+  questionId: string,
+  reviewDecision: ReviewDecision,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<void> => {
+  return apiFetch<void>(getDecideQuestionUrl(questionId), {
+    ...options,
+    method: "POST",
+    headers: getHeaders({ "Content-Type": "application/json" }, options?.headers),
+    body: JSON.stringify(reviewDecision),
+  });
+};
+
+export const getDecideQuestionMutationKey = () => ["decideQuestion"] as const;
+
+export const getDecideQuestionMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof decideQuestion>>,
+    TError,
+    DecideQuestionMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof decideQuestion>>,
+  TError,
+  DecideQuestionMutationVariables,
+  TContext
+> => {
+  const mutationKey = getDecideQuestionMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof decideQuestion>>,
+    DecideQuestionMutationVariables
+  > = (props) => {
+    const { questionId, data } = props ?? {};
+
+    return decideQuestion(questionId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DecideQuestionMutationResult = NonNullable<Awaited<ReturnType<typeof decideQuestion>>>;
+export type DecideQuestionMutationBody = BodyType<ReviewDecision>;
+export type DecideQuestionMutationError = ErrorType<ErrorResponse>;
+export type DecideQuestionMutationVariables = {
+  questionId: string;
+  data: BodyType<ReviewDecision>;
+};
+
+/**
+ * Approve (serve it), reject or retire a question; its flags are resolved.
+ * @summary Decide Question
+ */
+export const useDecideQuestion = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof decideQuestion>>,
+      TError,
+      DecideQuestionMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof decideQuestion>>,
+  TError,
+  DecideQuestionMutationVariables,
+  TContext
+> => {
+  return useMutation(getDecideQuestionMutationOptions(options), queryClient);
 };
 
 export const getDeleteSetTextUrl = (setTextId: string) => {
@@ -1659,6 +2253,714 @@ export function useGetCatalogue<
   queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
   const queryOptions = getGetCatalogueQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getMyStudentsUrl = () => {
+  return `/api/v1/guardian/students`;
+};
+
+/**
+ * Students linked to this guardian, with consent status.
+ * @summary Students
+ */
+export const myStudents = async (
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<LinkedStudentOut[]> => {
+  return apiFetch<LinkedStudentOut[]>(getMyStudentsUrl(), {
+    ...options,
+    method: "GET",
+
+    schema: zod.array(LinkedStudentOut),
+  });
+};
+
+export const getMyStudentsQueryKey = () => {
+  return [`/api/v1/guardian/students`] as const;
+};
+
+export const getMyStudentsQueryOptions = <
+  TData = Awaited<ReturnType<typeof myStudents>>,
+  TError = ErrorType<ErrorResponse>,
+>(options?: {
+  query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myStudents>>, TError, TData>>;
+  request?: SecondParameter<typeof apiFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getMyStudentsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof myStudents>>> = ({ signal }) =>
+    myStudents({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof myStudents>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type MyStudentsQueryResult = NonNullable<Awaited<ReturnType<typeof myStudents>>>;
+export type MyStudentsQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * Students linked to this guardian, with consent status.
+ * @summary Students
+ */
+export function useMyStudents<
+  TData = Awaited<ReturnType<typeof myStudents>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof myStudents>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof myStudents>>,
+          TError,
+          Awaited<ReturnType<typeof myStudents>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Students linked to this guardian, with consent status.
+ * @summary Students
+ */
+export function useMyStudents<
+  TData = Awaited<ReturnType<typeof myStudents>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myStudents>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof myStudents>>,
+          TError,
+          Awaited<ReturnType<typeof myStudents>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Students linked to this guardian, with consent status.
+ * @summary Students
+ */
+export function useMyStudents<
+  TData = Awaited<ReturnType<typeof myStudents>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myStudents>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Students linked to this guardian, with consent status.
+ * @summary Students
+ */
+export function useMyStudents<
+  TData = Awaited<ReturnType<typeof myStudents>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof myStudents>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getMyStudentsQueryOptions(options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getWithdrawConsentUrl = (studentId: string) => {
+  return `/api/v1/guardian/students/${studentId}/consent`;
+};
+
+/**
+ * Withdraw consent. The record of what was agreed is kept.
+ * @summary Withdraw Consent
+ */
+export const withdrawConsent = async (
+  studentId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ConsentOut> => {
+  return apiFetch<ConsentOut>(getWithdrawConsentUrl(studentId), {
+    ...options,
+    method: "DELETE",
+
+    schema: ConsentOut,
+  });
+};
+
+export const getWithdrawConsentMutationKey = () => ["withdrawConsent"] as const;
+
+export const getWithdrawConsentMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof withdrawConsent>>,
+    TError,
+    WithdrawConsentMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof withdrawConsent>>,
+  TError,
+  WithdrawConsentMutationVariables,
+  TContext
+> => {
+  const mutationKey = getWithdrawConsentMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof withdrawConsent>>,
+    WithdrawConsentMutationVariables
+  > = (props) => {
+    const { studentId } = props ?? {};
+
+    return withdrawConsent(studentId, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type WithdrawConsentMutationResult = NonNullable<
+  Awaited<ReturnType<typeof withdrawConsent>>
+>;
+
+export type WithdrawConsentMutationError = ErrorType<ErrorResponse>;
+export type WithdrawConsentMutationVariables = { studentId: string };
+
+/**
+ * Withdraw consent. The record of what was agreed is kept.
+ * @summary Withdraw Consent
+ */
+export const useWithdrawConsent = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof withdrawConsent>>,
+      TError,
+      WithdrawConsentMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof withdrawConsent>>,
+  TError,
+  WithdrawConsentMutationVariables,
+  TContext
+> => {
+  return useMutation(getWithdrawConsentMutationOptions(options), queryClient);
+};
+
+export const getGiveConsentUrl = (studentId: string) => {
+  return `/api/v1/guardian/students/${studentId}/consent`;
+};
+
+/**
+ * Agree to the current privacy notice for this student.
+ * @summary Give Consent
+ */
+export const giveConsent = async (
+  studentId: string,
+  consentIn: ConsentIn,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<ConsentOut> => {
+  return apiFetch<ConsentOut>(getGiveConsentUrl(studentId), {
+    ...options,
+    method: "POST",
+    headers: getHeaders({ "Content-Type": "application/json" }, options?.headers),
+    body: JSON.stringify(consentIn),
+    schema: ConsentOut,
+  });
+};
+
+export const getGiveConsentMutationKey = () => ["giveConsent"] as const;
+
+export const getGiveConsentMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof giveConsent>>,
+    TError,
+    GiveConsentMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof giveConsent>>,
+  TError,
+  GiveConsentMutationVariables,
+  TContext
+> => {
+  const mutationKey = getGiveConsentMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof giveConsent>>,
+    GiveConsentMutationVariables
+  > = (props) => {
+    const { studentId, data } = props ?? {};
+
+    return giveConsent(studentId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type GiveConsentMutationResult = NonNullable<Awaited<ReturnType<typeof giveConsent>>>;
+export type GiveConsentMutationBody = BodyType<ConsentIn>;
+export type GiveConsentMutationError = ErrorType<ErrorResponse>;
+export type GiveConsentMutationVariables = { studentId: string; data: BodyType<ConsentIn> };
+
+/**
+ * Agree to the current privacy notice for this student.
+ * @summary Give Consent
+ */
+export const useGiveConsent = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof giveConsent>>,
+      TError,
+      GiveConsentMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof giveConsent>>,
+  TError,
+  GiveConsentMutationVariables,
+  TContext
+> => {
+  return useMutation(getGiveConsentMutationOptions(options), queryClient);
+};
+
+export const getDeleteStudentUrl = (studentId: string) => {
+  return `/api/v1/guardian/students/${studentId}/delete`;
+};
+
+/**
+ * Permanently delete the student's account and data (password and "DELETE" required).
+ * @summary Delete Student
+ */
+export const deleteStudent = async (
+  studentId: string,
+  deleteStudentIn: DeleteStudentIn,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<void> => {
+  return apiFetch<void>(getDeleteStudentUrl(studentId), {
+    ...options,
+    method: "POST",
+    headers: getHeaders({ "Content-Type": "application/json" }, options?.headers),
+    body: JSON.stringify(deleteStudentIn),
+  });
+};
+
+export const getDeleteStudentMutationKey = () => ["deleteStudent"] as const;
+
+export const getDeleteStudentMutationOptions = <
+  TError = ErrorType<ErrorResponse>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteStudent>>,
+    TError,
+    DeleteStudentMutationVariables,
+    TContext
+  >;
+  request?: SecondParameter<typeof apiFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteStudent>>,
+  TError,
+  DeleteStudentMutationVariables,
+  TContext
+> => {
+  const mutationKey = getDeleteStudentMutationKey();
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation && "mutationKey" in options.mutation && options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteStudent>>,
+    DeleteStudentMutationVariables
+  > = (props) => {
+    const { studentId, data } = props ?? {};
+
+    return deleteStudent(studentId, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteStudentMutationResult = NonNullable<Awaited<ReturnType<typeof deleteStudent>>>;
+export type DeleteStudentMutationBody = BodyType<DeleteStudentIn>;
+export type DeleteStudentMutationError = ErrorType<ErrorResponse>;
+export type DeleteStudentMutationVariables = { studentId: string; data: BodyType<DeleteStudentIn> };
+
+/**
+ * Permanently delete the student's account and data (password and "DELETE" required).
+ * @summary Delete Student
+ */
+export const useDeleteStudent = <TError = ErrorType<ErrorResponse>, TContext = unknown>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof deleteStudent>>,
+      TError,
+      DeleteStudentMutationVariables,
+      TContext
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof deleteStudent>>,
+  TError,
+  DeleteStudentMutationVariables,
+  TContext
+> => {
+  return useMutation(getDeleteStudentMutationOptions(options), queryClient);
+};
+
+export const getExportStudentDataUrl = (studentId: string) => {
+  return `/api/v1/guardian/students/${studentId}/export`;
+};
+
+/**
+ * Download everything stored about the student, as a JSON file.
+ * @summary Export
+ */
+export const exportStudentData = async (
+  studentId: string,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<unknown> => {
+  return apiFetch<unknown>(getExportStudentDataUrl(studentId), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getExportStudentDataQueryKey = (studentId: string) => {
+  return [`/api/v1/guardian/students/${studentId}/export`] as const;
+};
+
+export const getExportStudentDataQueryOptions = <
+  TData = Awaited<ReturnType<typeof exportStudentData>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  studentId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof exportStudentData>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getExportStudentDataQueryKey(studentId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof exportStudentData>>> = ({ signal }) =>
+    exportStudentData(studentId, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: studentId !== null && studentId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof exportStudentData>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type ExportStudentDataQueryResult = NonNullable<
+  Awaited<ReturnType<typeof exportStudentData>>
+>;
+export type ExportStudentDataQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * Download everything stored about the student, as a JSON file.
+ * @summary Export
+ */
+export function useExportStudentData<
+  TData = Awaited<ReturnType<typeof exportStudentData>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  studentId: string,
+  options: {
+    query: Partial<UseQueryOptions<Awaited<ReturnType<typeof exportStudentData>>, TError, TData>> &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof exportStudentData>>,
+          TError,
+          Awaited<ReturnType<typeof exportStudentData>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Download everything stored about the student, as a JSON file.
+ * @summary Export
+ */
+export function useExportStudentData<
+  TData = Awaited<ReturnType<typeof exportStudentData>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  studentId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof exportStudentData>>, TError, TData>> &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof exportStudentData>>,
+          TError,
+          Awaited<ReturnType<typeof exportStudentData>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Download everything stored about the student, as a JSON file.
+ * @summary Export
+ */
+export function useExportStudentData<
+  TData = Awaited<ReturnType<typeof exportStudentData>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  studentId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof exportStudentData>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * Download everything stored about the student, as a JSON file.
+ * @summary Export
+ */
+export function useExportStudentData<
+  TData = Awaited<ReturnType<typeof exportStudentData>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  studentId: string,
+  options?: {
+    query?: Partial<UseQueryOptions<Awaited<ReturnType<typeof exportStudentData>>, TError, TData>>;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getExportStudentDataQueryOptions(studentId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getStudentWeeklySummaryUrl = (
+  studentId: string,
+  params?: StudentWeeklySummaryParams,
+) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : String(value));
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/v1/guardian/students/${studentId}/summary?${stringifiedParams}`
+    : `/api/v1/guardian/students/${studentId}/summary`;
+};
+
+/**
+ * A week of the student's activity (this week by default).
+ * @summary Summary
+ */
+export const studentWeeklySummary = async (
+  studentId: string,
+  params?: StudentWeeklySummaryParams,
+  options?: Parameters<typeof apiFetch>[1],
+): Promise<WeeklySummaryOut> => {
+  return apiFetch<WeeklySummaryOut>(getStudentWeeklySummaryUrl(studentId, params), {
+    ...options,
+    method: "GET",
+
+    schema: WeeklySummaryOut,
+  });
+};
+
+export const getStudentWeeklySummaryQueryKey = (
+  studentId: string,
+  params?: StudentWeeklySummaryParams,
+) => {
+  return [`/api/v1/guardian/students/${studentId}/summary`, ...(params ? [params] : [])] as const;
+};
+
+export const getStudentWeeklySummaryQueryOptions = <
+  TData = Awaited<ReturnType<typeof studentWeeklySummary>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  studentId: string,
+  params?: StudentWeeklySummaryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof studentWeeklySummary>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getStudentWeeklySummaryQueryKey(studentId, params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof studentWeeklySummary>>> = ({ signal }) =>
+    studentWeeklySummary(studentId, params, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: studentId !== null && studentId !== undefined,
+    ...queryOptions,
+  } as UseQueryOptions<Awaited<ReturnType<typeof studentWeeklySummary>>, TError, TData> & {
+    queryKey: DataTag<QueryKey, TData, TError>;
+  };
+};
+
+export type StudentWeeklySummaryQueryResult = NonNullable<
+  Awaited<ReturnType<typeof studentWeeklySummary>>
+>;
+export type StudentWeeklySummaryQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * A week of the student's activity (this week by default).
+ * @summary Summary
+ */
+export function useStudentWeeklySummary<
+  TData = Awaited<ReturnType<typeof studentWeeklySummary>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  studentId: string,
+  params: undefined | StudentWeeklySummaryParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof studentWeeklySummary>>, TError, TData>
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof studentWeeklySummary>>,
+          TError,
+          Awaited<ReturnType<typeof studentWeeklySummary>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * A week of the student's activity (this week by default).
+ * @summary Summary
+ */
+export function useStudentWeeklySummary<
+  TData = Awaited<ReturnType<typeof studentWeeklySummary>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  studentId: string,
+  params?: StudentWeeklySummaryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof studentWeeklySummary>>, TError, TData>
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof studentWeeklySummary>>,
+          TError,
+          Awaited<ReturnType<typeof studentWeeklySummary>>
+        >,
+        "initialData"
+      >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * A week of the student's activity (this week by default).
+ * @summary Summary
+ */
+export function useStudentWeeklySummary<
+  TData = Awaited<ReturnType<typeof studentWeeklySummary>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  studentId: string,
+  params?: StudentWeeklySummaryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof studentWeeklySummary>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+/**
+ * A week of the student's activity (this week by default).
+ * @summary Summary
+ */
+export function useStudentWeeklySummary<
+  TData = Awaited<ReturnType<typeof studentWeeklySummary>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  studentId: string,
+  params?: StudentWeeklySummaryParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<Awaited<ReturnType<typeof studentWeeklySummary>>, TError, TData>
+    >;
+    request?: SecondParameter<typeof apiFetch>;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+  const queryOptions = getStudentWeeklySummaryQueryOptions(studentId, params, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<TData, TError> & {
     queryKey: DataTag<QueryKey, TData, TError>;

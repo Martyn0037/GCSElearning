@@ -15,6 +15,10 @@ export const accounts = {
     password: required("E2E_STUDENT_PASSWORD"),
   }),
   admin: () => ({ id: required("E2E_ADMIN_EMAIL"), password: required("E2E_ADMIN_PASSWORD") }),
+  guardian: () => ({
+    id: required("E2E_GUARDIAN_EMAIL"),
+    password: required("E2E_GUARDIAN_PASSWORD"),
+  }),
 };
 
 /** Sign in through the real login form. */

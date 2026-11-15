@@ -98,6 +98,7 @@ jobs:
     env:
       E2E_STUDENT_USERNAME: e2e-student
       E2E_ADMIN_EMAIL: e2e-admin@example.test
+      E2E_GUARDIAN_EMAIL: e2e-guardian@example.test
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Create a throwaway .env with random secrets
@@ -121,7 +122,7 @@ jobs:
         run: |
           docker compose run --rm -T -e SEED_ADMIN_PASSWORD -e SEED_GUARDIAN_PASSWORD \
             -e SEED_STUDENT_PASSWORD api python -m app.cli.seed_users \
-            --admin-email "$E2E_ADMIN_EMAIL" --guardian-email e2e-guardian@example.test \
+            --admin-email "$E2E_ADMIN_EMAIL" --guardian-email "$E2E_GUARDIAN_EMAIL" \
             --guardian-name Guardian --student-username "$E2E_STUDENT_USERNAME" --student-name Sam
       - name: Seed end-to-end fixture questions (test data; refused in production)
         run: docker compose run --rm -T api python -m app.cli.seed_test_questions --spec 1MA1 --objective N4

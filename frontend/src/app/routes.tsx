@@ -3,9 +3,10 @@ import type { RouteObject } from "react-router";
 
 import { AdminPage } from "../admin/AdminPage";
 import { RequireRole } from "../auth/RequireRole";
-import { GuardianHomePage } from "../pages/HomePages";
+import { GuardianDashboard } from "../guardian/GuardianDashboard";
 import { LoginPage } from "../pages/LoginPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
+import { PrivacyPage } from "../pages/PrivacyPage";
 import { LazyPracticePage } from "../practice/LazyPracticePage";
 import { BadgesPage } from "../game/BadgesPage";
 import {
@@ -22,6 +23,7 @@ import { TopicMapPage } from "../subjects/TopicMapPage";
 /** All app routes. Kept separate from the router so tests can mount them in memory. */
 export const routes: RouteObject[] = [
   { path: "/login", element: <LoginPage /> },
+  { path: "/privacy", element: <PrivacyPage /> },
   {
     path: "/",
     element: (
@@ -83,7 +85,7 @@ export const routes: RouteObject[] = [
   {
     path: "/guardian",
     element: (
-      <RequireRole roles={["guardian"]}>{(user) => <GuardianHomePage user={user} />}</RequireRole>
+      <RequireRole roles={["guardian"]}>{(user) => <GuardianDashboard user={user} />}</RequireRole>
     ),
   },
   {

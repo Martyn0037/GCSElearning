@@ -2,7 +2,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import type { SyntheticEvent } from "react";
 import { useId, useState } from "react";
-import { Navigate, useLocation, useNavigate } from "react-router";
+import { Link, Navigate, useLocation, useNavigate } from "react-router";
 
 import { getGetCurrentUserQueryKey, useLogin } from "../api/generated/endpoints";
 import { ApiError } from "../api/http";
@@ -127,6 +127,11 @@ export function LoginPage() {
 
         <p className="text-sm text-slate-600">
           Forgotten your password? Ask your parent or carer to reset it.
+        </p>
+        <p className="text-sm">
+          <Link to="/privacy" className="text-brand-700 underline">
+            Privacy notice
+          </Link>
         </p>
       </form>
     </main>

@@ -440,3 +440,31 @@ curriculum content comes only from the exam board's spec, never from model knowl
 **Trade-offs.**
 - Marking synchronously keeps the result screen simple, but the student waits up to about a minute (the UI says so). A background job would need polling.
 - A model-judged "on topic" can be fooled. The fixed redirect, the per-question cap and the budget bound the damage, and every tutor message is stored for the admin.
+
+## ADR-019 — Guardian dashboard, consent, data rights and admin tools
+
+**Status:** Accepted (2026-11-15). Implemented in Phase 7.
+
+**Decision.**
+- **The guardian dashboard is read-only**, scoped to linked students (anything else is 404). It shows a weekly summary in London weeks, up to 12 weeks back:
+  - questions answered and right;
+  - minutes practising, with each question capped at 10 minutes so one left open doesn't inflate it;
+  - active days, XP, streak, mistakes fixed, badges and boss battles;
+  - the weakest practised topics per subject, with their rings.
+- **Consent** is recorded against a versioned plain-language privacy notice (`PRIVACY_POLICY_VERSION`). Withdrawing keeps the record, marked withdrawn. Both are audited.
+  - Consent is recorded and shown but does **not** yet block the student: the account is set up by the family, and blocking needs a decision about what the student sees meanwhile.
+  - Making it a hard gate later is a small change (a check in `require_roles` for students).
+- **Data rights:**
+  - **Export:** a guardian can download everything stored about the student as JSON (UK GDPR access).
+  - **Deletion:** a guardian can permanently delete the account. It needs the guardian's password and the typed word "DELETE", is rate-limited, cascades through every table, and is audited with IDs only.
+- **Admin review queue:** pending questions (strict mode) and flagged ones, with the key, solution, hints, verifier notes and the student's reasons. The decisions are:
+  - approve, which serves the question;
+  - reject;
+  - retire.
+
+  Every decision resolves the question's flags and is audited.
+- **Learn cards** are approved or rejected. Rejecting deletes the card so a fresh one can be written.
+- **Cost dashboard:** today and this month in pounds (London periods, rounded half up) against the caps, by purpose, and the last 30 days, from `ai_usage`.
+- **Grade boundaries** get an admin form per spec and tier, using the Phase 5 API.
+
+**Trade-offs.** The privacy notice says Anthropic doesn't train on API data and that backups are kept for 30 days. Both must stay true: the first depends on Anthropic's commercial terms (check before going live), and the second is set in Phase 8.

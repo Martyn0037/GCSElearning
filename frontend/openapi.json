@@ -432,6 +432,40 @@
         "title": "BoardOut",
         "type": "object"
       },
+      "BossResultOut": {
+        "additionalProperties": false,
+        "description": "A boss battle finished this week.",
+        "properties": {
+          "percent": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Percent"
+          },
+          "topicTitle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Topictitle"
+          }
+        },
+        "required": [
+          "topicTitle",
+          "percent"
+        ],
+        "title": "BossResultOut",
+        "type": "object"
+      },
       "CatalogueOut": {
         "additionalProperties": false,
         "description": "Everything the setup screen needs.",
@@ -882,6 +916,62 @@
         "title": "ChallengeStatus",
         "type": "string"
       },
+      "ConsentIn": {
+        "additionalProperties": false,
+        "description": "Record consent under the privacy notice version shown.",
+        "properties": {
+          "policyVersion": {
+            "maxLength": 32,
+            "title": "Policyversion",
+            "type": "string"
+          }
+        },
+        "required": [
+          "policyVersion"
+        ],
+        "title": "ConsentIn",
+        "type": "object"
+      },
+      "ConsentOut": {
+        "additionalProperties": false,
+        "description": "The guardian's current consent for a student (null fields if none).",
+        "properties": {
+          "granted": {
+            "title": "Granted",
+            "type": "boolean"
+          },
+          "grantedAt": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grantedat"
+          },
+          "policyVersion": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policyversion"
+          }
+        },
+        "required": [
+          "granted",
+          "policyVersion",
+          "grantedAt"
+        ],
+        "title": "ConsentOut",
+        "type": "object"
+      },
       "ContinueOut": {
         "additionalProperties": false,
         "description": "Where \"Continue\" goes: the next best thing to do.",
@@ -942,6 +1032,129 @@
           "label"
         ],
         "title": "ContinueOut",
+        "type": "object"
+      },
+      "CostDayOut": {
+        "additionalProperties": false,
+        "description": "Spend on one London day.",
+        "properties": {
+          "calls": {
+            "title": "Calls",
+            "type": "integer"
+          },
+          "date": {
+            "format": "date",
+            "title": "Date",
+            "type": "string"
+          },
+          "gbp": {
+            "title": "Gbp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "date",
+          "gbp",
+          "calls"
+        ],
+        "title": "CostDayOut",
+        "type": "object"
+      },
+      "CostPurposeOut": {
+        "additionalProperties": false,
+        "description": "This month's spend for one kind of call.",
+        "properties": {
+          "calls": {
+            "title": "Calls",
+            "type": "integer"
+          },
+          "failures": {
+            "title": "Failures",
+            "type": "integer"
+          },
+          "gbp": {
+            "title": "Gbp",
+            "type": "string"
+          },
+          "purpose": {
+            "title": "Purpose",
+            "type": "string"
+          }
+        },
+        "required": [
+          "purpose",
+          "gbp",
+          "calls",
+          "failures"
+        ],
+        "title": "CostPurposeOut",
+        "type": "object"
+      },
+      "CostsOut": {
+        "additionalProperties": false,
+        "description": "Claude spend against the caps (pounds, converted at the configured rate).",
+        "properties": {
+          "apiKeyConfigured": {
+            "title": "Apikeyconfigured",
+            "type": "boolean"
+          },
+          "byPurpose": {
+            "items": {
+              "$ref": "#/components/schemas/CostPurposeOut"
+            },
+            "title": "Bypurpose",
+            "type": "array"
+          },
+          "dailyCapGbp": {
+            "title": "Dailycapgbp",
+            "type": "string"
+          },
+          "last30Days": {
+            "description": "Oldest first; days without calls are 0",
+            "items": {
+              "$ref": "#/components/schemas/CostDayOut"
+            },
+            "title": "Last30Days",
+            "type": "array"
+          },
+          "monthCalls": {
+            "title": "Monthcalls",
+            "type": "integer"
+          },
+          "monthFailures": {
+            "title": "Monthfailures",
+            "type": "integer"
+          },
+          "monthGbp": {
+            "title": "Monthgbp",
+            "type": "string"
+          },
+          "monthlyCapGbp": {
+            "title": "Monthlycapgbp",
+            "type": "string"
+          },
+          "todayGbp": {
+            "title": "Todaygbp",
+            "type": "string"
+          },
+          "usdToGbp": {
+            "title": "Usdtogbp",
+            "type": "string"
+          }
+        },
+        "required": [
+          "todayGbp",
+          "monthGbp",
+          "dailyCapGbp",
+          "monthlyCapGbp",
+          "usdToGbp",
+          "monthCalls",
+          "monthFailures",
+          "byPurpose",
+          "last30Days",
+          "apiKeyConfigured"
+        ],
+        "title": "CostsOut",
         "type": "object"
       },
       "DailyActivity": {
@@ -1070,6 +1283,29 @@
           "recentBadges"
         ],
         "title": "DashboardOut",
+        "type": "object"
+      },
+      "DeleteStudentIn": {
+        "additionalProperties": false,
+        "description": "Confirmation for permanently deleting a student's account and data.",
+        "properties": {
+          "confirm": {
+            "const": "DELETE",
+            "title": "Confirm",
+            "type": "string"
+          },
+          "password": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "confirm",
+          "password"
+        ],
+        "title": "DeleteStudentIn",
         "type": "object"
       },
       "EnrolmentOut": {
@@ -1366,6 +1602,34 @@
         "title": "ExtendedMarkingOut",
         "type": "object"
       },
+      "FlagOut": {
+        "additionalProperties": false,
+        "description": "A student's \"this looks wrong\" report.",
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          }
+        },
+        "required": [
+          "reason",
+          "createdAt"
+        ],
+        "title": "FlagOut",
+        "type": "object"
+      },
       "FlagRequest": {
         "additionalProperties": false,
         "description": "A \"this looks wrong\" report.",
@@ -1569,6 +1833,46 @@
           "workedExample"
         ],
         "title": "LearnCardOut",
+        "type": "object"
+      },
+      "LearnCardStatus": {
+        "description": "Only ``active`` cards are shown; strict mode holds new ones for review.",
+        "enum": [
+          "pending_review",
+          "active",
+          "rejected"
+        ],
+        "title": "LearnCardStatus",
+        "type": "string"
+      },
+      "LinkedStudentOut": {
+        "additionalProperties": false,
+        "description": "A student the guardian can see.",
+        "properties": {
+          "consent": {
+            "$ref": "#/components/schemas/ConsentOut"
+          },
+          "currentPolicyVersion": {
+            "title": "Currentpolicyversion",
+            "type": "string"
+          },
+          "displayName": {
+            "title": "Displayname",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "displayName",
+          "consent",
+          "currentPolicyVersion"
+        ],
+        "title": "LinkedStudentOut",
         "type": "object"
       },
       "LoginRequest": {
@@ -2092,6 +2396,18 @@
         "title": "ProgressOut",
         "type": "object"
       },
+      "QuestionStatus": {
+        "description": "Lifecycle of a bank question. Only ``active`` questions are served.",
+        "enum": [
+          "pending_review",
+          "active",
+          "flagged",
+          "rejected",
+          "retired"
+        ],
+        "title": "QuestionStatus",
+        "type": "string"
+      },
       "QuestionType": {
         "description": "How a question is answered and marked.",
         "enum": [
@@ -2118,6 +2434,217 @@
           "newPassword"
         ],
         "title": "ResetPasswordRequest",
+        "type": "object"
+      },
+      "ReviewDecision": {
+        "additionalProperties": false,
+        "description": "What to do with a reviewed question or card.",
+        "properties": {
+          "action": {
+            "enum": [
+              "approve",
+              "reject",
+              "retire"
+            ],
+            "title": "Action",
+            "type": "string"
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "title": "ReviewDecision",
+        "type": "object"
+      },
+      "ReviewLearnCardOut": {
+        "additionalProperties": false,
+        "description": "A learn card waiting for review.",
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "objectiveRef": {
+            "title": "Objectiveref",
+            "type": "string"
+          },
+          "objectiveText": {
+            "title": "Objectivetext",
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/LearnCardStatus"
+          },
+          "workedExample": {
+            "title": "Workedexample",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "objectiveRef",
+          "objectiveText",
+          "explanation",
+          "workedExample",
+          "createdAt"
+        ],
+        "title": "ReviewLearnCardOut",
+        "type": "object"
+      },
+      "ReviewQuestionOut": {
+        "additionalProperties": false,
+        "description": "A question waiting for the admin, with everything needed to judge it.",
+        "properties": {
+          "answer": {
+            "additionalProperties": true,
+            "title": "Answer",
+            "type": "object"
+          },
+          "confidence": {
+            "title": "Confidence",
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "title": "Createdat",
+            "type": "string"
+          },
+          "difficulty": {
+            "title": "Difficulty",
+            "type": "integer"
+          },
+          "flags": {
+            "items": {
+              "$ref": "#/components/schemas/FlagOut"
+            },
+            "title": "Flags",
+            "type": "array"
+          },
+          "hints": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Hints",
+            "type": "array"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "marks": {
+            "title": "Marks",
+            "type": "integer"
+          },
+          "objectiveRef": {
+            "title": "Objectiveref",
+            "type": "string"
+          },
+          "objectiveText": {
+            "title": "Objectivetext",
+            "type": "string"
+          },
+          "options": {
+            "items": {
+              "additionalProperties": {
+                "type": "string"
+              },
+              "type": "object"
+            },
+            "title": "Options",
+            "type": "array"
+          },
+          "questionType": {
+            "$ref": "#/components/schemas/QuestionType"
+          },
+          "status": {
+            "$ref": "#/components/schemas/QuestionStatus"
+          },
+          "stem": {
+            "title": "Stem",
+            "type": "string"
+          },
+          "subjectName": {
+            "title": "Subjectname",
+            "type": "string"
+          },
+          "verificationNotes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Verificationnotes"
+          },
+          "workedSolution": {
+            "title": "Workedsolution",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "questionType",
+          "difficulty",
+          "objectiveRef",
+          "objectiveText",
+          "subjectName",
+          "stem",
+          "options",
+          "answer",
+          "marks",
+          "workedSolution",
+          "hints",
+          "confidence",
+          "verificationNotes",
+          "flags",
+          "createdAt"
+        ],
+        "title": "ReviewQuestionOut",
+        "type": "object"
+      },
+      "ReviewQuestionPage": {
+        "additionalProperties": false,
+        "description": "A page of the review queue, oldest first.",
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ReviewQuestionOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "nextCursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nextcursor"
+          }
+        },
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "title": "ReviewQuestionPage",
         "type": "object"
       },
       "ReviewSummaryOut": {
@@ -2594,6 +3121,39 @@
         "title": "SubjectChoices",
         "type": "object"
       },
+      "SubjectWeekOut": {
+        "additionalProperties": false,
+        "description": "One subject's week.",
+        "properties": {
+          "answered": {
+            "title": "Answered",
+            "type": "integer"
+          },
+          "correct": {
+            "title": "Correct",
+            "type": "integer"
+          },
+          "subjectName": {
+            "title": "Subjectname",
+            "type": "string"
+          },
+          "weakTopics": {
+            "items": {
+              "$ref": "#/components/schemas/WeakTopicOut"
+            },
+            "title": "Weaktopics",
+            "type": "array"
+          }
+        },
+        "required": [
+          "subjectName",
+          "answered",
+          "correct",
+          "weakTopics"
+        ],
+        "title": "SubjectWeekOut",
+        "type": "object"
+      },
       "SubtopicOut": {
         "additionalProperties": false,
         "description": "A heading inside a topic.",
@@ -3000,6 +3560,127 @@
         "title": "UserOut",
         "type": "object"
       },
+      "WeakTopicOut": {
+        "additionalProperties": false,
+        "description": "A topic to work on.",
+        "properties": {
+          "mastery": {
+            "title": "Mastery",
+            "type": "number"
+          },
+          "ring": {
+            "$ref": "#/components/schemas/Ring"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "mastery",
+          "ring"
+        ],
+        "title": "WeakTopicOut",
+        "type": "object"
+      },
+      "WeeklySummaryOut": {
+        "additionalProperties": false,
+        "description": "A student's week (London, Monday to Sunday).",
+        "properties": {
+          "activeDays": {
+            "items": {
+              "format": "date",
+              "type": "string"
+            },
+            "title": "Activedays",
+            "type": "array"
+          },
+          "answered": {
+            "title": "Answered",
+            "type": "integer"
+          },
+          "badges": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Badges",
+            "type": "array"
+          },
+          "bossBattles": {
+            "items": {
+              "$ref": "#/components/schemas/BossResultOut"
+            },
+            "title": "Bossbattles",
+            "type": "array"
+          },
+          "correct": {
+            "title": "Correct",
+            "type": "integer"
+          },
+          "displayName": {
+            "title": "Displayname",
+            "type": "string"
+          },
+          "minutes": {
+            "description": "Approximate time answering (each question capped at 10 min)",
+            "title": "Minutes",
+            "type": "integer"
+          },
+          "mistakesFixed": {
+            "title": "Mistakesfixed",
+            "type": "integer"
+          },
+          "streakDays": {
+            "title": "Streakdays",
+            "type": "integer"
+          },
+          "studentId": {
+            "format": "uuid",
+            "title": "Studentid",
+            "type": "string"
+          },
+          "subjects": {
+            "items": {
+              "$ref": "#/components/schemas/SubjectWeekOut"
+            },
+            "title": "Subjects",
+            "type": "array"
+          },
+          "weekEnd": {
+            "format": "date",
+            "title": "Weekend",
+            "type": "string"
+          },
+          "weekStart": {
+            "format": "date",
+            "title": "Weekstart",
+            "type": "string"
+          },
+          "xp": {
+            "title": "Xp",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "studentId",
+          "displayName",
+          "weekStart",
+          "weekEnd",
+          "answered",
+          "correct",
+          "minutes",
+          "activeDays",
+          "xp",
+          "streakDays",
+          "mistakesFixed",
+          "badges",
+          "bossBattles",
+          "subjects"
+        ],
+        "title": "WeeklySummaryOut",
+        "type": "object"
+      },
       "app__gamification__schemas__LevelOut": {
         "additionalProperties": false,
         "description": "Overall level and XP.",
@@ -3068,6 +3749,98 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/admin/costs": {
+      "get": {
+        "description": "Claude spend today and this month against the caps, by purpose and by day.",
+        "operationId": "aiCosts",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Costs",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/api/v1/admin/enrolments": {
       "get": {
         "description": "Students' subjects, oldest first, with what needs attention.",
@@ -3654,6 +4427,457 @@
           }
         },
         "summary": "Set Topic Taught",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/review/learn-cards": {
+      "get": {
+        "description": "Learn cards waiting for review (strict mode).",
+        "operationId": "learnCardQueue",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ReviewLearnCardOut"
+                  },
+                  "title": "Response Learncardqueue",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Learn Card Queue",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/review/learn-cards/{card_id}": {
+      "post": {
+        "description": "Approve or reject a learn card (rejecting lets a new one be written).",
+        "operationId": "decideLearnCard",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "card_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Card Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Decide Learn Card",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/review/questions": {
+      "get": {
+        "description": "Questions waiting for review: new ones (strict mode) and ones the student flagged.",
+        "operationId": "reviewQueue",
+        "parameters": [
+          {
+            "description": "pending_review or flagged",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/QuestionStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "pending_review or flagged",
+              "title": "Status"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "cursor",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReviewQuestionPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Review Queue",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/v1/admin/review/questions/{question_id}": {
+      "post": {
+        "description": "Approve (serve it), reject or retire a question; its flags are resolved.",
+        "operationId": "decideQuestion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "question_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Question Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewDecision"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Decide Question",
         "tags": [
           "admin"
         ]
@@ -4695,6 +5919,643 @@
         "summary": "Get Catalogue",
         "tags": [
           "subjects"
+        ]
+      }
+    },
+    "/api/v1/guardian/students": {
+      "get": {
+        "description": "Students linked to this guardian, with consent status.",
+        "operationId": "myStudents",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LinkedStudentOut"
+                  },
+                  "title": "Response Mystudents",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Students",
+        "tags": [
+          "guardian"
+        ]
+      }
+    },
+    "/api/v1/guardian/students/{student_id}/consent": {
+      "delete": {
+        "description": "Withdraw consent. The record of what was agreed is kept.",
+        "operationId": "withdrawConsent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "student_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Student Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Withdraw Consent",
+        "tags": [
+          "guardian"
+        ]
+      },
+      "post": {
+        "description": "Agree to the current privacy notice for this student.",
+        "operationId": "giveConsent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "student_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Student Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsentIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Give Consent",
+        "tags": [
+          "guardian"
+        ]
+      }
+    },
+    "/api/v1/guardian/students/{student_id}/delete": {
+      "post": {
+        "description": "Permanently delete the student's account and data (password and \"DELETE\" required).",
+        "operationId": "deleteStudent",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "student_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Student Id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteStudentIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Delete Student",
+        "tags": [
+          "guardian"
+        ]
+      }
+    },
+    "/api/v1/guardian/students/{student_id}/export": {
+      "get": {
+        "description": "Download everything stored about the student, as a JSON file.",
+        "operationId": "exportStudentData",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "student_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Student Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "All the student's data"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Export",
+        "tags": [
+          "guardian"
+        ]
+      }
+    },
+    "/api/v1/guardian/students/{student_id}/summary": {
+      "get": {
+        "description": "A week of the student's activity (this week by default).",
+        "operationId": "studentWeeklySummary",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "student_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Student Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "weeks_ago",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "maximum": 11,
+              "minimum": 0,
+              "title": "Weeks Ago",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeeklySummaryOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Bad Request"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Forbidden"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Unprocessable Content"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Too Many Requests"
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "summary": "Summary",
+        "tags": [
+          "guardian"
         ]
       }
     },

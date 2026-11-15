@@ -65,7 +65,7 @@ references. Anything unclear is marked `TODO`; nothing is invented.
 4. Memory and mistakes ✅
 5. Gamification ✅
 6. Extended answers and tutor chat ✅
-7. Guardian and admin tools
+7. Guardian and admin tools ✅
 8. Production
 
 See `docs/architecture-decisions.md` for the decisions behind all of this.

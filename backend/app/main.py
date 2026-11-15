@@ -10,6 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.admin.router import router as admin_router
+from app.admin.tools_router import router as admin_tools_router
 from app.ai.factory import build_breaker, build_llm_client
 from app.auth.cookies import CSRF_HEADER
 from app.auth.router import router as auth_router
@@ -23,6 +24,7 @@ from app.enrolment.router import router as enrolment_router
 from app.gamification.router import admin_router as boundaries_router
 from app.gamification.router import challenge_router
 from app.gamification.router import me_router as gamification_me_router
+from app.guardian.router import router as guardian_router
 from app.health.router import router as health_router
 from app.learning.router import router as learning_router
 from app.practice.me_router import router as me_router
@@ -94,7 +96,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         me_router,
         gamification_me_router,
         admin_router,
+        admin_tools_router,
         boundaries_router,
+        guardian_router,
     ):
         app.include_router(router)
     app.include_router(health_router)
