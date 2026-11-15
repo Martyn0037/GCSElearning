@@ -20,7 +20,8 @@ from pydantic import BaseModel, ConfigDict, Field, HttpUrl, StringConstraints, m
 
 Slug = Annotated[str, StringConstraints(pattern=r"^[a-z0-9]+(-[a-z0-9]+)*$", max_length=64)]
 ShortText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
-Wording = Annotated[str, StringConstraints(strip_whitespace=True, min_length=3, max_length=4000)]
+# Long enough for the longest spec unit (AQA physics 6.5.4.1 is about 4,300 characters).
+Wording = Annotated[str, StringConstraints(strip_whitespace=True, min_length=3, max_length=8000)]
 
 # A spec statement still to be copied from the PDF. Files containing it are
 # rejected so half-finished content never reaches the student.

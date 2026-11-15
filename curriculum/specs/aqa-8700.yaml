@@ -1,0 +1,86 @@
+# curriculum/specs/aqa-8700.yaml
+# AQA GCSE English Language 8700, section 3.1 "Scope of study", copied word
+# for word from the specification PDF (Version 1.5, 14 October 2021, p. 11–12).
+# The spec has no statement codes, so refs are the section number plus a letter
+# for each bullet in order (3.1.1a, 3.1.1b, ...).
+
+specification:
+  board: aqa
+  subject: english-language
+  code: "8700"
+  title: AQA GCSE English Language
+  version: Version 1.5 14 October 2021
+  source_url: "https://filestore.aqa.org.uk/resources/english/specifications/AQA-8700-SP-2015.PDF"
+  tiered: false
+
+topics:
+  - ref: "3.1.1"
+    title: Critical reading and comprehension
+    subtopics:
+      - title: Critical reading and comprehension
+        objectives:
+          - ref: 3.1.1a
+            foundation: >-
+              critical reading and comprehension: identifying and interpreting themes, ideas and
+              information in a range of literature and other high-quality writing; reading in
+              different ways for different purposes, and comparing and evaluating the usefulness,
+              relevance and presentation of content for these purposes; drawing inferences and
+              justifying these with evidence; supporting a point of view by referring to evidence
+              within the text; identifying bias and misuse of evidence, including distinguishing
+              between statements that are supported by evidence and those that are not; reflecting
+              critically and evaluatively on text, using the context of the text and drawing on
+              knowledge and skills gained from wider reading; recognising the possibility of
+              different responses to a text
+          - ref: 3.1.1b
+            foundation: >-
+              summary and synthesis: identifying the main theme or themes; summarising ideas and
+              information from a single text; synthesising from more than one text
+          - ref: 3.1.1c
+            foundation: >-
+              evaluation of a writer’s choice of vocabulary, form, grammatical and structural
+              features: explaining and illustrating how vocabulary and grammar contribute to
+              effectiveness and impact, using linguistic and literary terminology accurately to do
+              so and paying attention to detail; analysing and evaluating how form and structure
+              contribute to the effectiveness and impact of a text
+          - ref: 3.1.1d
+            foundation: >-
+              comparing texts: comparing two or more texts critically with respect to the above.
+  - ref: "3.1.2"
+    title: Writing
+    subtopics:
+      - title: Writing
+        objectives:
+          - ref: 3.1.2a
+            foundation: >-
+              producing clear and coherent text: writing effectively for different purposes and
+              audiences: to describe, narrate, explain, instruct, give and respond to information,
+              and argue; selecting vocabulary, grammar, form, and structural and organisational
+              features judiciously to reflect audience, purpose and context; using language
+              imaginatively and creatively; using information provided by others to write in
+              different forms; maintaining a consistent point of view; maintaining coherence and
+              consistency across a text
+          - ref: 3.1.2b
+            foundation: >-
+              writing for impact: selecting, organising and emphasising facts, ideas and key
+              points; citing evidence and quotation effectively and pertinently to support views;
+              creating emotional impact; using language creatively, imaginatively and
+              persuasively, including rhetorical devices (such as rhetorical questions,
+              antithesis, parenthesis).
+  - ref: "3.1.3"
+    title: Spoken language
+    subtopics:
+      - title: Spoken language
+        objectives:
+          - ref: 3.1.3a
+            foundation: >-
+              presenting information and ideas: selecting and organising information and ideas
+              effectively and persuasively for prepared spoken presentations; planning effectively
+              for different purposes and audiences; making presentations and speeches
+          - ref: 3.1.3b
+            foundation: >-
+              responding to spoken language: listening to and responding appropriately to any
+              questions and feedback
+          - ref: 3.1.3c
+            foundation: >-
+              spoken Standard English: expressing ideas using Standard English whenever and
+              wherever appropriate.
