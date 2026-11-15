@@ -82,9 +82,10 @@ jobs:
         run: |
           docker build -t gcse-coach-api:ci backend
           docker build -t gcse-coach-web:ci --build-context caddyfile=infra/caddy frontend
+          docker build -t gcse-coach-backup:ci infra/backup
       - name: Scan images (fail on fixable HIGH/CRITICAL)
         run: |
-          for image in gcse-coach-api:ci gcse-coach-web:ci; do
+          for image in gcse-coach-api:ci gcse-coach-web:ci gcse-coach-backup:ci; do
             docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
               -v "$PWD/.trivyignore:/trivyignore:ro" "$TRIVY_IMAGE" \
               image --exit-code 1 --severity HIGH,CRITICAL --ignore-unfixed --no-progress \
@@ -137,6 +138,10 @@ jobs:
           npm ci --no-audit --no-fund
           npx playwright install --with-deps chromium
           npx playwright test
+      - name: Back up the database and prove the backup restores
+        run: |
+          docker compose run --rm -T backup backup
+          docker compose run --rm -T backup restore-test
       - name: Stack logs on failure
         if: failure()
         run: docker compose logs --no-color --tail 200

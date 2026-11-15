@@ -66,6 +66,6 @@ references. Anything unclear is marked `TODO`; nothing is invented.
 5. Gamification ✅
 6. Extended answers and tutor chat ✅
 7. Guardian and admin tools ✅
-8. Production
+8. Production ✅ (deployment to Lightsail: see DEPLOY.md)
 
 See `docs/architecture-decisions.md` for the decisions behind all of this.

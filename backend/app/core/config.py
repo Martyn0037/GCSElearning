@@ -12,7 +12,7 @@ from enum import StrEnum
 from functools import lru_cache
 from typing import Annotated
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 MIN_SECRET_LENGTH = 32
@@ -141,6 +141,17 @@ class Settings(BaseSettings):
         if len(value.get_secret_value()) < MIN_SECRET_LENGTH:
             raise ValueError(f"secret must be at least {MIN_SECRET_LENGTH} characters")
         return value
+
+    @model_validator(mode="after")
+    def _production_safety(self) -> Settings:
+        """In production, refuse settings that would weaken security."""
+        if self.environment is not Environment.PRODUCTION:
+            return self
+        if not self.cookie_secure:
+            raise ValueError("COOKIE_SECURE must be true in production")
+        if self.jwt_secret.get_secret_value() == self.audit_ip_salt.get_secret_value():
+            raise ValueError("JWT_SECRET and AUDIT_IP_SALT must be different")
+        return self
 
 
 @lru_cache(maxsize=1)

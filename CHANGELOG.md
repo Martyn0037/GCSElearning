@@ -6,6 +6,21 @@ project uses [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added — Phase 8 (Production)
+- **Backups:**
+  - A `backup` service with a nightly database dump, 7 days kept on the server, and optional encrypted upload to S3 (30-day lifecycle).
+  - A weekly restore test, also run in CI.
+  - A health check that fails after 26 hours without a backup.
+- **Installable app (PWA):** a manifest, icons and a service worker that caches the app shell and assets but never API data.
+- **`/healthz`** for uptime monitoring.
+- **`DEPLOY.md`:** step-by-step Lightsail deployment, backups to S3, restoring, monitoring, updating and security.
+- **Docs:** ADR-020.
+
+### Changed
+- Production refuses insecure cookies and a shared JWT secret and IP salt.
+- Caddy allows 90 seconds for API responses (written-answer marking and the tutor).
+- CI builds and scans the backup image.
+
 ### Added — Phase 7 (Guardian and admin tools)
 - **Guardian dashboard:**
   - A weekly summary: questions, accuracy, time, active days, XP, streak, mistakes fixed, badges and boss battles.

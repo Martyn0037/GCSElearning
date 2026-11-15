@@ -7,6 +7,8 @@ Covers:
 - short JWT secret / IP salt are rejected
 - defaults: secure cookies on, 15-minute access tokens
 - a blank Anthropic key counts as not configured
+- production refuses insecure cookies and a shared JWT secret / IP salt;
+  development allows them
 """
 
 from __future__ import annotations
@@ -44,3 +46,20 @@ def test_should_default_to_secure_cookies_and_short_access_tokens() -> None:
 @pytest.mark.parametrize("value", ["", "   "])
 def test_blank_anthropic_key_should_mean_not_configured(value: str) -> None:
     assert make_settings(anthropic_api_key=value).anthropic_api_key is None
+
+
+@pytest.mark.parametrize(
+    ("overrides", "problem"),
+    [
+        ({"cookie_secure": False}, "COOKIE_SECURE must be true"),
+        ({"jwt_secret": "s" * 40, "audit_ip_salt": "s" * 40}, "must be different"),
+    ],
+)
+def test_production_should_refuse_weak_settings(overrides: dict[str, object], problem: str) -> None:
+    with pytest.raises(ValidationError, match=problem):
+        make_settings(environment="production", **overrides)
+
+
+def test_development_should_allow_them() -> None:
+    settings = make_settings(environment="development", cookie_secure=False)
+    assert settings.cookie_secure is False

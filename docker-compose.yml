@@ -102,6 +102,38 @@ services:
         limits: { cpus: "0.5", memory: 384M }
     logging: *logging
 
+  backup:
+    image: ${BACKUP_IMAGE:-gcse-coach-backup:local}
+    build: ./infra/backup
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+      BACKUP_AT: ${BACKUP_AT:-02:30}
+      BACKUP_KEEP_DAYS: ${BACKUP_KEEP_DAYS:-7}
+      # Optional off-site copies (DEPLOY.md); without a bucket, backups stay local.
+      BACKUP_S3_BUCKET: ${BACKUP_S3_BUCKET:-}
+      BACKUP_S3_PREFIX: ${BACKUP_S3_PREFIX:-gcse-coach}
+      AWS_ACCESS_KEY_ID: ${BACKUP_AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${BACKUP_AWS_SECRET_ACCESS_KEY:-}
+      AWS_DEFAULT_REGION: ${BACKUP_AWS_REGION:-eu-west-2}
+    volumes:
+      - backups:/backups
+    read_only: true
+    tmpfs:
+      - /tmp:mode=1777
+    security_opt: ["no-new-privileges:true"]
+    cap_drop: [ALL]
+    deploy:
+      resources:
+        limits: { cpus: "0.5", memory: 256M }
+    logging: *logging
+
   caddy:
     image: ${WEB_IMAGE:-gcse-coach-web:local}
     build:
@@ -128,5 +160,6 @@ services:
 
 volumes:
   pgdata:
+  backups:
   caddy_data:
   caddy_config:

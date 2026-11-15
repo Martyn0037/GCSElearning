@@ -8,6 +8,7 @@ import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 
 import { createQueryClient } from "./app/queryClient";
+import { registerServiceWorker } from "./app/registerServiceWorker";
 import { routes } from "./app/routes";
 
 const container = document.getElementById("root");
@@ -23,3 +24,5 @@ createRoot(container).render(
     </QueryClientProvider>
   </StrictMode>,
 );
+
+registerServiceWorker();

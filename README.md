@@ -9,7 +9,7 @@ for the decisions behind the design.
 backend/    FastAPI API, Alembic migrations, CLI commands          → backend/README.md
 frontend/   React + TypeScript app (served by Caddy in production) → frontend/README.md
 curriculum/ Spec content as YAML, imported automatically on start  → curriculum/README.md
-infra/      Caddy configuration (backup scripts arrive in Phase 8)
+infra/      Caddy configuration and the backup service (backup, restore test)
 docs/       Project context, architecture decisions
 ```
 
@@ -69,3 +69,7 @@ port 8000, so cookies behave the same as in production.
 
 CI (`.github/workflows/ci.yml`) also runs lint, type checks, OpenAPI and client drift checks,
 the image build, and a Trivy scan.
+
+## Deploying
+
+See [DEPLOY.md](DEPLOY.md) for putting the app on AWS Lightsail with your domain, HTTPS, backups and monitoring.

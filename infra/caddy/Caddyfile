@@ -16,7 +16,13 @@
 		-Server
 	}
 
-	# Only /api is proxied. Health and metrics endpoints stay internal.
+	# Readiness only, for an external uptime monitor. Liveness and metrics stay internal.
+	handle /healthz {
+		rewrite * /health/ready
+		reverse_proxy api:8000
+	}
+
+	# Only /api is proxied.
 	handle /api/* {
 		request_body {
 			max_size 1MB
@@ -26,7 +32,8 @@
 			health_interval 15s
 			transport http {
 				dial_timeout 3s
-				response_header_timeout 30s
+				# Marking a written answer or a tutor reply can take up to about a minute.
+			response_header_timeout 90s
 			}
 		}
 	}
@@ -37,6 +44,8 @@
 		header @assets Cache-Control "public, max-age=31536000, immutable"
 		@pages not path /assets/*
 		header @pages Cache-Control "no-cache"
+		@manifest path /manifest.webmanifest
+		header @manifest Content-Type "application/manifest+json"
 		try_files {path} /index.html
 		file_server
 	}

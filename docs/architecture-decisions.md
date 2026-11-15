@@ -468,3 +468,28 @@ curriculum content comes only from the exam board's spec, never from model knowl
 - **Grade boundaries** get an admin form per spec and tier, using the Phase 5 API.
 
 **Trade-offs.** The privacy notice says Anthropic doesn't train on API data and that backups are kept for 30 days. Both must stay true: the first depends on Anthropic's commercial terms (check before going live), and the second is set in Phase 8.
+
+## ADR-020 — Production: backups, restore tests, PWA and hardening
+
+**Status:** Accepted (2026-11-15). Implemented in Phase 8.
+
+**Decision.**
+- **Backups** run in a small `backup` container: Postgres 16 tools plus the AWS CLI, running as a non-root user, read-only, with no capabilities.
+  - `pg_dump` runs in custom format every night at 02:30 London time. Copies are kept 7 days on the server.
+  - Copies are optionally uploaded with SSE to S3, using an IAM key that can only `PutObject` under one prefix. The server can't read or delete backups, and a bucket lifecycle rule expires them after 30 days.
+  - The health check fails if there's been no successful backup for 26 hours.
+- **The restore test** loads the newest dump into a scratch database and checks it has the same schema version, at least one user and at least one learning objective, then drops it. It runs every Sunday and in CI after the end-to-end tests.
+- **PWA:**
+  - A web manifest and icons make the app installable.
+  - A hand-written service worker (no new dependency) caches content-hashed `/assets` forever and serves the cached app shell when offline (network first, so updates show at once).
+  - It never touches `/api`: answers, marks and progress always come from the server.
+  - It's registered only in production builds.
+- **Hardening:**
+  - In production, settings validation also refuses insecure cookies and a shared JWT secret and IP salt (short secrets were already refused).
+  - Caddy now allows 90 seconds for API responses, because marking written answers and tutor replies can take up to a minute.
+  - `/healthz` exposes readiness only, for an external uptime monitor; liveness and `/metrics` stay internal.
+- **Deployment** is documented step by step in `DEPLOY.md`: Lightsail in London, a firewall allowing only 80, 443 and SSH from your own IP, key-only SSH, unattended upgrades, `.env` at mode 600, and monitoring through an uptime check plus Lightsail alarms.
+
+**Trade-offs.**
+- Logical dumps are simple and portable, but restoring loses anything written after the last nightly dump (at most a day of practice). Point-in-time recovery would need WAL archiving, which isn't worth it at this scale.
+- A hand-written service worker is ~60 lines with no build step. A plugin (Workbox) would add precaching of every asset, at the cost of a dependency.
